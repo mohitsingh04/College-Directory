@@ -1,0 +1,517 @@
+import React, { Fragment, useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Col, Row, Card, Form, Breadcrumb, Button } from "react-bootstrap";
+import Dropdown from "react-dropdown-select";
+import * as Yup from "yup";
+import { toast } from "react-hot-toast";
+import { useFormik } from "formik";
+import { Editor } from '@tinymce/tinymce-react';
+import { API } from "../../services/API";
+import LoadingBar from "react-top-loading-bar";
+
+export default function EditCourse() {
+  const { Id } = useParams();
+  const navigate = useNavigate();
+  const editorRef = useRef(null);
+  const [description, setDescription] = useState("");
+  const [categoryData, setCategoryData] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [toggleHideShow, setToggleHideShow] = useState(false);
+  const [filteredSubCategory, setFilteredSubCategory] = useState([]);
+  const [course, setCourse] = useState("");
+  const [authUser, setAuthUser] = useState(null);
+  const loadingBarRef = useRef(null);
+  const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
+  const [status, setStatus] = useState([]);
+
+  const startLoadingBar = () => loadingBarRef.current?.continuousStart();
+  const stopLoadingBar = () => loadingBarRef.current?.complete();
+
+  useEffect(() => {
+    const getAuthUserData = async () => {
+      try {
+        setHandlePermissionLoading(true)
+        const { data } = await API.get("/profile");
+        setAuthUser(data?.data);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setHandlePermissionLoading(false)
+      }
+    }
+
+    getAuthUserData();
+  }, []);
+
+  useEffect(() => {
+    const getCategoryData = async () => {
+      try {
+        startLoadingBar();
+        const response = await API.get(`/category`);
+        setCategoryData(response.data);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        stopLoadingBar()
+      }
+    };
+
+    const getStatusData = async () => {
+      try {
+        startLoadingBar();
+        const response = await API.get("/status");
+        const filteredStatus = response?.data.filter((item) => item.parent_status === "Category");
+        setStatus(filteredStatus);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        stopLoadingBar();
+      }
+    };
+
+    getCategoryData();
+    getStatusData();
+  }, []);
+
+  useEffect(() => {
+    const getCourseData = async () => {
+      try {
+        startLoadingBar();
+        const { data } = await API.get(`/course/${Id}`);
+        setCourse(data);
+      } catch (error) {
+        toast.error('Error fetching course' + error);
+      } finally {
+        stopLoadingBar()
+      }
+    };
+
+    getCourseData();
+  }, [Id]);
+
+  const initialValues = {
+    name: course?.name || "",
+    short_name: course?.short_name || "",
+    description: course?.description || "",
+    eligibility: course?.eligibility || "",
+    course_duration: course.duration ? course.duration.split(' ')[0] : "",
+    course_duration_unit: course.duration ? course.duration.split(' ')[1] : "",
+    specialization: course?.specialization || "",
+    course_type: course?.course_type || "",
+    program_type: course?.program_type || "",
+    category: course?.category || "",
+    sub_category: course?.sub_category || "",
+    stream: course?.stream || "",
+    status: course?.status || "",
+  }
+
+  const validationSchema = Yup.object({
+    name: Yup.string().required("Name is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Name can contain only alphabets and single spaces.').min(2, "Name must contain atleast 2 characters"),
+    short_name: Yup.string().required("Short Name is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Name can contain only alphabets and single spaces.').min(2, "Name must contain atleast 2 characters"),
+    specialization: Yup.string().required("Specialization is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Specialization can contain only alphabets and single spaces.').min(2, "Specialization must contain atleast 2 characters"),
+    course_duration: Yup.string().required("Duration is required."),
+    course_duration_unit: Yup.string().required("Duration unit is required."),
+    program_type: Yup.string().required("Program type is required."),
+    status: Yup.string().required("Status is required."),
+  });
+
+  const handleSubmit = async (values) => {
+    try {
+      startLoadingBar();
+      const formData = { ...values, description: editorRef.current.getContent(), duration: `${values.course_duration} ${values.course_duration_unit}` };
+      const response = await API.put(`/course/${Id}`, formData);
+      if (response.data.message) {
+        toast.success(response.data.message);
+        navigate('/dashboard/course');
+      } else {
+        toast.error(response.data.error);
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 400) {
+          toast.error(error.response.data.error || "Bad Request");
+        } else if (error.response.status === 404) {
+          toast.error(error.response.status);
+        } else if (error.response.status === 500) {
+          toast.error("Internal server error, please try again later.");
+        } else {
+          toast.error("Something went wrong, please try again.");
+        }
+      } else {
+        toast.error(`Failed: ${error.message}`);
+      }
+    } finally {
+      stopLoadingBar();
+    }
+  };
+
+  const formik = useFormik({
+    initialValues: initialValues,
+    validationSchema: validationSchema,
+    onSubmit: handleSubmit,
+    enableReinitialize: true
+  });
+
+  const CourseTypeData = [
+    { value: "Degree", label: "Degree" },
+    { value: "Diploma", label: "Diploma" },
+    { value: "Certification", label: "Certification" },
+  ];
+
+  const handleCategory = (value) => {
+    const category = formik.setFieldValue("category", value);
+    setSelectedCategory(value[0].value)
+    setToggleHideShow(category ? true : false);
+  }
+
+  const handleSubCategory = (value) => {
+    formik.setFieldValue("sub_category", value)
+  }
+
+  useEffect(() => {
+    const filteredData = categoryData.filter((item) => item.category_name === selectedCategory);
+    setFilteredSubCategory(filteredData)
+  }, [selectedCategory, categoryData]);
+
+  useEffect(() => {
+    document.title = "AJ | Edit Course";
+  }, []);
+
+  const hasPermission = authUser?.permission?.some(
+    (item) => item.value === "Read Status"
+  );
+
+  if (!handlePermissionLoading && authUser) {
+    if (!hasPermission) {
+      return (
+        <div className="position-absolute top-50 start-50 translate-middle">
+          USER DOES NOT HAVE THE RIGHT ROLES.
+        </div>
+      );
+    }
+  }
+
+  return (
+    <Fragment>
+      <LoadingBar color="#ff5b00" ref={loadingBarRef} />
+      <div className="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
+        <div className="">
+          <h1 className="page-title fw-semibold fs-20 mb-0">Edit Course</h1>
+          <div className="">
+            <Breadcrumb className='mb-0'>
+              <Breadcrumb.Item>
+                <Link to={'/dashboard'}>
+                  Dashboard
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link to={'/dashboard/course'}>
+                  Course
+                </Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item active>Edit</Breadcrumb.Item>
+            </Breadcrumb>
+          </div>
+        </div>
+      </div>
+
+      <Card className="custom-card">
+        <Card.Header>
+          <h3 className="card-title">Edit Course</h3>
+          <div className="card-options ms-auto">
+            <Link to={"/dashboard/course"}>
+              <button type="button" className="btn btn-md btn-primary">
+                <i className="fe fe-arrow-left"></i> Back
+              </button>
+            </Link>
+          </div>
+        </Card.Header>
+        <Card.Body>
+          <Form onSubmit={formik.handleSubmit}>
+            <Row>
+              {/* Name */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="courseName">Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="courseName"
+                    placeholder="Name"
+                    name="name"
+                    className={`form-control ${formik.touched.name && formik.errors.name ? 'is-invalid' : ''}`}
+                    value={formik.values.name}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  {formik.errors.name && formik.touched.name ? <div className="text-danger mt-1">{formik.errors.name}</div> : null}
+                </Form.Group>
+              </Col>
+              {/* Short Name */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="courseShortName">Short Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="courseShortName"
+                    placeholder="Short Name"
+                    name="short_name"
+                    className={`form-control ${formik.touched.short_name && formik.errors.short_name ? 'is-invalid' : ''}`}
+                    value={formik.values.short_name}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  {formik.errors.short_name && formik.touched.short_name ? <div className="text-danger mt-1">{formik.errors.short_name}</div> : null}
+                </Form.Group>
+              </Col>
+              {/* Specialization */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="specialization">Specialization</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="specialization"
+                    placeholder="Specialization"
+                    name="specialization"
+                    className={`form-control ${formik.touched.specialization && formik.errors.specialization ? 'is-invalid' : ''}`}
+                    value={formik.values.specialization}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  {formik.errors.specialization && formik.touched.specialization ? <div className="text-danger mt-1">{formik.errors.specialization}</div> : null}
+                </Form.Group>
+              </Col>
+              {/* Duration */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="course_duration">Duration</Form.Label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Form.Control
+                      type="text"
+                      id="course_duration"
+                      placeholder="Duration..."
+                      name="course_duration"
+                      className={`form-control ${formik.touched.course_duration && formik.errors.course_duration ? 'is-invalid' : ''}`}
+                      value={formik.values.course_duration}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      style={{ marginRight: '10px' }}
+                    />
+                    <Form.Select
+                      name="course_duration_unit"
+                      className={`form-control ${formik.touched.course_duration_unit && formik.errors.course_duration_unit ? 'is-invalid' : ''}`}
+                      value={formik.values.course_duration_unit}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                    >
+                      <option value="">Select Duration</option>
+                      <option value="Months">Months</option>
+                      <option value="Years">Years</option>
+                    </Form.Select>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    {formik.errors.course_duration && formik.touched.course_duration ? <div className="text-danger mt-1">{formik.errors.course_duration}</div> : null}
+                    {formik.errors.course_duration_unit && formik.touched.course_duration_unit ? <div className="text-danger mt-1">{formik.errors.course_duration_unit}</div> : null}
+                  </div>
+                </Form.Group>
+              </Col>
+              {/* Fees */}
+              {/* <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="course_fees">Course Fees</Form.Label>
+                  <Form.Control
+                    type="text"
+                    id="course_fees"
+                    placeholder="Course Fees"
+                    name="course_fees"
+                    value={formik.values.course_fees}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  {formik.errors.course_fees && formik.touched.course_fees ? <div className="text-danger mt-1">{formik.errors.course_fees}</div> : null}
+                </Form.Group>
+              </Col> */}
+              {/* Course Type */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="course_type">Course Type</Form.Label>
+                  <Dropdown
+                    options={CourseTypeData}
+                    closeOnSelect={false}
+                    placeholder="Choose Type  "
+                    keepSelectedInList={false}
+                    searchable={false}
+                    dropdownHandle={false}
+                    value={formik.values.course_type}
+                    values={course?.course_type}
+                    onChange={(value) => formik.setFieldValue("course_type", value)}
+                    onBlur={formik.handleBlur}
+                  />
+                </Form.Group>
+              </Col>
+              {/* Category */}
+              <Col md={12}>
+                <Row>
+                  {/* Category */}
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label htmlFor="category">Category</Form.Label>
+                      <Dropdown
+                        options={categoryData
+                          .filter((item) => item.category_name === "Course")
+                          .map((group) => ({
+                            label: group.parent_category,
+                            value: group.parent_category,
+                          }))}
+                        values={course?.category}
+                        closeOnSelect={false}
+                        placeholder="Choose Category    "
+                        keepSelectedInList={false}
+                        searchable={false}
+                        dropdownHandle={false}
+                        value={formik.values.category}
+                        // onChange={(value) => formik.setFieldValue("category", value)}
+                        onChange={handleCategory}
+                        onBlur={formik.handleBlur}
+                      />
+                    </Form.Group>
+                  </Col>
+                  {/* Sub Category */}
+                  {toggleHideShow && (
+                    <>
+                      {filteredSubCategory.length > 0 ? (
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label htmlFor="sub_category">Sub Category</Form.Label>
+                            <Dropdown
+                              options={filteredSubCategory.map((group) => ({
+                                label: group.parent_category,
+                                value: group.parent_category,
+                              }))}
+                              values={course?.sub_category}
+                              closeOnSelect={false}
+                              placeholder="Choose Sub Category   "
+                              keepSelectedInList={false}
+                              searchable={false}
+                              dropdownHandle={false}
+                              value={formik.values.sub_category}
+                              // onChange={(value) => formik.setFieldValue("sub_category", value)}
+                              onChange={handleSubCategory}
+                              onBlur={formik.handleBlur}
+                            />
+                          </Form.Group>
+                        </Col>
+                      ) : null}
+                    </>
+                  )}
+                </Row>
+              </Col>
+              {/* Stream */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="stream">Stream</Form.Label><Dropdown
+                    options={CourseTypeData}
+                    closeOnSelect={false}
+                    placeholder="Choose Type  "
+                    keepSelectedInList={false}
+                    searchable={false}
+                    dropdownHandle={false}
+                    value={formik.values.stream}
+                    values={course?.stream}
+                    onChange={(value) => formik.setFieldValue("stream", value)}
+                    onBlur={formik.handleBlur}
+                  />
+                </Form.Group>
+              </Col>
+              {/* Program Type */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="program_type">Program Type</Form.Label>
+                  <br />
+                  {['UG', 'PG', 'Diploma'].map((type, index) => (
+                    <div key={index} className="form-check form-check-inline">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="program_type"
+                        id={`inlineRadio${index + 1}`}
+                        value={type}
+                        checked={formik.values.program_type === type}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                      />
+                      <label className="form-check-label" htmlFor={`inlineRadio${index + 1}`}>{type}</label>
+                    </div>
+                  ))}
+                </Form.Group>
+              </Col>
+              {/* Eligibility */}
+              <Col md={12}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="eligibility">Eligibility</Form.Label>
+                  <Form.Control
+                    // type="text"
+                    as="textarea"
+                    id="eligibility"
+                    placeholder="Eligibility"
+                    name="eligibility"
+                    value={formik.values.eligibility}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  {formik.errors.eligibility && formik.touched.eligibility ? <div className="text-danger mt-1">{formik.errors.eligibility}</div> : null}
+                </Form.Group>
+              </Col>
+              {/* Description */}
+              <Col md={12}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="userName">Description</Form.Label>
+                  <Editor
+                    apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
+                    onInit={(evt, editor) => editorRef.current = editor}
+                    onChange={(e) => setDescription(editorRef.current.getContent())}
+                    onBlur={formik.handleBlur}
+                    init={{
+                      height: 250,
+                      menubar: false,
+                      plugins: [
+                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                      ],
+                      toolbar: 'undo redo | blocks | ' +
+                        'bold italic forecolor | alignleft aligncenter ' +
+                        'alignright alignjustify | bullist numlist outdent indent | ' +
+                        'removeformat',
+                      content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                    }}
+                    initialValue={course?.description}
+                  />
+                </Form.Group>
+              </Col>
+              {/* Status */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label htmlFor="status">Status</Form.Label>
+                  <Form.Select
+                    name="status"
+                    value={formik.values.status}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    <option value="">Select Status</option>
+                    {status.map((item) => (
+                      <option key={item.uniqueId} value={item.status_name}>{item.status_name}</option>
+                    ))}
+                  </Form.Select>
+                  {formik.errors.status && formik.touched.status ? <div className="text-danger mt-1">{formik.errors.status}</div> : null}
+                </Form.Group>
+              </Col>
+
+            </Row>
+            <Button type="submit">Update</Button>
+          </Form>
+        </Card.Body>
+      </Card>
+    </Fragment>
+  );
+}

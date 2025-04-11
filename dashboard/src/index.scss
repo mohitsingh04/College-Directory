@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./assets/scss/variables";
+@import "./assets/scss/switcher";
+@import "./assets/css/bootstrap.css";
+
+//Swiper CSS
+@import "swiper/css";
+@import "swiper/css/pagination";
+@import "swiper/css/navigation";
+@import "swiper/css/effect-coverflow";
+@import "swiper/css/thumbs";
+@import "swiper/css/effect-flip";
+@import "swiper/css/effect-fade";
+@import "swiper/css/effect-cube";
+@import "swiper/css/scrollbar";
+@import "swiper/css/free-mode";
+
+//tag input
+@import "react-tagsinput/react-tagsinput.css";
+
+//react time picker css
+@import "flatpickr/dist/flatpickr.css";
+@import "flatpickr/dist/flatpickr.min.css";
+
+//React Sun editor
+@import "suneditor/dist/css/suneditor.min.css";
+
+//File pond css
+@import "filepond/dist/filepond.min.css";
+@import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
+
+//Simple bar css
+
+@import "simplebar-react/dist/simplebar.min.css";
+
+//yet image librery
+@import "yet-another-react-lightbox/styles.css";
+@import "yet-another-react-lightbox/plugins/thumbnails.css";
+
+//Grid-js Table
+
+@import "gridjs/dist/theme/mermaid.css";
+@import "rc-slider/assets/index.css";
+@import "react-range-slider-input/dist/style.css"; //rangeSliderinput
+
+@import "react-datepicker/dist/react-datepicker.css"; //react-datepicker
+
+@import "react-calendar/dist/Calendar.css"; //  react Calendar
+
+@import "@simonwep/pickr/dist/themes/classic.min.css"; // 'classic' theme
+@import "@simonwep/pickr/dist/themes/monolith.min.css"; // 'monolith' theme
+@import "@simonwep/pickr/dist/themes/nano.min.css"; // 'nano' theme
+
+//Rodal css
+@import "rodal/lib/rodal.css";
+
+@import "./assets/css/styles.css";
+@import "./assets/css/icons.css";
+
+.fixed-icon {
+	margin-bottom: 18px;
+}
+
+.spinner-parent {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.704);
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+}
+
+.spinner-border {
+	width: 5rem;
+	height: 5rem;
+	color: white !important;
+}
+
+.guest-bg-color {
+	background-color: #6259ca;
+}
+
+.nav-style-3 .nav-link {
+	font-size: 14px;
+	font-weight: 500;
+	color: #6c757d;
+	padding: 10px 15px;
+	transition: 0.3s;
+}
+
+.nav-style-3 .nav-link.active {
+	color: #000;
+	font-weight: 700;
+	border-bottom: 2px solid #3b82f6;
+}
+
+.owl-nav {
+	display: flex;
+	justify-content: space-between;
+	position: absolute;
+	width: 100%;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.owl-nav button {
+	background: white !important;
+	padding: 5px 10px !important;
+	border-radius: 50%;
+	font-size: 16px !important;
+	color: #555 !important;
+	box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.owl-carousel .owl-item img {
+	width: inherit !important;
+}
+
+.course_eligibility_ellipsis {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	overflow: hidden;
+}

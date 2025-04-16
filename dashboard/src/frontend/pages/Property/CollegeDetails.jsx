@@ -284,15 +284,6 @@ export default function CollegeDetails() {
                                                     <Nav.Item as='li'><Nav.Link eventKey="eleventh">QnA</Nav.Link></Nav.Item>
                                                 </Nav>
                                             )}
-                                            {/* {tabs.map((tab) => (
-                                                    <Nav.Item as="li" key={tab.key} className="inline-block">
-                                                        <Nav.Link
-                                                            eventKey={tab.key}
-                                                            className={`px-3 py-2 text-gray-600 text-sm font-medium transition-all`}>
-                                                            {tab.label}
-                                                        </Nav.Link>
-                                                    </Nav.Item>
-                                                ))} */}
                                         </div>
                                     </div>
                                 </div>

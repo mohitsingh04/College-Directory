@@ -30,7 +30,7 @@ const upload = multer({ storage: storage });
 
 propertyRouter.get("/get-property-list", getProperty);
 propertyRouter.get("/property", authMiddleware, getProperty);
-propertyRouter.get("/property/:uniqueId", authMiddleware, getPropertyById);
+propertyRouter.get("/property/:uniqueId", getPropertyById);
 propertyRouter.post("/property", addProperty);
 propertyRouter.put("/property/:uniqueId", updateProperty);
 propertyRouter.put("/property-files/:uniqueId", upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'featured_image', maxCount: 1 }]), handleUpdateFiles);

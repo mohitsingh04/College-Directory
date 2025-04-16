@@ -4,7 +4,7 @@ import { addAnnouncement, getAnnouncement, updateAnnouncement } from "../control
 
 const announcementRouter = express.Router();
 
-announcementRouter.get("/announcement", authMiddleware, getAnnouncement);
+announcementRouter.get("/announcement", getAnnouncement);
 announcementRouter.post("/announcement", addAnnouncement);
 announcementRouter.put("/announcement/:uniqueId", updateAnnouncement);
 

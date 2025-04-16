@@ -4,7 +4,7 @@ import { addHostel, getHostel, updateHostel } from "../controller/HostelControll
 
 const hostelRouter = express.Router();
 
-hostelRouter.get("/hostel", authMiddleware, getHostel);
+hostelRouter.get("/hostel", getHostel);
 hostelRouter.post("/hostel", addHostel);
 hostelRouter.put("/hostel/:uniqueId", updateHostel);
 

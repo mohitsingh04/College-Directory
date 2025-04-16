@@ -4,7 +4,7 @@ import { addScholarship, getScholarship, updateScholarship } from "../controller
 
 const scholarshipRouter = express.Router();
 
-scholarshipRouter.get("/scholarship", authMiddleware, getScholarship);
+scholarshipRouter.get("/scholarship", getScholarship);
 scholarshipRouter.post("/scholarship", addScholarship);
 scholarshipRouter.put("/scholarship/:uniqueId", updateScholarship);
 

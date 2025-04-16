@@ -4,7 +4,7 @@ import { addFaqs, deleteFaqs, getFaqs, getFaqsById, updateFaqs } from "../contro
 
 const faqsRouter = express.Router();
 
-faqsRouter.get("/faqs", authMiddleware, getFaqs);
+faqsRouter.get("/faqs", getFaqs);
 faqsRouter.get("/faqs/:uniqueId", getFaqsById);
 faqsRouter.post("/faqs", addFaqs);
 faqsRouter.put("/faqs/:uniqueId", updateFaqs);

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Search, ChevronDown, Star, MapPin } from "lucide-react";
 import API from "@/services/API/API";
 import { useSearchParams } from "next/navigation";
+import Loader from "@/Components/Loader/Loader";
+import Link from "next/link";
 
 interface Review {
 	rating: number;
@@ -48,8 +50,6 @@ interface Filters {
 	courses: string[];
 	states: string[];
 	cities: string[];
-	streams: string[];
-	subStreams: string[];
 	courseTypes: string[];
 	collegeTypes: string[];
 }
@@ -66,13 +66,12 @@ export default function IndiaColleges() {
 	const [propertyCategory, setPropertyCategory] = useState<PropertyCategory[]>(
 		[]
 	);
+	const [loading, setLoading] = useState(true);
 
 	// Search states
 	const [searchPropertyCourse, setSearchPropertyCourse] = useState("");
 	const [searchPropertyState, setSearchPropertyState] = useState("");
 	const [searchPropertyCity, setSearchPropertyCity] = useState("");
-	const [searchPropertyStream, setSearchPropertyStream] = useState("");
-	const [searchPropertySubStream, setSearchPropertySubStream] = useState("");
 	const [searchPropertyCollegeType, setSearchPropertyCollegeType] =
 		useState("");
 
@@ -86,11 +85,6 @@ export default function IndiaColleges() {
 	const [filterPropertyCityData, setFilterPropertyCityData] = useState<
 		PropertyLocation[]
 	>([]);
-	const [filterPropertyStreamData, setFilterPropertyStreamData] = useState<
-		PropertyCategory[]
-	>([]);
-	const [filterPropertySubStreamData, setFilterPropertySubStreamData] =
-		useState<PropertyCategory[]>([]);
 	const [filterPropertyCollegeTypeData, setFilterPropertyCollegeTypeData] =
 		useState<Property[]>([]);
 
@@ -99,8 +93,6 @@ export default function IndiaColleges() {
 		courses: [],
 		states: [],
 		cities: [],
-		streams: [],
-		subStreams: [],
 		courseTypes: [],
 		collegeTypes: [],
 	});
@@ -108,44 +100,56 @@ export default function IndiaColleges() {
 	// Fetch Property Data
 	const fetchPropertyData = useCallback(async () => {
 		try {
+			setLoading(true);
 			const response = await API.get("/get-property-list");
 			const filteredPropertyData = response.data;
 			setPropertyData(filteredPropertyData);
 		} catch (error) {
 			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	}, []);
 
 	// Fetch Course Data
 	const fetchPropertyDataCourse = useCallback(async () => {
 		try {
+			setLoading(true);
 			const response = await API.get("/property-course");
 			const filteredPropertyCourseData = response.data;
 			setPropertyCourse(filteredPropertyCourseData);
 		} catch (error) {
 			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	}, []);
 
 	// Fetch Location Data
 	const fetchPropertyDataLocation = useCallback(async () => {
 		try {
+			setLoading(true);
 			const response = await API.get("/location");
 			const filteredPropertyLocationData = response.data;
 			setPropertyLocation(filteredPropertyLocationData);
 		} catch (error) {
 			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	}, []);
 
 	// Fetch Category Data
 	const fetchPropertyDataCategory = useCallback(async () => {
 		try {
+			setLoading(true);
 			const response = await API.get("/category");
 			const filteredPropertyCategoryData = response.data;
 			setPropertyCategory(filteredPropertyCategoryData);
 		} catch (error) {
 			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	}, []);
 
@@ -153,6 +157,7 @@ export default function IndiaColleges() {
 	useEffect(() => {
 		const fetchAndMergeData = async () => {
 			try {
+				setLoading(true);
 				const propertyResponse = await API.get("/get-property-list");
 				const locationResponse = await API.get("/get-property-location");
 				const reviewsResponse = await API.get("/reviews");
@@ -192,6 +197,8 @@ export default function IndiaColleges() {
 				setFilteredProperties(merged);
 			} catch (error: any) {
 				console.log(error.message);
+			} finally {
+				setLoading(false);
 			}
 		};
 
@@ -301,30 +308,6 @@ export default function IndiaColleges() {
 		setFilterPropertyCityData(filteredData);
 	}, [propertyLocation, searchPropertyCity]);
 
-	// Fiter Stream
-	useEffect(() => {
-		const searchValue = searchPropertyStream.toLowerCase();
-		const filteredData = propertyCategory.filter((category) => {
-			const nameMatch = category.category_name
-				?.toLowerCase()
-				.includes(searchValue);
-			return nameMatch;
-		});
-		setFilterPropertyStreamData(filteredData);
-	}, [propertyCategory, searchPropertyStream]);
-
-	// Fiter Sub Stream
-	useEffect(() => {
-		const searchValue = searchPropertySubStream.toLowerCase();
-		const filteredData = propertyCategory.filter((subStream) => {
-			const nameMatch = subStream.parent_category
-				?.toLowerCase()
-				.includes(searchValue);
-			return nameMatch;
-		});
-		setFilterPropertySubStreamData(filteredData);
-	}, [propertyCategory, searchPropertySubStream]);
-
 	// Fiter College Type
 	useEffect(() => {
 		const filteredData = propertyData.filter((property) => {
@@ -332,6 +315,7 @@ export default function IndiaColleges() {
 			const nameMatch = property.college_or_university_type[0]?.value
 				?.toLowerCase()
 				.includes(searchValue);
+			console.log(nameMatch);
 			return nameMatch;
 		});
 		setFilterPropertyCollegeTypeData(filteredData);
@@ -341,8 +325,6 @@ export default function IndiaColleges() {
 		courses: true,
 		states: true,
 		cities: true,
-		stream: true,
-		sub_stream: true,
 		course_type: true,
 		college_type: true,
 	});
@@ -353,6 +335,17 @@ export default function IndiaColleges() {
 			[section]: !prev[section],
 		}));
 	};
+
+	if (loading) {
+		return <Loader />;
+	}
+
+	// console.log(`${filteredProperties[0]?.property_type}/${filteredProperties[0]?.uniqueId}/${filteredProperties[0]?.property_name}/${filteredProperties[0]?.location?.city}`)
+	const slugify = (text: string) =>
+		text
+			.toLowerCase()
+			.replace(/\s+/g, "-")
+			.replace(/[^\w\-]+/g, "");
 
 	return (
 		<div className="container mx-auto px-4 py-8">
@@ -420,7 +413,7 @@ export default function IndiaColleges() {
 															}
 														/>
 														<span className="text-gray-700 text-sm">
-															{course.name[0]?.value}
+															{course.short_name}
 														</span>
 													</label>
 												))}
@@ -560,144 +553,6 @@ export default function IndiaColleges() {
 								</div>
 							)}
 						</div>
-
-						{/* Stream Filter */}
-						{/* <div className="mb-6">
-							<button
-								onClick={() => toggleSection("stream")}
-								className="flex items-center justify-between w-full mb-2"
-							>
-								<h3 className="text-lg font-semibold text-gray-900">Stream</h3>
-								<ChevronDown
-									className={`h-5 w-5 transition-transform ${
-										expandedSections.stream ? "rotate-180" : ""
-									}`}
-								/>
-							</button>
-							{expandedSections.stream && (
-								<div className="space-y-2">
-									<div className="relative">
-										<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-										<input
-											type="text"
-											placeholder="Search stream..."
-											className="w-full pl-10 pr-4 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-											value={searchPropertyStream}
-											onChange={(e) => setSearchPropertyStream(e.target.value)}
-										/>
-									</div>
-									<div className="max-h-40 overflow-auto">
-										{filterPropertyStreamData.length > 0 ? (
-											<>
-												{[
-													...new Map(
-														filterPropertyStreamData.map((stream) => [
-															stream.category_name,
-															stream,
-														])
-													).values(),
-												].map((stream) => (
-													<label
-														key={stream.uniqueId}
-														className="flex items-center space-x-2 cursor-pointer mb-2"
-													>
-														<input
-															type="checkbox"
-															className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-															checked={selectedFilters.streams.includes(
-																stream.category_name
-															)}
-															onChange={() =>
-																handleFilterChange(
-																	"streams",
-																	stream.category_name
-																)
-															}
-														/>
-														<span className="text-gray-700 text-sm">
-															{stream.category_name}
-														</span>
-													</label>
-												))}
-											</>
-										) : (
-											<p>No stream available</p>
-										)}
-									</div>
-								</div>
-							)}
-						</div> */}
-
-						{/* Sub-Stream Filter */}
-						{/* <div className="mb-6">
-							<button
-								onClick={() => toggleSection("sub_stream")}
-								className="flex items-center justify-between w-full mb-2"
-							>
-								<h3 className="text-lg font-semibold text-gray-900">
-									Sub Stream
-								</h3>
-								<ChevronDown
-									className={`h-5 w-5 transition-transform ${
-										expandedSections.sub_stream ? "rotate-180" : ""
-									}`}
-								/>
-							</button>
-							{expandedSections.sub_stream && (
-								<div className="space-y-2">
-									<div className="relative">
-										<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-										<input
-											type="text"
-											placeholder="Search sub stream..."
-											className="w-full pl-10 pr-4 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-											value={searchPropertySubStream}
-											onChange={(e) =>
-												setSearchPropertySubStream(e.target.value)
-											}
-										/>
-									</div>
-									<div className="max-h-40 overflow-auto">
-										{filterPropertySubStreamData.length > 0 ? (
-											<>
-												{[
-													...new Map(
-														filterPropertySubStreamData.map((stream) => [
-															stream.parent_category,
-															stream,
-														])
-													).values(),
-												].map((stream) => (
-													<label
-														key={stream.uniqueId}
-														className="flex items-center space-x-2 cursor-pointer mb-2"
-													>
-														<input
-															type="checkbox"
-															className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-															checked={selectedFilters.subStreams.includes(
-																stream.parent_category
-															)}
-															onChange={() =>
-																handleFilterChange(
-																	"subStreams",
-																	stream.parent_category
-																)
-															}
-														/>
-														<span className="text-gray-700 text-sm">
-															{stream.parent_category}
-														</span>
-													</label>
-												))}
-											</>
-										) : (
-											<p>No sub stream available</p>
-										)}
-									</div>
-								</div>
-							)}
-						</div> */}
 
 						{/* Course Type Filter */}
 						<div className="mb-6">
@@ -844,11 +699,6 @@ export default function IndiaColleges() {
 							<h2 className="text-xl font-semibold text-gray-900">
 								Showing {filteredProperties.length} colleges
 							</h2>
-							<select className="border border-gray-300 rounded-md shadow-sm py-2 px-3">
-								<option value="relevance">Sort by Relevance</option>
-								<option value="rating">Sort by Rating</option>
-								<option value="fees">Sort by Fees</option>
-							</select>
 						</div>
 
 						<div className="grid gap-6">
@@ -913,9 +763,18 @@ export default function IndiaColleges() {
 											</div>
 
 											<div className="mt-4 flex float-end">
-												<button className="inline-flex me-1 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer transition duration-300 ease-in-out">
-													View Details
-												</button>
+												<Link
+													href={`/${college?.property_type?.toLowerCase()}/${
+														college?.uniqueId
+													}/${slugify(college?.property_name || "")}/${slugify(
+														college?.location?.city || ""
+													)}`}
+													target="blank"
+												>
+													<button className="inline-flex me-1 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer transition duration-300 ease-in-out">
+														View Details
+													</button>
+												</Link>
 												<button className="inline-flex items-center px-4 py-2 border border-indigo-600 text-sm font-medium rounded-md shadow-sm text-indigo-600 hover:bg-indigo-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer transition duration-300 ease-in-out">
 													Brochure
 												</button>

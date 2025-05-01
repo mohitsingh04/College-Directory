@@ -62,7 +62,6 @@ const Dashboard = () => {
   return (
     <div>
       <LoadingBar color="#ff5b00" ref={loadingBarRef} />
-      {/* <Pageheader homepage='Dashboard' activepage='Home' page='Dashboard' /> */}
       <div className="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
         <div className="">
           <h1 className="page-title fw-semibold fs-20 mb-0">Dashboard</h1>

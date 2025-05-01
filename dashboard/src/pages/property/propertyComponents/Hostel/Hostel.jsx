@@ -90,7 +90,7 @@ export default function Hostel() {
                                             ?
                                             <>
                                                 <p
-                                                    style={{ fontSize: "16px" }}
+                                                    style={{ fontSize: "14px" }}
                                                     dangerouslySetInnerHTML={{
                                                         __html: isExpandedBoysDetails
                                                             ? hostel[0]?.boys_hostel_description
@@ -103,7 +103,7 @@ export default function Hostel() {
                                             </>
                                             :
                                             <p
-                                                style={{ fontSize: "16px" }}
+                                                style={{ fontSize: "14px" }}
                                                 dangerouslySetInnerHTML={{
                                                     __html: hostel[0]?.boys_hostel_description
                                                 }}
@@ -117,7 +117,7 @@ export default function Hostel() {
                                             ?
                                             <>
                                                 <p
-                                                    style={{ fontSize: "16px" }}
+                                                    style={{ fontSize: "14px" }}
                                                     dangerouslySetInnerHTML={{
                                                         __html: isExpandedGirlsDetails
                                                             ? hostel[0]?.girls_hostel_description
@@ -130,7 +130,7 @@ export default function Hostel() {
                                             </>
                                             :
                                             <p
-                                                style={{ fontSize: "16px" }}
+                                                style={{ fontSize: "14px" }}
                                                 dangerouslySetInnerHTML={{
                                                     __html: hostel[0]?.girls_hostel_description
                                                 }}

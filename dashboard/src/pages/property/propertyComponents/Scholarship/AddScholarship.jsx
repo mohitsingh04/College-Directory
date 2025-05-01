@@ -5,20 +5,19 @@ import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
 
 export default function AddScholarship() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const editorRef = useRef(null);
-    const [scholarship, setScholarship] = useState("");
 
     const initialValues = {
         propertyId: uniqueId,
+        scholarship: "",
     }
 
     const handleSubmit = async (values) => {
         try {
-            values = { ...values, scholarship: editorRef.current.getContent() }
             const response = await API.post(`/scholarship`, values);
 
             if (response.status === 200) {
@@ -55,25 +54,14 @@ export default function AddScholarship() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Scholarship</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => editorRef.current = editor}
-                                onChange={(e) => setScholarship(editorRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.scholarship}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("scholarship", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>

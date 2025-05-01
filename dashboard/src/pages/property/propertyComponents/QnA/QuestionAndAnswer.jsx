@@ -99,9 +99,8 @@ export default function QuestionAndAnswer() {
                             {questionAndAnswer.length > 0 ? (
                                 <Accordion id="accordionExample">
                                     {questionAndAnswer.map((item, index) => (
-                                        <>
-                                            <div className="mt-1">
-                                                <Accordion.Item eventKey={item.uniqueId} key={index}>
+                                            <div className="mt-1" key={index}>
+                                                <Accordion.Item eventKey={item.uniqueId}>
                                                     <div className="d-flex justify-content-between align-items-center px-2 py-1">
                                                         <Accordion.Header className="flex-grow-1">{item.question}</Accordion.Header>
                                                         <span className='ms-1'>
@@ -118,8 +117,6 @@ export default function QuestionAndAnswer() {
                                                     </Accordion.Body>
                                                 </Accordion.Item>
                                             </div>
-
-                                        </>
                                     ))}
                                 </Accordion>
                             ) : (

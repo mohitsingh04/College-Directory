@@ -9,7 +9,7 @@ import LoadingBar from 'react-top-loading-bar';
 
 export default function HandleUpdatePodcast() {
     const navigate = useNavigate();
-    const { Id } = useParams();
+    const { objectId } = useParams();
     const [exam, setExam] = useState(null);
     const loadingBarRef = useRef(null);
 
@@ -20,7 +20,7 @@ export default function HandleUpdatePodcast() {
         const getExam = async () => {
             try {
                 startLoadingBar();
-                const { data } = await API.get(`/exam/${Id}`);
+                const { data } = await API.get(`/exam/${objectId}`);
                 setExam(data);
             } catch (error) {
                 toast.error('Error fetching exam' + error.message);
@@ -30,7 +30,7 @@ export default function HandleUpdatePodcast() {
         };
 
         getExam();
-    }, [Id]);
+    }, [objectId]);
 
     const initialValues = {
         podcast_hindi: exam?.podcast_hindi || null,
@@ -49,7 +49,7 @@ export default function HandleUpdatePodcast() {
             formData.append("podcast_hindi", values.podcast_hindi);
             formData.append("podcast_english", values.podcast_english);
 
-            const response = await API.put(`/update-files/${Id}`, formData, {
+            const response = await API.put(`/update-files/${objectId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -119,12 +119,15 @@ export default function HandleUpdatePodcast() {
                             {/* Hindi Podcast */}
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label htmlFor="podcast_hindi">Hindi Podcast <span style={{ fontSize: "10px" }}>(mp3)</span></Form.Label>
+                                    <div>
+                                        <Form.Label htmlFor="podcast_hindi" className="btn btn-primary btn-sm"><i className="fe fe-upload"></i> Hindi Podcast</Form.Label>
+                                    </div>
                                     <Form.Control
                                         type="file"
                                         id="podcast_hindi"
                                         name="podcast_hindi"
                                         className={`form-control`}
+                                        hidden
                                         accept="audio/mp3,audio/*;capture=microphone"
                                         onChange={handleHindiPodcastFileChange}
                                         onBlur={formik.handleBlur}
@@ -132,13 +135,6 @@ export default function HandleUpdatePodcast() {
                                     {formik.errors.podcast_hindi && formik.touched.podcast_hindi ? <div className="text-danger mt-1">{formik.errors.podcast_hindi}</div> : null}
                                     {exam?.podcast_hindi ? (
                                         <div className="mt-1">
-                                            {/* <a
-                                                href={`${import.meta.env.VITE_API_URL}${exam?.podcast_hindi}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                View Podcast
-                                            </a> */}
                                             <audio controls>
                                                 <source src={`${import.meta.env.VITE_API_URL}${exam?.podcast_hindi}`} type="audio/mpeg" />
                                                 Listen Hindi Podcast.
@@ -152,7 +148,9 @@ export default function HandleUpdatePodcast() {
                             {/* English Podcast */}
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label htmlFor="podcast_english">English Podcast <span style={{ fontSize: "10px" }}>(mp3)</span></Form.Label>
+                                    <div>
+                                        <Form.Label htmlFor="podcast_english" className="btn btn-primary btn-sm"><i className="fe fe-upload"></i> English Podcast</Form.Label>
+                                    </div>
                                     <Form.Control
                                         type="file"
                                         id="podcast_english"
@@ -161,6 +159,7 @@ export default function HandleUpdatePodcast() {
                                         accept="audio/mp3,audio/*;capture=microphone"
                                         onChange={handleEnglishPodcastFileChange}
                                         onBlur={formik.handleBlur}
+                                        hidden
                                     />
                                     {formik.errors.podcast_english && formik.touched.podcast_english ? <div className="text-danger mt-1">{formik.errors.podcast_english}</div> : null}
                                     {exam?.podcast_english ? (

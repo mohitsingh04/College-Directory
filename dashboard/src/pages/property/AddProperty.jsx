@@ -27,10 +27,6 @@ export default function AddProperty() {
         getAuthUserData();
     }, []);
 
-    const handleTypeChange = (e) => {
-        setType(e.target.value);
-    };
-
     useEffect(() => {
         document.title = "AJ | Add Property";
     }, []);
@@ -49,6 +45,8 @@ export default function AddProperty() {
         }
     }
 
+    console.log(authUser?.role)
+
     return (
         <Fragment>
             <div className="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
@@ -59,7 +57,7 @@ export default function AddProperty() {
                             <Link to="/dashboard">Dashboard</Link>
                         </Breadcrumb.Item>
                         <Breadcrumb.Item>
-                            <Link to="/dashboard/property">Property</Link>
+                            {authUser?.role === "Property Manager" ? "Property" : <Link to="/dashboard/property">Property</Link>}
                         </Breadcrumb.Item>
                         <Breadcrumb.Item active>Add</Breadcrumb.Item>
                     </Breadcrumb>
@@ -69,41 +67,17 @@ export default function AddProperty() {
             <Card className="custom-card">
                 <Card.Header className="d-flex justify-content-between align-items-center">
                     <h3 className="card-title">Add Property</h3>
-                    <Link to="/dashboard/property">
-                        <Button variant="primary">
-                            <i className="fe fe-arrow-left"></i> Back
-                        </Button>
-                    </Link>
+                    {authUser?.role === "Property Manager"
+                        ? null
+                        :
+                        <Link to="/dashboard/property">
+                            <Button variant="primary">
+                                <i className="fe fe-arrow-left"></i> Back
+                            </Button>
+                        </Link>
+                    }
                 </Card.Header>
                 <Card.Body>
-                    {/* <Form>
-                        <Form.Group controlId="propertyType">
-                            <Form.Label>Property Type</Form.Label>
-                            <br />
-                            <div className="form-check form-check-inline">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="program_type"
-                                    id="inlineRadio2"
-                                    value="University"
-                                    onChange={handleTypeChange}
-                                />
-                                <label className="form-check-label" htmlFor="inlineRadio2">University</label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="program_type"
-                                    id="inlineRadio1"
-                                    value="College"
-                                    onChange={handleTypeChange}
-                                />
-                                <label className="form-check-label" htmlFor="inlineRadio1">College</label>
-                            </div>
-                        </Form.Group>
-                    </Form> */}
                     <Row>
                         <Form.Label>Please select your property type from below options</Form.Label>
                         <Col md={3}>

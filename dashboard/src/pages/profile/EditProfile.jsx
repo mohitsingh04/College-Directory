@@ -9,6 +9,7 @@ import { useFormik } from "formik";
 import { API } from "../../services/API";
 import Skeleton from "react-loading-skeleton";
 import LoadingBar from 'react-top-loading-bar';
+import PhoneInput from "react-phone-input-2";
 
 export default function EditProfile() {
     const navigate = useNavigate();
@@ -22,33 +23,25 @@ export default function EditProfile() {
     const stopLoadingBar = () => loadingBarRef.current?.complete();
 
     useEffect(() => {
-        const getUserData = async () => {
+        const fetchData = async () => {
             try {
                 startLoadingBar();
-                const { data } = await API.get("/profile");
-                setUser(data?.data);
+                const [userResponse, statesResponse] = await Promise.all([
+                    API.get("/profile"),
+                    API.get("/fetch-states"),
+                ]);
+                setUser(userResponse?.data?.data);
+                setStates(statesResponse?.data);
             } catch (error) {
                 toast.error(error.message);
             } finally {
                 stopLoadingBar();
             }
-        }
+        };
 
-        const getStatesData = async () => {
-            try {
-                startLoadingBar();
-                const response = await API.get("/fetch-states");
-                setStates(response?.data);
-            } catch (error) {
-                toast.error(error.message);
-            } finally {
-                stopLoadingBar();
-            }
-        }
-
-        getUserData();
-        getStatesData();
+        fetchData();
     }, []);
+
 
     const initialValues = {
         name: user?.name || "",
@@ -64,7 +57,7 @@ export default function EditProfile() {
     const validationSchema = Yup.object({
         name: Yup.string().required("Name is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Name can contain only alphabets and single spaces.').min(2, "Name must contain atleast 2 characters"),
         email: Yup.string().email("Invalid email").required("Email is required"),
-        phone: Yup.string().matches(/^[0-9]{10}$/, 'Phone number is not valid'),
+        phone: Yup.string().required("Phone number is required"),
         pincode: Yup.string().required("Pincode is required").matches(/^[1-9][0-9]{5}$/, 'Pincode must be a 6-digit number starting with 1-9'),
         address: Yup.string().required("Address is required"),
         city: Yup.string().required("City is required"),
@@ -184,28 +177,34 @@ export default function EditProfile() {
                         </Col>
                         <Col xl={8} md={12} sm={12}>
                             <Card className="custom-card">
-                                <Card.Header>
+                                <Card.Header className="d-flex justify-content-between">
                                     <h3 className="card-title">Edit Profile</h3>
+                                    <Link to="/dashboard/profile">
+                                        <Button variant="primary">
+                                            <i className="fe fe-arrow-left"></i> Back
+                                        </Button>
+                                    </Link>
                                 </Card.Header>
                                 <Card.Body>
                                     <Form onSubmit={formik.handleSubmit} encType="multipart/form-data">
                                         <Row>
                                             <Col className="mb-4" xl={12} md={12} sm={12}>
                                                 <Row>
-                                                    <Col xl={2} md={12} sm={12}>
+                                                    <Col xl={3} md={12} sm={12}>
                                                         {previewProfile
-                                                            ? <img src={previewProfile} alt="Logo Preview" className="rounded-circle" width={80} />
+                                                            ? <img src={previewProfile} alt="Logo Preview" className="rounded-circle" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
                                                             : user?.profile_image
-                                                                ? <img src={`${import.meta.env.VITE_API_URL}${user?.profile_image}`} alt="Profile Image Preview" className="rounded-circle" width={80} height={80} />
-                                                                : <img className="rounded-circle" width={80} src={ALLImages('face8')} alt="img" />
+                                                                ? <img src={`${import.meta.env.VITE_API_URL}${user?.profile_image}`} alt="Profile Image Preview" className="rounded-circle" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
+                                                                : <img className="rounded-circle" src={ALLImages('face8')} alt="img" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
                                                         }
                                                     </Col>
-                                                    <Col xl={10} md={12} sm={12}>
+                                                    <Col xl={9} md={12} sm={12}>
                                                         <Form.Group className="mb-3">
                                                             <Form.Control
                                                                 type="file"
                                                                 className={`form-control`}
                                                                 name="profile_image"
+                                                                accept="image/jpeg, image/png"
                                                                 onChange={(e) => handleFileChange(e, formik.setFieldValue, "profile_image", setPreviewProfile)}
                                                                 onBlur={formik.handleBlur}
                                                             />
@@ -249,15 +248,14 @@ export default function EditProfile() {
                                             <Col xl={12} md={12} sm={12}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="exampleInputnumber">Phone</Form.Label>
-                                                    <Form.Control
-                                                        type="text"
-                                                        id="exampleInputnumber"
-                                                        placeholder="Phone"
-                                                        className={`form-control ${formik.touched.phone && formik.errors.phone ? 'is-invalid' : ''}`}
-                                                        name="phone"
+                                                    <PhoneInput
+                                                        country={'in'}
                                                         value={formik.values.phone}
-                                                        onChange={formik.handleChange}
-                                                        onBlur={formik.handleBlur}
+                                                        inputClass={`border w-100 ${formik.touched.phone && formik.errors.phone ? "border-danger" : ""}`}
+                                                        inputStyle={{ height: "45px" }}
+                                                        buttonClass={`bg-white border ${formik.touched.phone && formik.errors.phone ? "border-danger" : ""}`}
+                                                        onChange={(value) => formik.setFieldValue("phone", value)}
+                                                        onBlur={formik.handleBlur("phone")}
                                                         disabled
                                                     />
                                                     {formik.errors.phone && formik.touched.phone ? <div className="text-danger">{formik.errors.phone}</div> : null}
@@ -347,7 +345,7 @@ export default function EditProfile() {
                                     <div className="card-title"><Skeleton width={129} height={24} /></div>
                                 </Card.Header>
                                 <Card.Body>
-                                    <Form onSubmit={formik.handleSubmit}>
+                                    <Form>
                                         <Form.Group className="mb-3">
                                             <Form.Label><Skeleton width={102} height={20} /></Form.Label>
                                             <Skeleton width={281} height={35} />
@@ -374,7 +372,7 @@ export default function EditProfile() {
                                     <h3 className="card-title"><Skeleton width={78} height={24} /></h3>
                                 </Card.Header>
                                 <Card.Body>
-                                    <Form onSubmit={formik.handleSubmit}>
+                                    <Form>
                                         <Row>
                                             <Col xl={12} md={12} sm={12}>
                                                 <Form.Group className="mb-3">

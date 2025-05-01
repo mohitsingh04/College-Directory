@@ -54,10 +54,10 @@ export default function AllStatus() {
         getStatus();
     }, [getStatus]);
 
-    const handleViewStatus = useCallback((id) => navigate(`/dashboard/status/view/${id}`), [navigate]);
-    const handleEditStatus = useCallback((id) => navigate(`/dashboard/status/edit/${id}`), [navigate]);
+    const handleViewStatus = useCallback((objectId) => navigate(`/dashboard/status/view/${objectId}`), [navigate]);
+    const handleEditStatus = useCallback((objectId) => navigate(`/dashboard/status/edit/${objectId}`), [navigate]);
 
-    const handleDeleteStatus = useCallback((id) => {
+    const handleDeleteStatus = useCallback((objectId) => {
         Swal.fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
@@ -71,7 +71,7 @@ export default function AllStatus() {
                 try {
                     startLoadingBar();
                     setLoading(true);
-                    const response = await API.delete(`/status/${id}`);
+                    const response = await API.delete(`/status/${objectId}`);
                     toast.success(response.data.message);
                     getStatus();
                 } catch (error) {
@@ -84,24 +84,24 @@ export default function AllStatus() {
         });
     }, [getStatus]);
 
-    const ActionButtons = ({ id, onView, onEdit, onDelete }) => (
+    const ActionButtons = ({ objectId, onView, onEdit, onDelete }) => (
         <>
             {authUser?.permission.some((items) => items.value !== "Read Status") ? (
-                <button className="btn btn-sm btn-success me-1" title="View" onClick={() => onView(id)}>
+                <button className="btn btn-sm btn-success me-1" title="View" onClick={() => onView(objectId)}>
                     <i className="fe fe-eye"></i>
                 </button>
             ) : (
                 null
             )}
             {authUser?.permission.some((items) => items.value !== "Update Status") ? (
-                <button className="btn btn-sm btn-primary me-1" title="Edit" onClick={() => onEdit(id)}>
+                <button className="btn btn-sm btn-primary me-1" title="Edit" onClick={() => onEdit(objectId)}>
                     <i className="fe fe-edit"></i>
                 </button>
             ) : (
                 null
             )}
             {authUser?.permission.some((items) => items.value !== "Delete Status") ? (
-                <button className="btn btn-sm btn-danger" title="Delete" onClick={() => onDelete(id)}>
+                <button className="btn btn-sm btn-danger" title="Delete" onClick={() => onDelete(objectId)}>
                     <i className="fe fe-trash"></i>
                 </button>
             ) : (
@@ -118,7 +118,7 @@ export default function AllStatus() {
             name: "Action",
             cell: (row) => (
                 <ActionButtons
-                    id={row._id}
+                    objectId={row._id}
                     onView={handleViewStatus}
                     onEdit={handleEditStatus}
                     onDelete={handleDeleteStatus}

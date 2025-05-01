@@ -5,22 +5,26 @@ import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
+import Skeleton from "react-loading-skeleton";
 
 export default function EditAnnouncement() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const editorRef = useRef(null);
-    const [announcement, setAnnouncement] = useState("");
     const [announcementData, setAnnouncementData] = useState("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchAnnouncement = async () => {
             try {
+                setLoading(true);
                 const response = await API.get(`/announcement`);
                 const filteredAnnouncement = response.data.filter((announcement) => announcement.propertyId === Number(uniqueId));
                 setAnnouncementData(filteredAnnouncement);
             } catch (error) {
                 console.error('Error fetching announcement:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -29,11 +33,11 @@ export default function EditAnnouncement() {
 
     const initialValues = {
         propertyId: uniqueId,
+        announcementData: announcementData[0]?.announcement || "",
     }
 
     const handleSubmit = async (values) => {
         try {
-            values = { ...values, announcement: editorRef.current.getContent() }
             const response = await API.put(`/announcement/${announcementData[0]?.uniqueId}`, values);
 
             if (response.status === 200) {
@@ -65,38 +69,32 @@ export default function EditAnnouncement() {
 
     return (
         <Fragment>
-            <Form onSubmit={formik.handleSubmit}>
-                <Row>
-                    {/* Announcement */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Announcement</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => editorRef.current = editor}
-                                onChange={(e) => setAnnouncement(editorRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                }}
-                                initialValue={announcementData[0]?.announcement} />
-                        </Form.Group>
-                    </Col>
+            {loading
+                ?
+                <Skeleton height={300} />
+                :
+                <Form onSubmit={formik.handleSubmit}>
+                    <Row>
+                        {/* Announcement */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Announcement</Form.Label>
+                                <JoditEditor
+                                    config={{
+                                        height: 300,
+                                    }}
+                                    value={formik.values.announcement}
+                                    onBlur={(newContent) =>
+                                        formik.setFieldValue("announcement", newContent)
+                                    }
+                                />
+                            </Form.Group>
+                        </Col>
 
-                </Row>
-                <Button type="submit">Update</Button>
-            </Form>
+                    </Row>
+                    <Button type="submit">Update</Button>
+                </Form>
+            }
         </Fragment>
     );
 }

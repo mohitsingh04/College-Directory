@@ -84,10 +84,10 @@ const Login = () => {
                                     value={formik.values.email}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    autoFocus={true}
+                                    autoFocus={false}
                                 />
                                 {formik.touched.email && formik.errors.email ? (
-                                    <div className="text-danger">{formik.errors.email}</div>
+                                    <small className="text-danger">{formik.errors.email}</small>
                                 ) : null}
                                 <span className="focus-input100"></span>
                                 <span className="symbol-input100">
@@ -110,7 +110,7 @@ const Login = () => {
                                     onBlur={formik.handleBlur}
                                 />
                                 {formik.touched.password && formik.errors.password ? (
-                                    <div className="text-danger">{formik.errors.password}</div>
+                                    <small className="text-danger">{formik.errors.password}</small>
                                 ) : null}
                                 <span className="focus-input100"></span>
                                 <span className="symbol-input100">

@@ -5,14 +5,12 @@ import Dropdown from "react-dropdown-select";
 import * as Yup from "yup";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../services/API";
 import LoadingBar from "react-top-loading-bar";
+import JoditEditor from "jodit-react";
 
 export default function AddCourse() {
   const navigate = useNavigate();
-  const editorRef = useRef(null);
-  const [description, setDescription] = useState("");
   const [categoryData, setCategoryData] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [toggleHideShow, setToggleHideShow] = useState(false);
@@ -83,7 +81,7 @@ export default function AddCourse() {
 
   const handleSubmit = async (values) => {
     try {
-      const formData = { ...values, description, duration: `${values.course_duration} ${values.course_duration_unit}` };
+      const formData = { ...values, duration: `${values.course_duration} ${values.course_duration_unit}` };
       startLoadingBar();
       const response = await API.post("/course", formData);
       if (response.data.message) {
@@ -419,25 +417,14 @@ export default function AddCourse() {
               <Col md={12}>
                 <Form.Group className="mb-3">
                   <Form.Label htmlFor="userName">Description</Form.Label>
-                  <Editor
-                    apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                    onInit={(evt, editor) => editorRef.current = editor}
-                    onChange={(e) => setDescription(editorRef.current.getContent())}
-                    onBlur={formik.handleBlur}
-                    init={{
-                      height: 250,
-                      menubar: false,
-                      plugins: [
-                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                      ],
-                      toolbar: 'undo redo | blocks | ' +
-                        'bold italic forecolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                        'removeformat',
-                      content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                  <JoditEditor
+                    config={{
+                      height: 300,
                     }}
+                    value={formik.values.description}
+                    onBlur={(newContent) =>
+                      formik.setFieldValue("description", newContent)
+                    }
                   />
                 </Form.Group>
               </Col>

@@ -9,7 +9,7 @@ import ALLImages from "../../common/Imagesdata";
 
 export default function ViewUser() {
   const navigate = useNavigate();
-  const { Id } = useParams();
+  const { objectId } = useParams();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
@@ -40,7 +40,7 @@ export default function ViewUser() {
       try {
         setLoading(true);
         startLoadingBar();
-        const { data } = await API.get(`/user/${Id}`);
+        const { data } = await API.get(`/user/${objectId}`);
         setUser(data);
       } catch (error) {
         toast.error('Error fetching user: ' + error.message);
@@ -51,7 +51,7 @@ export default function ViewUser() {
     };
 
     getUser();
-  }, [Id]);
+  }, [objectId]);
 
   useEffect(() => {
     document.title = "AJ | View User";

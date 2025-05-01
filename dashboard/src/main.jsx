@@ -7,6 +7,7 @@ import 'owl.carousel/dist/assets/owl.carousel.css';
 import 'owl.carousel/dist/assets/owl.theme.default.css';
 import 'react-dropzone-uploader/dist/styles.css';
 import 'react-phone-input-2/lib/style.css';
+import 'react-image-crop/dist/ReactCrop.css';
 
 import { Toaster } from "react-hot-toast";
 import { HelmetProvider } from 'react-helmet-async';
@@ -95,15 +96,15 @@ const AppWrapper = () => {
             <Scrolltotop />
             <Toaster />
             <Routes>
-              <Route path='/' element={<HomePage />} />
-              <Route path='/india-colleges' element={<Search />} />
+              {/* <Route path='/' element={<HomePage />} />
+              <Route path='/india-colleges' element={<Search />} /> */}
               {/* <Route path="/university" element={<University />} /> */}
               {/* <Route path="/university/:collegeId-:collegeName-:city" element={<CollegeDetails />} /> */}
-              <Route path="/:collegeType/:collegeId/:collegeName/:city" element={<CollegeDetails />} />
+              {/* <Route path="/:collegeType/:collegeId/:collegeName/:city" element={<CollegeDetails />} /> */}
 
               {/* Public Routes */}
               <Route path='/' element={<Custompage />}>
-                <Route path='/login' element={<GuestRoute><Login /></GuestRoute>} />
+                <Route path='/' element={<GuestRoute><Login /></GuestRoute>} />
                 <Route path='/register' element={<GuestRoute><Register /></GuestRoute>} />
                 <Route path='/register-with-otp' element={<GuestRoute><RegisterWithOtp /></GuestRoute>} />
                 <Route path='/verify-otp' element={<GuestRoute><VerifyOtp /></GuestRoute>} />
@@ -125,34 +126,34 @@ const AppWrapper = () => {
                 {/* Status */}
                 <Route path='/dashboard/status' element={<ProtectedRoutes><AllStatus /></ProtectedRoutes>} />
                 <Route path='/dashboard/status/add' element={<ProtectedRoutes><AddStatus /></ProtectedRoutes>} />
-                <Route path='/dashboard/status/edit/:Id' element={<ProtectedRoutes><EditStatus /></ProtectedRoutes>} />
-                <Route path='/dashboard/status/view/:Id' element={<ProtectedRoutes><ViewStatus /></ProtectedRoutes>} />
+                <Route path='/dashboard/status/edit/:objectId' element={<ProtectedRoutes><EditStatus /></ProtectedRoutes>} />
+                <Route path='/dashboard/status/view/:objectId' element={<ProtectedRoutes><ViewStatus /></ProtectedRoutes>} />
 
                 {/* Exam */}
                 <Route path='/dashboard/exam' element={<ProtectedRoutes><AllExam /></ProtectedRoutes>} />
                 <Route path='/dashboard/exam/add' element={<ProtectedRoutes><AddExam /></ProtectedRoutes>} />
-                <Route path='/dashboard/exam/edit/:Id' element={<ProtectedRoutes><EditExam /></ProtectedRoutes>} />
-                <Route path='/dashboard/exam/view/:Id' element={<ProtectedRoutes><ViewExam /></ProtectedRoutes>} />
+                <Route path='/dashboard/exam/edit/:objectId' element={<ProtectedRoutes><EditExam /></ProtectedRoutes>} />
+                <Route path='/dashboard/exam/view/:objectId' element={<ProtectedRoutes><ViewExam /></ProtectedRoutes>} />
                 <Route path='/dashboard/cookies' element={<ProtectedRoutes><GetCookies /></ProtectedRoutes>} />
 
                 {/* User */}
                 <Route path='/dashboard/:role' element={<ProtectedRoutes><Role /></ProtectedRoutes>} />
                 <Route path='/dashboard/users' element={<ProtectedRoutes><AllUser /></ProtectedRoutes>} />
                 <Route path='/dashboard/user/add' element={<ProtectedRoutes><AddUser /></ProtectedRoutes>} />
-                <Route path='/dashboard/user/edit/:Id' element={<ProtectedRoutes><EditUser /></ProtectedRoutes>} />
-                <Route path='/dashboard/user/view/:Id' element={<ProtectedRoutes><ViewUser /></ProtectedRoutes>} />
+                <Route path='/dashboard/user/edit/:objectId' element={<ProtectedRoutes><EditUser /></ProtectedRoutes>} />
+                <Route path='/dashboard/user/view/:objectId' element={<ProtectedRoutes><ViewUser /></ProtectedRoutes>} />
 
                 {/* Category */}
                 <Route path='/dashboard/category' element={<ProtectedRoutes><AllCategory /></ProtectedRoutes>} />
                 <Route path='/dashboard/category/add' element={<ProtectedRoutes><AddCategory /></ProtectedRoutes>} />
-                <Route path='/dashboard/category/edit/:Id' element={<ProtectedRoutes><EditCategory /></ProtectedRoutes>} />
-                <Route path='/dashboard/category/view/:Id' element={<ProtectedRoutes><ViewCategory /></ProtectedRoutes>} />
+                <Route path='/dashboard/category/edit/:objectId' element={<ProtectedRoutes><EditCategory /></ProtectedRoutes>} />
+                <Route path='/dashboard/category/view/:objectId' element={<ProtectedRoutes><ViewCategory /></ProtectedRoutes>} />
 
                 {/* Course */}
                 <Route path='/dashboard/course' element={<ProtectedRoutes><AllCourse /></ProtectedRoutes>} />
                 <Route path='/dashboard/course/add' element={<ProtectedRoutes><AddCourse /></ProtectedRoutes>} />
-                <Route path='/dashboard/course/edit/:Id' element={<ProtectedRoutes><EditCourse /></ProtectedRoutes>} />
-                <Route path='/dashboard/course/view/:Id' element={<ProtectedRoutes><ViewCourse /></ProtectedRoutes>} />
+                <Route path='/dashboard/course/edit/:objectId' element={<ProtectedRoutes><EditCourse /></ProtectedRoutes>} />
+                <Route path='/dashboard/course/view/:objectId' element={<ProtectedRoutes><ViewCourse /></ProtectedRoutes>} />
 
                 {/* Property */}
                 <Route path='/dashboard/property' element={<ProtectedRoutes><AllProperty /></ProtectedRoutes>} />

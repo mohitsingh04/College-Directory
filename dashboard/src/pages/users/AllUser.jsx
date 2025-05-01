@@ -20,37 +20,33 @@ export default function AllUser() {
     const startLoadingBar = () => loadingBarRef.current?.continuousStart();
     const stopLoadingBar = () => loadingBarRef.current?.complete();
 
-    useEffect(() => {
-        const getAuthUserData = async () => {
-            try {
-                setHandlePermissionLoading(true)
-                const { data } = await API.get("/profile");
-                setAuthUser(data?.data);
-            } catch (error) {
-                toast.error(error.message);
-            } finally {
-                setHandlePermissionLoading(false)
-            }
-        }
-
-        getAuthUserData();
-    }, []);
-
-    const getUsers = async () => {
+    const fetchData = async () => {
         try {
+            setLoading(true);
+            setHandlePermissionLoading(true);
             startLoadingBar();
-            const response = await API.get("/user");
-            setUser(response.data.filter((filterData) => !filterData.isDeleted));
+
+            const [authResponse, userResponse] = await Promise.all([
+                API.get("/profile"),
+                API.get("/user"),
+            ]);
+
+            setAuthUser(authResponse?.data?.data);
+
+            const filteredUsers = userResponse?.data?.filter((user) => !user.isDeleted);
+            setUser(filteredUsers);
+
         } catch (error) {
-            toast.error("Something went wrong.");
+            toast.error(error.message || "Something went wrong.");
         } finally {
+            setLoading(false);
+            setHandlePermissionLoading(false);
             stopLoadingBar();
-            setLoading(false)
         }
     };
 
     useEffect(() => {
-        getUsers();
+        fetchData();
     }, []);
 
     const handleViewUser = (_id) => {
@@ -77,7 +73,7 @@ export default function AllUser() {
                     const response = await API.delete(`/user/${_id}`);
                     if (response.status === 200) {
                         toast.success(response.data.message);
-                        getUsers();
+                        fetchData();
                     }
                 } catch (error) {
                     if (error.response) {
@@ -122,23 +118,23 @@ export default function AllUser() {
         },
         {
             name: 'Status',
-            selector: row => [
+            selector: row => (
                 <>
                     {row.status === "Active"
-                        ? <span className="badge bg-success">Active</span>
+                        ? <span className="badge bg-success">{row.status}</span>
                         : row.status === "Suspended"
-                            ? <span className="badge bg-danger">Suspended</span>
+                            ? <span className="badge bg-danger">{row.status}</span>
                             : row.status === "Pending"
-                                ? <span className="badge bg-warning">Pending</span>
+                                ? <span className="badge bg-warning">{row.status}</span>
                                 : <span className="badge bg-secondary">Unknown</span>
                     }
                 </>
-            ],
+            ),
             sortable: true,
         },
         {
             name: "Action",
-            selector: (row) => [
+            selector: (row) => (
                 <>
                     {authUser?.permission.some((items) => items.value !== "Read Agent") ? (
                         <button className="btn btn-sm btn-success me-1" data-bs-toggle="tooltip" title="View" onClick={() => handleViewUser(row._id)}>
@@ -162,7 +158,7 @@ export default function AllUser() {
                         null
                     )}
                 </>
-            ],
+            ),
         },
     ];
 
@@ -210,7 +206,7 @@ export default function AllUser() {
                     <div className="">
                         <Breadcrumb className='mb-0'>
                             <Breadcrumb.Item>
-                                <Link to={'/dashboard'}>
+                                <Link to="/dashboard">
                                     Dashboard
                                 </Link>
                             </Breadcrumb.Item>
@@ -226,11 +222,14 @@ export default function AllUser() {
                         <Card.Header>
                             <h3 className="card-title">User</h3>
                             <div className="card-options ms-auto">
-                                <Link to={"/dashboard/user/add"}>
-                                    <button type="button" className="btn btn-md btn-primary">
-                                        <i className="fe fe-plus"></i> Add a new User
-                                    </button>
-                                </Link>
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary"
+                                    onClick={() => navigate("/dashboard/user/add")}
+                                >
+                                    <i className="fe fe-plus"></i> Add a new User
+                                </button>
+
                             </div>
                         </Card.Header>
                         <Card.Body>
@@ -279,12 +278,6 @@ export default function AllUser() {
                     </Card>
                 </div>
             </Row>
-            {/* {!loading ? authUser?.permission.some((items) => items.value !== "Create Agent") ? (
-                <>
-                </>
-            ) : (
-                <div className='position-absolute top-50 start-50 translate-middle'>USER DOES NOT HAVE THE RIGHT ROLES.</div>
-            ) : ""} */}
         </Fragment>
     )
 }

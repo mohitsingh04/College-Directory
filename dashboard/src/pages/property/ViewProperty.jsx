@@ -23,17 +23,17 @@ import LoadingBar from 'react-top-loading-bar';
 import toast from "react-hot-toast";
 
 export default function ViewProperty() {
-    const { uniqueId } = useParams();
-    const [property, setProperty] = useState("");
-    const [reviews, setReviews] = useState([]);
-    const loadingBarRef = useRef(null);
-    const [propertyCourseData, setPropertyCourseData] = useState([]);
-    const [authUser, setAuthUser] = useState(null);
-    const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [fetchTime, setFetchTime] = useState(null);
-    const location = useLocation();
     const navigate = useNavigate();
+    const location = useLocation();
+    const { uniqueId } = useParams();
+    const loadingBarRef = useRef(null);
+    const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [property, setProperty] = useState("");
+    const [authUser, setAuthUser] = useState(null);
+    const [fetchTime, setFetchTime] = useState(null);
+    const [propertyCourseData, setPropertyCourseData] = useState([]);
+    const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
 
     const startLoadingBar = () => loadingBarRef.current?.continuousStart();
     const stopLoadingBar = () => loadingBarRef.current?.complete();
@@ -141,40 +141,36 @@ export default function ViewProperty() {
         }
     }
 
-    const tabMappings = {
-        first: "basic-info",
-        second: "location",
-        third: "gallery",
-        fourth: "hostel",
-        fifth: "amenities",
-        sixth: "faqs",
-        seventh: "scholarship",
-        eighth: "announcement",
-        ninth: "faculty",
-        tenth: "reviews",
-        eleventh: "qna",
-        twelfth: "others",
-        thirteenth: "seo",
-        fourteenth: "courses"
-    };
+    const tabMapping = [
+        { id: "info", label: "Info" },
+        { id: "location", label: "Location" },
+        { id: "gallery", label: "Gallery" },
+        { id: "hostel", label: "Hostel" },
+        { id: "amenities", label: "Amenities" },
+        { id: "faqs", label: "Faq's" },
+        { id: "scholarship", label: "Scholarship" },
+        { id: "announcement", label: "Announcement" },
+        { id: "faculty", label: "Faculty" },
+        { id: "reviews", label: "Reviews" },
+        { id: "qna", label: "QnA" },
+        { id: "others", label: "Other Details" },
+        { id: "seo", label: "Seo" },
+        { id: "courses", label: "Courses" },
+    ];
 
-    // Reverse mapping for getting eventKey from hash
-    const reverseTabMappings = Object.fromEntries(
-        Object.entries(tabMappings).map(([key, value]) => [value, key])
-    );
-
-    const [activeTab, setActiveTab] = useState("first");
+    const [activeTab, setActiveTab] = useState("info");
 
     useEffect(() => {
-        const hash = location.hash.replace("#", ""); // Get hash without #
-        if (reverseTabMappings[hash]) {
-            setActiveTab(reverseTabMappings[hash]); // Set active tab from hash
+        const params = new URLSearchParams(location.search);
+        const tab = params.get("tab");
+        if (tab) {
+            setActiveTab(tab);
         }
-    }, [location.hash]);
+    }, [location.search]);
 
-    const handleSelect = (eventKey) => {
-        setActiveTab(eventKey);
-        navigate(`#${tabMappings[eventKey]}`); // Update URL hash
+    const handleSelect = (tabId) => {
+        setActiveTab(tabId);
+        navigate(`/dashboard/property/view/${uniqueId}?tab=${tabId}`);
     };
 
     return (
@@ -207,7 +203,7 @@ export default function ViewProperty() {
                                                 {loading ? (
                                                     <Skeleton width={94} height={94} className="rounded-circle me-2" />
                                                 ) : (
-                                                    <div className="wideget-user-img">
+                                                    <div className="">
                                                         {property.logo !== "image.png"
                                                             ?
                                                             <img src={`${import.meta.env.VITE_API_URL}${property?.logo}`} width={94} height={94} alt="Logo Preview" />
@@ -228,20 +224,6 @@ export default function ViewProperty() {
                                                         <>
                                                             <h4>{property.property_name} <span className="text-gray-700">({property.short_name})</span></h4>
                                                             <p style={{ fontSize: "16px" }}><StarIcon style={{ color: "#faaf00" }} fontSize="inherit" /> {averageRating !== 0 ? `${averageRating}/5` : 'No reviews yet'} ({reviews?.length} Reviews)</p>
-                                                            <Link to="#" className="btn btn-success mt-1 mb-1 me-1">
-                                                                <div className="">
-                                                                    {property?.status === "Active"
-                                                                        ? <span className="badge bg-success">Active</span>
-                                                                        : property?.status === "Suspended"
-                                                                            ? <span className="badge bg-danger">Suspended</span>
-                                                                            : property?.status === "Pending"
-                                                                                ? <span className="badge bg-warning">Pending</span>
-                                                                                : <span className="badge bg-secondary">Unknown</span>
-                                                                    }
-                                                                </div>
-                                                            </Link>
-                                                            {/* <Link to="#" className="btn btn-primary mt-1 mb-1 me-1"><i className="fa fa-rss"></i> <span>Fetched Time: {fetchTime} sec</span></Link> */}
-                                                            <Link to={`${import.meta.env.BASE_URL}pages/mailcompose/`} className="btn btn-secondary mt-1 mb-1"><i className="fa fa-envelope"></i> Broucher</Link>
                                                         </>
                                                     )}
                                                 </div>
@@ -338,26 +320,12 @@ export default function ViewProperty() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    {/* <Nav as='ul' variant="pills" className="nav-style-3">
-                                                        <Nav.Item as='li'><Nav.Link eventKey="first">Basic Info.</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="second">Location</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="third">Gallery</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="fourth">Hostel</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="fifth">Amenities</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="sixth">Faq's</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="seventh">Scholarship</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="eighth">Announcement</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="ninth">Faculty</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="tenth">Reviews</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="eleventh">QnA</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="twelfth">Others</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="thirteenth">Seo</Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="fourteenth">Courses</Nav.Link></Nav.Item>
-                                                    </Nav> */}
-                                                    <Nav as="ul" variant="pills" className="nav-style-3">
-                                                        {Object.entries(tabMappings).map(([eventKey, hash]) => (
-                                                            <Nav.Item as="li" key={eventKey}>
-                                                                <Nav.Link eventKey={eventKey}>{hash.replace("-", " ")}</Nav.Link>
+                                                    <Nav as="ul" variant="pills" className="nav-style-3" activeKey={activeTab} onSelect={handleSelect}>
+                                                        {tabMapping.map((tab) => (
+                                                            <Nav.Item as="li" key={tab.id}>
+                                                                <Nav.Link eventKey={tab.id}>
+                                                                    {tab.label}
+                                                                </Nav.Link>
                                                             </Nav.Item>
                                                         ))}
                                                     </Nav>
@@ -369,46 +337,46 @@ export default function ViewProperty() {
                             </div>
                         </Card>
                         <Tab.Content>
-                            <Tab.Pane className="p-0 border-0" eventKey="first">
+                            <Tab.Pane className="p-0 border-0" eventKey="info">
                                 <BasicDetails />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="second">
+                            <Tab.Pane className="p-0 border-0" eventKey="location">
                                 <Location />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="third">
+                            <Tab.Pane className="p-0 border-0" eventKey="gallery">
                                 <Gallery />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="fourth">
+                            <Tab.Pane className="p-0 border-0" eventKey="hostel">
                                 <Hostel />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="fifth">
+                            <Tab.Pane className="p-0 border-0" eventKey="amenities">
                                 <Amenities />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="sixth">
+                            <Tab.Pane className="p-0 border-0" eventKey="faqs">
                                 <Faqs />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="seventh">
+                            <Tab.Pane className="p-0 border-0" eventKey="scholarship">
                                 <Scholarship />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="eighth">
+                            <Tab.Pane className="p-0 border-0" eventKey="announcement">
                                 <Announcement />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="ninth">
+                            <Tab.Pane className="p-0 border-0" eventKey="faculty">
                                 <Faculty />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="tenth">
+                            <Tab.Pane className="p-0 border-0" eventKey="reviews">
                                 <Reviews />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="eleventh">
+                            <Tab.Pane className="p-0 border-0" eventKey="qna">
                                 <QuestionAndAnswer />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="twelfth">
+                            <Tab.Pane className="p-0 border-0" eventKey="others">
                                 <OtherDetails />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="thirteenth">
+                            <Tab.Pane className="p-0 border-0" eventKey="seo">
                                 <Seo />
                             </Tab.Pane>
-                            <Tab.Pane className="p-0 border-0" eventKey="fourteenth">
+                            <Tab.Pane className="p-0 border-0" eventKey="courses">
                                 <Course />
                             </Tab.Pane>
                         </Tab.Content>

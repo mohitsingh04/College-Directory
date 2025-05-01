@@ -118,7 +118,7 @@ export default function AllCourse() {
     // { name: 'Specialization', selector: row => row.specialization || "Null", sortable: true },
     {
       name: 'Status',
-      selector: row => [
+      selector: row => (
         <>
           {row.status === "Active"
             ? <span className="badge bg-success">Active</span>
@@ -129,7 +129,7 @@ export default function AllCourse() {
                 : <span className="badge bg-secondary">Unknown</span>
           }
         </>
-      ],
+      ),
       sortable: true,
     },
     {

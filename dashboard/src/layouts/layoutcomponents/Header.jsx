@@ -34,7 +34,7 @@ const Header = ({ ThemeChanger }) => {
     try {
       const response = await API.post("/logout");
       toast.success(response.data.message);
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.message || "Logout failed");
     }

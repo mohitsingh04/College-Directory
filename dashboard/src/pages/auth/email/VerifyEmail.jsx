@@ -33,7 +33,7 @@ export default function VerifyEmail() {
                     icon: "success",
                     timer: 2000,
                 }).then(() => {
-                    navigate("/login");
+                    navigate("/");
                 });
             } catch (error) {
                 if (error.response) {

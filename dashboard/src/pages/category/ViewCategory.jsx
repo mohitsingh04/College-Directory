@@ -9,7 +9,7 @@ import ALLImages from "../../common/Imagesdata";
 
 export default function ViewCategory() {
     const navigate = useNavigate();
-    const { Id } = useParams();
+    const { objectId } = useParams();
     const [category, setCategory] = useState(null);
     const [authUser, setAuthUser] = useState(null);
     const loadingBarRef = useRef(null);
@@ -38,7 +38,7 @@ export default function ViewCategory() {
         const getCategory = async () => {
             try {
                 startLoadingBar();
-                const { data } = await API.get(`/category/${Id}`);
+                const { data } = await API.get(`/category/${objectId}`);
                 setCategory(data);
             } catch (error) {
                 toast.error('Error fetching category: ' + error.message);
@@ -48,7 +48,7 @@ export default function ViewCategory() {
         };
 
         getCategory();
-    }, [Id]);
+    }, [objectId]);
 
     useEffect(() => {
         document.title = "AJ | View Category";

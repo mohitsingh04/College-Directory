@@ -95,24 +95,24 @@ export default function OtherBasicInformation() {
                                 <>
                                     <Row>
                                         <Col md={6} className="my-3">
-                                            <strong>Youtube Link</strong>
+                                            <strong>Youtube Link: </strong>
                                             <br />
-                                            {otherBasicInformation[0]?.youtube_link}
+                                            {otherBasicInformation[0]?.youtube_link || "N/A"}
                                         </Col>
                                         <Col md={6} className="my-3">
                                             <strong>Bitly Link</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.bitly_link}
+                                            {otherBasicInformation[0]?.bitly_link || "N/A"}
                                         </Col>
                                         <Col md={6} className="my-3">
                                             <strong>Website</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.website_url}
+                                            {otherBasicInformation[0]?.website_url || "N/A"}
                                         </Col>
                                         <Col md={6} className="my-3">
                                             <strong>Brochure</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.brochure ? (
+                                            {otherBasicInformation[0]?.brochure !== "brochure.pdf" ? (
                                                 <u>
                                                     <a
                                                         href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.brochure}`}
@@ -129,7 +129,7 @@ export default function OtherBasicInformation() {
                                         <Col md={6} className="my-3">
                                             <strong>Hindi Podcast</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.hindi_podcast ? (
+                                            {otherBasicInformation[0]?.hindi_podcast !== "music.mp3" ? (
                                                 <u>
                                                     <a
                                                         href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.hindi_podcast}`}
@@ -146,7 +146,7 @@ export default function OtherBasicInformation() {
                                         <Col md={6} className="my-3">
                                             <strong>English Podcast</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.english_podcast ? (
+                                            {otherBasicInformation[0]?.english_podcast !== "music.mp3" ? (
                                                 <u>
                                                     <a
                                                         href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.english_podcast}`}

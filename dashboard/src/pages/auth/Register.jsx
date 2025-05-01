@@ -19,6 +19,7 @@ export default function Register() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [isChecked, setIsChecked] = useState(false);
 
     const initialValues = {
         name: "",
@@ -35,7 +36,6 @@ export default function Register() {
             if (response.status === 200) {
                 toast.success(response.data.message);
                 navigate(`/verify-email?email=${values.email}`);
-                setLoading(true);
             }
         } catch (error) {
             if (error.response) {
@@ -75,7 +75,7 @@ export default function Register() {
                         <Form className="login100-form validate-form" onSubmit={formik.handleSubmit}>
                             <span className="login100-form-title">Registration</span>
 
-                            {error ? <div className="alert alert-danger text-center mt-3">{error} Head back to <Link to={`/login`} className="text-danger"><u>login.</u></Link></div> : <span />}
+                            {error ? <div className="alert alert-danger text-center mt-3">{error} Head back to <Link to={`/`} className="text-danger"><u>login.</u></Link></div> : <span />}
 
                             <div className="wrap-input100 validate-input" data-bs-validate="Name is required.">
                                 <Form.Control
@@ -86,9 +86,9 @@ export default function Register() {
                                     value={formik.values.name}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    autoFocus={true}
+                                    autoFocus={false}
                                 />
-                                {formik.errors.name && formik.touched.name ? <div className="text-danger">{formik.errors.name}</div> : null}
+                                {formik.errors.name && formik.touched.name ? <small className="text-danger">{formik.errors.name}</small> : null}
                                 <span className="focus-input100"></span>
                                 <span className="symbol-input100">
                                     {formik.errors.name && formik.touched.name ? <i className="ri-user-fill fixed-icon" aria-hidden="true"></i> : <i className="ri-user-fill" aria-hidden="true"></i>}
@@ -106,7 +106,7 @@ export default function Register() {
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                {formik.errors.email && formik.touched.email ? <div className="text-danger">{formik.errors.email}</div> : null}
+                                {formik.errors.email && formik.touched.email ? <small className="text-danger">{formik.errors.email}</small> : null}
                                 <span className="focus-input100"></span>
                                 <span className="symbol-input100">
                                     {formik.errors.email && formik.touched.email ? <i className="ri-mail-fill fixed-icon" aria-hidden="true"></i> : <i className="ri-mail-fill" aria-hidden="true"></i>}
@@ -133,7 +133,7 @@ export default function Register() {
                                     onChange={(value) => formik.setFieldValue("phone", value)}
                                     onBlur={formik.handleBlur("phone")}
                                 />
-                                {formik.errors.phone && formik.touched.phone ? <div className="text-danger">{formik.errors.phone}</div> : null}
+                                {formik.errors.phone && formik.touched.phone ? <small className="text-danger">{formik.errors.phone}</small> : null}
                                 {/* <span className="focus-input100"></span>
                                 <span className="symbol-input100">
                                     {formik.errors.phone && formik.touched.phone ? <i className="ri-mail-fill fixed-icon" aria-hidden="true"></i> : <i className="ri-mail-fill" aria-hidden="true"></i>}
@@ -151,7 +151,7 @@ export default function Register() {
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                {formik.errors.password && formik.touched.password ? <div className="text-danger">{formik.errors.password}</div> : null}
+                                {formik.errors.password && formik.touched.password ? <small className="text-danger">{formik.errors.password}</small> : null}
                                 <span className="focus-input100"></span>
                                 <span className="symbol-input100">
                                     {formik.errors.password && formik.touched.password ? <i className="ri-lock-fill fixed-icon" aria-hidden="true"></i> : <i className="ri-lock-fill" aria-hidden="true"></i>}
@@ -159,12 +159,12 @@ export default function Register() {
                             </div>
 
                             <label className="custom-control custom-checkbox mt-4">
-                                <input className="form-check-input" type="checkbox" id="checkboxNoLabel" value="" aria-label="..." />
+                                <input className="form-check-input" type="checkbox" id="checkboxNoLabel" value="" aria-label="..." onChange={(e) => { setIsChecked(e.target.checked) }} />
                                 <span className="custom-control-label ms-1">Agree the <Link to={`/terms-and-policy`} className="text-primary">terms and policy</Link></span>
                             </label>
 
                             <div className="container-login100-form-btn">
-                                <Button type="submit" className="login100-form-btn btn-primary">
+                                <Button type="submit" className="login100-form-btn btn-primary" disabled={!isChecked || loading}>
                                     {loading
                                         ? <span>Registering...</span>
                                         : <span>Register</span>
@@ -173,7 +173,7 @@ export default function Register() {
                             </div>
 
                             <div className="text-center pt-3">
-                                <p className="text-dark mb-0">Already have account?<Link to={`/login`} className="text-primary ms-1">Sign In</Link></p>
+                                <p className="text-dark mb-0">Already have account?<Link to={`/`} className="text-primary ms-1">Sign In</Link></p>
                             </div>
 
                         </Form>

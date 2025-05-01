@@ -127,6 +127,27 @@ export const logout = async (req, res) => {
     }
 };
 
+export const resendEmail = async (req, res) => {
+    try {
+        const { email } = req.params;
+
+        const existEmail = await User.findOne({ email });
+        if (!existEmail) {
+            return res.status(400).json({ error: "Email not found." });
+        }
+
+        const user = await User.findOne({ email });
+
+        const userId = user._id;
+
+        await sendEmail({ email, emailType: "VERIFY", userId: userId });
+
+        return res.status(200).json({ message: "A verification email has been sent to your email address. The verification email will expire after 24 hours." });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
 export const verifyEmail = async (req, res) => {
     try {
         const { token } = req.body;

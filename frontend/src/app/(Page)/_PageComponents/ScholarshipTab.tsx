@@ -39,7 +39,7 @@ export default function ScholarshipTab() {
 				<Loader />
 			) : (
 				<>
-					<div className="bg-white p-6 rounded-xl shadow-md">
+					<div className="bg-white p-6">
 						<div
 							className="text-gray-700 text-base leading-relaxed"
 							dangerouslySetInnerHTML={{

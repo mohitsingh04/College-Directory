@@ -126,10 +126,10 @@ export default function RegisterWithOtp() {
                                 </Button>
                             </div>
 
-                            {error ? <div className="alert alert-danger text-center mt-3">{error} Head back to <Link to={`/login`} className="text-danger"><u>login.</u></Link></div> : <span />}
+                            {error ? <div className="alert alert-danger text-center mt-3">{error} Head back to <Link to={`/`} className="text-danger"><u>login.</u></Link></div> : <span />}
 
                             <div className="text-center pt-3">
-                                <p className="text-dark mb-0">Already have account?<Link to={`/login`} className="text-primary ms-1">Sign In</Link></p>
+                                <p className="text-dark mb-0">Already have account?<Link to={`/`} className="text-primary ms-1">Sign In</Link></p>
                             </div>
 
                         </Form>

@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/Components/Navbar/Navbar";
 import Footer from "@/Components/Footer/Footer";
 import "react-loading-skeleton/dist/skeleton.css";
+import "yet-another-react-lightbox/styles.css";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",

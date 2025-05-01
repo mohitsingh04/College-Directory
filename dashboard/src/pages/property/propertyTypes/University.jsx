@@ -25,7 +25,7 @@ export default function University() {
     const validationSchema = Yup.object({
         property_name: Yup.string().required("University name is required."),
         short_name: Yup.string().required("Short name is required."),
-        phone_number: Yup.string().required("Phone is required.").matches(/^[0-9]{10}$/, 'Phone number is not valid'),
+        phone_number: Yup.string().required("Phone is required."),
         email: Yup.string().required("Email address is required."),
     });
 
@@ -44,6 +44,7 @@ export default function University() {
                 } else if (error.response.status === 404) {
                     toast.error(error.response.status);
                 } else if (error.response.status === 500) {
+                    console.log(error.response)
                     toast.error("Internal server error, please try again later.");
                 } else {
                     toast.error("Something went wrong, please try again.");

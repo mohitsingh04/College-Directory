@@ -107,24 +107,19 @@ export default function AllProperty() {
     }
 
     const columns = [
-        {
-            name: 'ID',
-            selector: row => row.uniqueId,
-            sortable: true,
-        },
+        // {
+        //     name: 'ID',
+        //     selector: row => row.uniqueId,
+        //     sortable: true,
+        // },
         {
             name: 'Logo',
             selector: row => (
                 row.logo === "image.png"
                     ?
-                    <img src={ALLImages('logo4')} alt="logo" width={53} className="Exam Logo" />
+                    <img src={ALLImages('logo4')} alt="logo" className="list-logo" />
                     :
-                    <img
-                        src={`${import.meta.env.VITE_API_URL}${row.logo}`}
-                        width={53}
-                        alt="Exam Logo"
-                        onError={(e) => { e.target.src = <Skeleton width={53} height={53} />; }}
-                    />
+                    <img src={`${import.meta.env.VITE_API_URL}${row.logo}`} alt="logo" className="list-logo" />
             ),
             sortable: false,
         },
@@ -140,12 +135,12 @@ export default function AllProperty() {
         },
         {
             name: 'State',
-            selector: row => row.location?.state,
+            selector: row => row.location?.state || "Null",
             sortable: true,
         },
         {
             name: 'Status',
-            selector: row => [
+            selector: row => (
                 <>
                     {row.status === "Active"
                         ? <span className="badge bg-success">Active</span>
@@ -156,12 +151,12 @@ export default function AllProperty() {
                                 : <span className="badge bg-secondary">Unknown</span>
                     }
                 </>
-            ],
+            ),
             sortable: true,
         },
         {
             name: "Action",
-            selector: (row) => [
+            selector: (row) => (
                 <>
                     {authUser?.permission.some((items) => items.value !== "Read Property") ? (
                         <button className="btn btn-sm btn-success me-1" data-bs-toggle="tooltip" title="View" onClick={() => handleViewProperty(row.uniqueId)}>
@@ -178,7 +173,7 @@ export default function AllProperty() {
                         null
                     )}
                 </>
-            ],
+            ),
         },
     ];
 
@@ -234,11 +229,15 @@ export default function AllProperty() {
                         <Card.Header>
                             <h3 className="card-title">Property</h3>
                             <div className="card-options ms-auto">
-                                <Link to={"/dashboard/property/add"}>
-                                    <button type="button" className="btn btn-md btn-primary">
-                                        <i className="fe fe-plus"></i> Add a new Property
-                                    </button>
-                                </Link>
+                                {authUser?.role === "Property Manager"
+                                    ? null
+                                    :
+                                    <Link to={"/dashboard/property/add"}>
+                                        <button type="button" className="btn btn-md btn-primary">
+                                            <i className="fe fe-plus"></i> Add a new Property
+                                        </button>
+                                    </Link>
+                                }
                             </div>
                         </Card.Header>
                         <Card.Body>

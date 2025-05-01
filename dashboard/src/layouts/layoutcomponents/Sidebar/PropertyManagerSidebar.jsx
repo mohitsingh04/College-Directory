@@ -1,14 +1,15 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import ALLImages from '../../../common/Imagesdata';
 import { connect } from 'react-redux';
 import { ThemeChanger } from '../../../common/redux/Action';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PropertyMangerMenuloop } from '.././Menuloop';
 import store from '../../../common/redux/Store';
 import { PROPERTYMANAGERMENUITEMS } from '../../../common/Sidemenudata';
 import { Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import SimpleBar from 'simplebar-react';
 import { API } from '../../../services/API';
+import Select from "react-select";
 
 export function closeMenuRecursively(items) {
     items?.forEach((item) => {
@@ -38,39 +39,14 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
         getUserData();
     }, []);
 
-    // if (User?.role === "Super Admin") {
-    //     console.log("Super Admin");
-    // } else if (User?.role === "Admin") {
-    //     console.log("Admin");
-    // } else if (User?.role === "Property Manager") {
-    //     console.log("Property Manager");
-    // } else if (User?.role === "Editor") {
-    //     console.log("Editor");
-    // } else if (User?.role === "Counselor") {
-    //     console.log("Counselor");
-    // } else if (User?.role === "Cyber Partner") {
-    //     console.log("Cyber Partner");
-    // } else if (User?.role === "Agent") {
-    //     console.log("Agent");
-    // } else if (User?.role === "Student") {
-    //     console.log("Student");
-    // } else {
-    //     console.log("Not Found!");
-    // }
-
     function closeMenuFn() {
-
         closeMenuRecursively(PROPERTYMANAGERMENUITEMS);
-
         setMenuitems((arr) => [...arr]);
     }
 
     useEffect(() => {
-
         const mainContent = document.querySelector(".main-content");
         window.addEventListener('resize', menuResizeFn);
-
-
     }, []);
 
 
@@ -132,9 +108,7 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
 
 
     const WindowPreSize = typeof window !== 'undefined' ? [window.innerWidth] : [];
-
     function menuResizeFn() {
-
         if (typeof window === 'undefined') {
             // Handle the case where window is not available (server-side rendering)
             return;
@@ -142,11 +116,9 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
 
         WindowPreSize.push(window.innerWidth);
         if (WindowPreSize.length > 2) { WindowPreSize.shift() }
-
         const theme = store.getState();
         const currentWidth = WindowPreSize[WindowPreSize.length - 1];
         const prevWidth = WindowPreSize[WindowPreSize.length - 2];
-
 
         if (WindowPreSize.length > 1) {
             if (currentWidth < 992 && prevWidth >= 992) {
@@ -162,7 +134,6 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
                 console.log('Current dataVerticalStyle:', theme.dataverticalstyle);
                 ThemeChanger({ ...theme, toggled: theme.dataverticalstyle === "doublemenu" ? "double-menu-open" : "" });
                 console.log('menuresizeclosed',);
-
             }
         }
     }
@@ -625,6 +596,126 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
     const handleClick = (event) => {
         event.preventDefault();
     };
+
+    const [searchParams] = useSearchParams();
+    const query = searchParams.get("tab");
+    // const [authUser, setAuthUser] = useState("");
+    // const [property, setProperty] = useState([]);
+    // const [propertyLocation, setPropertyLocation] = useState("");
+
+    // const getAuthUser = async () => {
+    //     try {
+    //         const { data } = await API.get(`/profile`);
+    //         setAuthUser(data?.data);
+    //     } catch (error) {
+    //         console.error(
+    //             error.response.data.error ||
+    //             error.response.data.message ||
+    //             error.message
+    //         );
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     getAuthUser();
+    // }, []);
+
+    // const getProperty = useCallback(async () => {
+    //     if (!authUser?.uniqueId) return;
+
+    //     try {
+    //         const response = await API.get(`/property`);
+    //         const userProperties = response.data.filter(
+    //             (item) => item?.userId === authUser?.uniqueId
+    //         );
+    //         setProperty(userProperties);
+    //     } catch (error) {
+    //         console.error(
+    //             error.response.data.error ||
+    //             error.response.data.message ||
+    //             error.message
+    //         );
+    //     }
+    // }, [authUser?.uniqueId]);
+
+    // const getPropertyLocation = async () => {
+    //     try {
+    //         const response = await API.get("/location");
+    //         const filterPropetyLocation = response.data.filter((location) => location?.propertyId === property[0]?.uniqueId);
+    //         setPropertyLocation(filterPropetyLocation);
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     getProperty();
+    //     getPropertyLocation();
+    // }, [getProperty]);
+
+    // console.log(propertyLocation[0]?.city)
+
+    const [authUser, setAuthUser] = useState("");
+    const [property, setProperty] = useState([]);
+    const [propertyLocation, setPropertyLocation] = useState([]);
+
+    const handleError = (error) => {
+        console.error(
+            error?.response?.data?.error ||
+            error?.response?.data?.message ||
+            error?.message
+        );
+    };
+
+    const fetchAuthUser = async () => {
+        try {
+            const { data } = await API.get("/profile");
+            setAuthUser(data?.data || null);
+        } catch (error) {
+            handleError(error);
+        }
+    };
+
+    const fetchUserProperty = async (userId) => {
+        try {
+            const response = await API.get("/property");
+            const userProperties = response.data.filter(
+                (item) => item?.userId === userId
+            );
+            setProperty(userProperties);
+        } catch (error) {
+            handleError(error);
+        }
+    };
+
+    const fetchPropertyLocation = async (propertyId) => {
+        try {
+            const response = await API.get("/location");
+            const filteredLocation = response.data.filter(
+                (location) => location?.propertyId === propertyId
+            );
+            setPropertyLocation(filteredLocation);
+        } catch (error) {
+            handleError(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAuthUser();
+    }, []);
+
+    useEffect(() => {
+        if (authUser?.uniqueId) {
+            fetchUserProperty(authUser.uniqueId);
+        }
+    }, [authUser]);
+
+    useEffect(() => {
+        if (property.length > 0 && property[0]?.uniqueId) {
+            fetchPropertyLocation(property[0].uniqueId);
+        }
+    }, [property]);
+
     return (
         <Fragment>
             <div id="responsive-overlay" onClick={() => menuClose()}></div>
@@ -655,6 +746,35 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
                             </svg>
                         </div>
                         <ul className="main-menu" onClick={() => Sideclick()}>
+                            {authUser?.role === "Property Manager" && (
+                                <>
+                                    {property.length === 0
+                                        ?
+                                        <div className='py-2 flex justify-content-center shadow-sm'>
+                                            <Link to={"/dashboard/property/add"}>
+                                                <button type="button" className="btn btn-md btn-primary">
+                                                    <i className="fe fe-plus"></i> Add a new Property
+                                                </button>
+                                            </Link>
+                                        </div>
+                                        :
+                                        <div className="py-2 pl-10 w-100 shadow-sm">
+                                            <p className='text-sm font-medium'>
+                                                {property?.[0]?.property_name}
+                                                <br />
+                                                {propertyLocation
+                                                    ?
+                                                    <span className='text-xs font-normal'>
+                                                        {propertyLocation[0]?.city}, {propertyLocation[0]?.state}
+                                                    </span>
+                                                    :
+                                                    null
+                                                }
+                                            </p>
+                                        </div>
+                                    }
+                                </>
+                            )}
                             {PROPERTYMANAGERMENUITEMS.map((levelone) => (
                                 <Fragment key={Math.random()}>
                                     <li className={`${levelone.menutitle ? 'slide__category' : ''} 
@@ -663,40 +783,50 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
 													${levelone?.active ? 'open' : ''} 
 													${levelone?.selected ? 'active' : ''}`}>{levelone.menutitle ? <span className='category-name'>{levelone.menutitle}</span> : ""}
                                         {/* if Link */}
-                                        {levelone.type === "link" ?
-                                            <Link to={levelone.path + "/"} className={`side-menu__item ${levelone.selected ? 'active' : ''}`}>
-
-                                                {/* In case of doublemenu style the icon contains tooltip here is the style for single menu items */}
-
-                                                {/* Note: for doublemenu style if contains tooltip kindly refer Menuloop.jsx for more info. refer line no. 20 in Menuloop.jsx component */}
-
-                                                {localStorage.zanexlayout === 'horizontal' ? (
-                                                    // If zanexlayout is 'horizontal', do not show tooltip
-                                                    <i className={`fe ${levelone.icon} side-menu__icon`}></i>
-                                                ) : (
-                                                    localStorage.zanexverticalstyles === 'doublemenu' ? (
-                                                        // If zanexverticalstyles is 'doublemenu', show tooltip
-                                                        <div className="custom-tooltip">
-                                                            <OverlayTrigger placement={localStorage.zanexrtl ? 'left' : 'right'} overlay={<Tooltip>{levelone.title}</Tooltip>}>
+                                        {property.length !== 0
+                                            ?
+                                            <>
+                                                {levelone.type === "link"
+                                                    ?
+                                                    <Link
+                                                        to={
+                                                            levelone?.path
+                                                                ? levelone?.title === "Analytics"
+                                                                    ? `${levelone?.path}/${selectedProperty?.value?.uniqueId}`
+                                                                    : levelone?.path
+                                                                : levelone?.tab &&
+                                                                `/dashboard/property/view/${property[0]?.uniqueId}?tab=${levelone.tab}#`
+                                                        }
+                                                        className={`side-menu__item ${levelone?.tab === query
+                                                            ? "active"
+                                                            : levelone?.path === location?.pathname &&
+                                                            "active"
+                                                            }`}
+                                                    >
+                                                        {localStorage.zanexlayout === 'horizontal' ? (
+                                                            <i className={`fe ${levelone.icon} side-menu__icon`}></i>
+                                                        ) : (
+                                                            localStorage.zanexverticalstyles === 'doublemenu' ? (
+                                                                <div className="custom-tooltip">
+                                                                    <OverlayTrigger placement={localStorage.zanexrtl ? 'left' : 'right'} overlay={<Tooltip>{levelone.title}</Tooltip>}>
+                                                                        <i className={`fe ${levelone.icon} side-menu__icon`}></i>
+                                                                    </OverlayTrigger>
+                                                                    <Badge bg='success' className="side-badge fs-11">{levelone.badgetxt}</Badge>
+                                                                </div>
+                                                            ) : (
                                                                 <i className={`fe ${levelone.icon} side-menu__icon`}></i>
-                                                            </OverlayTrigger>
-                                                            <Badge bg='success' className="side-badge fs-11">{levelone.badgetxt}</Badge>
-                                                        </div>
-                                                    ) : (
-                                                        // If zanexlayout is not 'horizontal' and zanexverticalstyles is not 'doublemenu', show levelone.icon
-                                                        <i className={`fe ${levelone.icon} side-menu__icon`}></i>
-                                                    )
-                                                )}
-
-                                                <span className="side-menu__label">{levelone.title}</span> </Link>
-                                            : ""}
-
-                                        {/* if empty  */}
+                                                            )
+                                                        )}
+                                                        <span className="side-menu__label">{levelone.title}</span> </Link>
+                                                    :
+                                                    ""
+                                                }
+                                            </>
+                                            : null
+                                        }
                                         {levelone.type === "empty" ?
                                             <Link to="#" className='side-menu__item' onClick={handleClick}>{levelone.icon}<span className="">{levelone.title}</span></Link>
                                             : ""}
-
-                                        {/* if Sub level  */}
                                         {levelone.type === "sub" ? <PropertyMangerMenuloop PROPERTYMANAGERMENUITEMS={levelone} level={level + 1} toggleSidemenu={toggleSidemenu} /> : ''}
                                     </li>
                                 </Fragment>

@@ -3,20 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
 
 export default function AddOtherDetails() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const naacRef = useRef(null);
-    const nirfRef = useRef(null);
-    const nbaRef = useRef(null);
-    const ajRankingRef = useRef(null);
-    const [naac, setNaac] = useState("");
-    const [nirf, setNirf] = useState("");
-    const [nba, setNba] = useState("");
-    const [ajRanking, setAJRanking] = useState("");
 
     const initialValues = {
         propertyId: uniqueId,
@@ -30,11 +22,6 @@ export default function AddOtherDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            values.naac = naacRef.current.getContent();
-            values.nirf = nirfRef.current.getContent();
-            values.nba = nbaRef.current.getContent();
-            values.aj_ranking = ajRankingRef.current.getContent();
-
             const response = await API.post(`/other-details`, values);
 
             if (response.status === 200) {
@@ -101,25 +88,14 @@ export default function AddOtherDetails() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>NAAC</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => naacRef.current = editor}
-                                onChange={(e) => setNaac(naacRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.naac}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("naac", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>
@@ -127,24 +103,14 @@ export default function AddOtherDetails() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>NIRF</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => nirfRef.current = editor}
-                                onChange={(e) => setNirf(nirfRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.nirf}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("nirf", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>
@@ -152,25 +118,14 @@ export default function AddOtherDetails() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>NBA</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => nbaRef.current = editor}
-                                onChange={(e) => setNba(nbaRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.nba}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("nba", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>
@@ -178,24 +133,14 @@ export default function AddOtherDetails() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>AJ Ranking</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => ajRankingRef.current = editor}
-                                onChange={(e) => setAJRanking(ajRankingRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.aj_ranking}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("aj_ranking", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>

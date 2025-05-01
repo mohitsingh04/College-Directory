@@ -73,24 +73,21 @@
 
 // export default GetCookies;
 
-import React, { Fragment, useRef, useState } from "react";
-import JoditEditor from "jodit-react";
+import React, { Fragment} from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
 
 export default function Cookies() {
-  const editorRef = useRef(null);
-
   const initialValues = {
     title: "",
-    description: "",
+    image: "",
   }
 
   const validationSchema = Yup.object({
     title: Yup.string().required("Title is required."),
-    description: Yup.string().required("Description is required."),
+    image: Yup.string().required("Image is required."),
   });
 
   const handleSubmit = async (values) => {
@@ -111,11 +108,11 @@ export default function Cookies() {
     <Fragment>
       <Card className="custom-card mt-5">
         <Card.Header>
-          <h3 className="card-title">Jodit Editor</h3>
+          <h3 className="card-title">Image Cropper</h3>
         </Card.Header>
         <Card.Body>
           <Form onSubmit={formik.handleSubmit}>
-            
+
             <Form.Group className="mb-3">
               <Form.Label htmlFor="title">Title</Form.Label>
               <Form.Control
@@ -132,14 +129,17 @@ export default function Cookies() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label htmlFor="description">Description</Form.Label>
-              <JoditEditor
-                ref={editorRef}
-                value={formik.values.description}
-                onChange={(newContent) => formik.setFieldValue("description", newContent)}
-                onBlur={() => formik.setFieldTouched("description", true)}
+              <Form.Label htmlFor="image">Image</Form.Label>
+              <Form.Control
+                type="file"
+                id="image"
+                name="image"
+                className={`form-control ${formik.touched.image && formik.errors.image ? 'is-invalid' : ''}`}
+                value={formik.values.image}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
               />
-              {formik.errors.description && formik.touched.description ? <div className="text-danger mt-1">{formik.errors.description}</div> : null}
+              {formik.errors.image && formik.touched.image ? <div className="text-danger mt-1">{formik.errors.image}</div> : null}
             </Form.Group>
 
             <Button type="submit">Submit</Button>

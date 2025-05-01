@@ -129,3 +129,60 @@
 	-webkit-line-clamp: 3;
 	overflow: hidden;
 }
+
+.logo-ratio {
+	aspect-ratio: 4/4;
+	object-fit: cover;
+	border-radius: 50%;
+	box-shadow: 0px 3px 6px rgb(190, 190, 190);
+}
+
+.banner-ratio {
+	aspect-ratio: 6/4;
+	width: 100% !important;
+	object-fit: cover;
+	box-shadow: 0px 3px 6px rgb(190, 190, 190);
+}
+
+.hover-effect {
+	position: relative;
+	overflow: hidden;
+}
+
+.hover-effect label {
+	opacity: 0;
+	transition: 0.5s;
+	background: rgba(0, 0, 0, 0.5);
+	color: white;
+	backdrop-filter: blur(5px);
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+}
+
+.hover-effect:hover label {
+	opacity: 1;
+}
+
+.pending-status-class {
+	background-color: #f7f7c8;
+}
+
+.active-status-class {
+	background-color: #bbdbca;
+}
+
+.suspended-status-class {
+	background-color: #f7c8c8;
+}
+
+.list-logo {
+	width: 50%;
+	aspect-ratio: 4/4;
+	object-fit: cover;
+	margin: 3px 0px 3px 0px;
+}

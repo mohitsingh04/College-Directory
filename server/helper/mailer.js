@@ -31,8 +31,8 @@ export const sendEmail = async ({ email, emailType, userId }) => {
             },
         });
 
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${hashedToken}`;
-        const verifyLink = `${process.env.FRONTEND_URL}/verifyemail?token=${hashedToken}`;
+        const resetLink = `${process.env.DASHBOARD_URL}/reset-password?token=${hashedToken}`;
+        const verifyLink = `${process.env.DASHBOARD_URL}/verifyemail?token=${hashedToken}`;
 
         const mailOptions = {
             from: "ms6498289@gmail.com",

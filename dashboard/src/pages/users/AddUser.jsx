@@ -24,6 +24,7 @@ const AddUser = () => {
   const [role, setRole] = useState([]);
   const [permissionData, setPermissionData] = useState([]);
   const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
 
   const startLoadingBar = () => loadingBarRef.current?.continuousStart();
   const stopLoadingBar = () => loadingBarRef.current?.complete();
@@ -32,13 +33,18 @@ const AddUser = () => {
     const fetchAllData = async () => {
       try {
         startLoadingBar();
-        const [roles, permissions] = await Promise.all([
+        const [rolesRes, permissionsRes] = await Promise.all([
           API.get("/roles"),
           API.get("/permissions"),
         ]);
 
-        setRole(roles?.data);
-        setPermissionData(permissions?.data);
+        setRole(rolesRes?.data);
+        setPermissionData(
+          permissionsRes.data.map((perm) => ({
+            label: perm.name,
+            value: perm.name,
+          }))
+        );
       } catch (error) {
         toast.error(error.message);
       } finally {
@@ -134,6 +140,26 @@ const AddUser = () => {
     }
   }
 
+  // Handle Select All Logic
+  const handleSelectAllChange = (e) => {
+    const checked = e.target.checked;
+    setSelectAll(checked);
+    if (checked) {
+      formik.setFieldValue("permission", permissionData);
+    } else {
+      formik.setFieldValue("permission", []);
+    }
+  };
+
+  useEffect(() => {
+    // Sync selectAll checkbox with actual selection
+    if (formik.values.permission.length === permissionData.length && permissionData.length !== 0) {
+      setSelectAll(true);
+    } else {
+      setSelectAll(false);
+    }
+  }, [formik.values.permission, permissionData]);
+
   return (
     <Fragment>
       <LoadingBar color="#ff5b00" ref={loadingBarRef} />
@@ -216,19 +242,6 @@ const AddUser = () => {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label htmlFor="userPhone">Phone number</Form.Label>
-                  {/* <Form.Control
-                    type="text"
-                    id="userPhone"
-                    placeholder="Enter phone number"
-                    name="phone"
-                    className={`form-control ${formik.touched.phone && formik.errors.phone
-                      ? "is-invalid"
-                      : ""
-                      }`}
-                    value={formik.values.phone}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  /> */}
                   <PhoneInput
                     country={'in'}
                     value={formik.values.phone}
@@ -257,7 +270,18 @@ const AddUser = () => {
                       : ""
                       }`}
                     value={formik.values.role}
-                    onChange={formik.handleChange}
+                    onChange={(e) => {
+                      const selectedRole = e.target.value;
+                      formik.setFieldValue("role", selectedRole);
+
+                      if (selectedRole === "Super Admin") {
+                        formik.setFieldValue("permission", permissionData);
+                      } else if (selectedRole === "Admin") {
+                        formik.setFieldValue("permission", permissionData);
+                      } else {
+                        formik.setFieldValue("permission", []);
+                      }
+                    }}
                     onBlur={formik.handleBlur}
                   >
                     <option value="">--Select--</option>
@@ -268,17 +292,25 @@ const AddUser = () => {
                 </Form.Group>
               </Col>
               {/* Permission */}
-              <Col md={6}>
+              <Col md={12}>
                 <Form.Group className="mb-3">
                   <Form.Label htmlFor="userPermission">Permission</Form.Label>
                   <Dropdown
-                    options={permissionData.map((group) => ({ label: group.name, value: group.name }))}
+                    options={permissionData}
                     keepSelectedInList={false}
                     multi={true}
-                    placeholder="Choose Permissions   "
-                    value={formik.values.permission}
+                    values={formik.values.permission}
                     onChange={(value) => formik.setFieldValue("permission", value)}
-                    onBlur={formik.handleBlur}
+                    placeholder="Choose Permissions"
+                    labelField="label"
+                    valueField="value"
+                  />
+                  <Form.Check
+                    type="checkbox"
+                    label="Select All Permissions"
+                    className="mt-2"
+                    checked={selectAll}
+                    onChange={handleSelectAllChange}
                   />
                 </Form.Group>
               </Col>

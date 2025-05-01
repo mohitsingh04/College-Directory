@@ -18,7 +18,7 @@ const validationSchema = Yup.object({
 });
 
 const EditUser = () => {
-  const { Id } = useParams();
+  const { objectId } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState("");
   const [role, setRole] = useState([]);
@@ -29,6 +29,7 @@ const EditUser = () => {
   const [states, setStates] = useState([]);
   const [city, setCity] = useState([]);
   const [status, setStatus] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   const startLoadingBar = () => loadingBarRef.current?.continuousStart();
   const stopLoadingBar = () => loadingBarRef.current?.complete();
@@ -80,15 +81,20 @@ const EditUser = () => {
     const fetchAllData = async () => {
       try {
         startLoadingBar();
-        const [userData, roles, permissions] = await Promise.all([
-          API.get(`/user/${Id}`),
+        const [userData, roles, permissionsRes] = await Promise.all([
+          API.get(`/user/${objectId}`),
           API.get("/roles"),
           API.get("/permissions"),
         ]);
 
         setUser(userData?.data);
         setRole(roles?.data);
-        setPermissionData(permissions?.data);
+        setPermissionData(
+          permissionsRes.data.map((perm) => ({
+            label: perm.name,
+            value: perm.name,
+          }))
+        );
       } catch (error) {
         toast.error(error.message);
       } finally {
@@ -97,7 +103,7 @@ const EditUser = () => {
     };
 
     fetchAllData();
-  }, [Id]);
+  }, [objectId]);
 
   const initialValues = {
     name: user?.name || "",
@@ -115,7 +121,7 @@ const EditUser = () => {
   const handleSubmit = async (values) => {
     try {
       startLoadingBar();
-      const response = await API.put(`/user/${Id}`, values);
+      const response = await API.put(`/user/${objectId}`, values);
       if (response.data.message) {
         toast.success(response.data.message);
         navigate('/dashboard/users');
@@ -188,6 +194,24 @@ const EditUser = () => {
   useEffect(() => {
     fetchCitiesByState(formik.values.state);
   }, [formik.values.state]);
+
+  const handleSelectAllChange = (e) => {
+    const checked = e.target.checked;
+    setSelectAll(checked);
+    if (checked) {
+      formik.setFieldValue("permission", permissionData);
+    } else {
+      formik.setFieldValue("permission", []);
+    }
+  };
+
+  useEffect(() => {
+    if (formik.values.permission.length === permissionData.length && permissionData.length !== 0) {
+      setSelectAll(true);
+    } else {
+      setSelectAll(false);
+    }
+  }, [formik.values.permission, permissionData]);
 
   return (
     <Fragment>
@@ -272,20 +296,6 @@ const EditUser = () => {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label htmlFor="userPhone">Phone number</Form.Label>
-                  {/* <Form.Control
-                    type="text"
-                    id="userPhone"
-                    placeholder="Enter phone number"
-                    name="phone"
-                    className={`form-control ${formik.touched.phone && formik.errors.phone
-                      ? "is-invalid"
-                      : ""
-                      }`}
-                    value={formik.values.phone}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    disabled
-                  /> */}
                   <PhoneInput
                     country={'in'}
                     value={formik.values.phone}
@@ -399,7 +409,18 @@ const EditUser = () => {
                       : ""
                       }`}
                     value={formik.values.role}
-                    onChange={formik.handleChange}
+                    onChange={(e) => {
+                      const selectedRole = e.target.value;
+                      formik.setFieldValue("role", selectedRole);
+
+                      if (selectedRole === "Super Admin") {
+                        formik.setFieldValue("permission", permissionData);
+                      } else if (selectedRole === "Admin") {
+                        formik.setFieldValue("permission", permissionData);
+                      } else {
+                        formik.setFieldValue("permission", []);
+                      }
+                    }}
                     onBlur={formik.handleBlur}
                   >
                     <option value="">--Select--</option>
@@ -410,18 +431,25 @@ const EditUser = () => {
                 </Form.Group>
               </Col>
               {/* Permission */}
-              <Col md={6}>
+              <Col md={12}>
                 <Form.Group className="mb-3">
                   <Form.Label htmlFor="userPermission">Permission</Form.Label>
                   <Dropdown
-                    options={permissionData.map((group) => ({ label: group.name, value: group.name }))}
+                    options={permissionData}
                     keepSelectedInList={false}
                     multi={true}
                     placeholder="Choose Permissions   "
-                    value={formik.values.permission}
-                    values={user?.permission}
+                    value={user?.permission}
+                    values={formik.values.permission}
                     onChange={(value) => formik.setFieldValue("permission", value)}
                     onBlur={formik.handleBlur}
+                  />
+                  <Form.Check
+                    type="checkbox"
+                    label="Select All Permissions"
+                    className="mt-2"
+                    checked={selectAll}
+                    onChange={handleSelectAllChange}
                   />
                 </Form.Group>
               </Col>
@@ -434,6 +462,7 @@ const EditUser = () => {
                     value={formik.values.status}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
+                    className=""
                   >
                     <option value="">Select Status</option>
                     {status.map((item) => (
@@ -449,12 +478,6 @@ const EditUser = () => {
           </Form>
         </Card.Body>
       </Card>
-      {/* {authUser?.permission.some((items) => items.value !== "Read Agent") ? (
-        <>
-        </>
-      ) : (
-        <div className='position-absolute top-50 start-50 translate-middle'>USER DOES NOT HAVE THE RIGHT ROLES.</div>
-      )} */}
     </Fragment>
   );
 };

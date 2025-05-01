@@ -3,24 +3,27 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
+import Skeleton from "react-loading-skeleton";
 
 export default function EditScholarship() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const editorRef = useRef(null);
-    const [scholarship, setScholarship] = useState("");
     const [scholarshipData, setScholarshipData] = useState("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchScholarship = async () => {
             try {
+                setLoading(true);
                 const response = await API.get(`/scholarship`);
                 const filteredScholarship = response.data.filter((scholarship) => scholarship.propertyId === Number(uniqueId));
                 setScholarshipData(filteredScholarship);
             } catch (error) {
                 console.error('Error fetching scholarship:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -29,11 +32,11 @@ export default function EditScholarship() {
 
     const initialValues = {
         propertyId: uniqueId,
+        scholarship: scholarshipData[0]?.scholarship || "",
     }
 
     const handleSubmit = async (values) => {
         try {
-            values = { ...values, scholarship: editorRef.current.getContent() }
             const response = await API.put(`/scholarship/${scholarshipData[0]?.uniqueId}`, values);
 
             if (response.status === 200) {
@@ -65,38 +68,32 @@ export default function EditScholarship() {
 
     return (
         <Fragment>
-            <Form onSubmit={formik.handleSubmit}>
-                <Row>
-                    {/* Scholarship */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Scholarship</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => editorRef.current = editor}
-                                onChange={(e) => setScholarship(editorRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                }}
-                                initialValue={scholarshipData[0]?.scholarship} />
-                        </Form.Group>
-                    </Col>
+            {loading
+                ?
+                <Skeleton height={300} />
+                :
+                <Form onSubmit={formik.handleSubmit}>
+                    <Row>
+                        {/* Scholarship */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Scholarship</Form.Label>
+                                <JoditEditor
+                                    config={{
+                                        height: 300,
+                                    }}
+                                    value={formik.values.scholarship}
+                                    onBlur={(newContent) =>
+                                        formik.setFieldValue("scholarship", newContent)
+                                    }
+                                />
+                            </Form.Group>
+                        </Col>
 
-                </Row>
-                <Button type="submit">Update</Button>
-            </Form>
+                    </Row>
+                    <Button type="submit">Update</Button>
+                </Form>
+            }
         </Fragment>
     );
 }

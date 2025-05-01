@@ -1,18 +1,19 @@
 "use client";
 
-import { FaStar } from "react-icons/fa";
-import { IoMdPin } from "react-icons/io";
-import { FiDownload } from "react-icons/fi";
-import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import {
+	useParams,
+	useRouter,
+	usePathname,
+	useSearchParams,
+} from "next/navigation";
+import { FaStar } from "react-icons/fa";
 import { Download, MapPin, ChevronRight, Navigation2 } from "lucide-react";
 import API from "@/services/API/API";
 import { InfoTab } from "@/app/(Page)/_PageComponents/InfoTabs";
 import { CoursesTab } from "@/app/(Page)/_PageComponents/CoursesTabs";
 import { ReviewsTab } from "@/app/(Page)/_PageComponents/ReviewsTabs";
-import { DepartmentTab } from "@/app/(Page)/_PageComponents/DepartmentTabs";
 import Loader from "@/Components/Loader/Loader";
-import Skeleton from "react-loading-skeleton";
 import GalleryTab from "@/app/(Page)/_PageComponents/GalleryTab";
 import HostelTab from "@/app/(Page)/_PageComponents/HostelTab";
 import AdmissionTab from "@/app/(Page)/_PageComponents/AdmissionTab";
@@ -45,11 +46,17 @@ interface Review {
 
 export default function University() {
 	const { id } = useParams();
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
 	const [property, setProperty] = useState<Property | null>(null);
 	const [location, setLocation] = useState<Location[]>([]);
 	const [reviews, setReviews] = useState<Review[]>([]);
-	const [activeTab, setActiveTab] = useState("info");
 	const [loading, setLoading] = useState(true);
+	const [tab, setTab] = useState("");
+
+	const activeTab = searchParams.get("tab") || "info";
 
 	const fetchProperty = useCallback(async () => {
 		try {
@@ -117,6 +124,15 @@ export default function University() {
 		{ id: "qna", label: "QnA" },
 	];
 
+	const capitalizeFirstWord = (str: any) => {
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	};
+
+	const handleTabClick = (tabId: string) => {
+		setTab(capitalizeFirstWord(tabId));
+		router.push(`${pathname}?tab=${tabId}`);
+	};
+
 	const renderTabContent = () => {
 		switch (activeTab) {
 			case "info":
@@ -143,8 +159,8 @@ export default function University() {
 				return <QnATab />;
 			default:
 				return (
-					<div className="text-gray-600">
-						Content for {tabs.find((tab) => tab.id === activeTab)?.label} tab is
+					<div className="text-gray-500">
+						Content for {tabs.find((tab) => tab.id === activeTab)?.label} is
 						coming soon.
 					</div>
 				);
@@ -156,121 +172,120 @@ export default function University() {
 	}
 
 	return (
-		<div className="min-h-screen mt-5 md:px-14">
+		<div className="min-h-screen py-8 px-4 md:px-12 bg-gray-100">
 			{/* Breadcrumb */}
-			<div className="bg-white px-4 py-2 text-sm text-gray-600">
-				<div className="max-w-7xl mx-auto flex items-center gap-2">
-					<a href="#" className="text-indigo-600 hover:underline">
+			<nav className="text-sm mb-6">
+				<div className="flex items-center gap-2 text-gray-600">
+					<a href="#" className="hover:underline hover:text-indigo-600">
 						Home
 					</a>
 					<ChevronRight size={16} />
-					<a href="#" className="text-indigo-600 hover:underline">
+					<a href="#" className="hover:underline hover:text-indigo-600">
 						{location?.[0]?.city}
 					</a>
-					<ChevronRight size={16} />
-					<span>{property?.property_name}</span>
+					{tab ? (
+						<>
+							<ChevronRight size={16} />
+							<span className="text-gray-800">{property?.property_name}</span>
+							<ChevronRight size={16} />
+							<span className="text-gray-800">{tab}</span>
+						</>
+					) : (
+						<>
+							<ChevronRight size={16} />
+							<span className="text-gray-800">{property?.property_name}</span>
+						</>
+					)}
 				</div>
-			</div>
+			</nav>
 
 			{/* Header */}
-			<div className="bg-white border-b border-gray-200">
-				<div className="max-w-7xl mx-auto px-4 py-6">
-					<div className="flex items-start gap-6">
-						{/* Logo */}
-						<div className="w-24 h-24 rounded-lg flex items-center justify-center">
-							<img
-								src="https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&w=96&h=96"
-								alt="University Logo"
-								className="w-20 h-20 object-contain"
-							/>
+			<section className="bg-white shadow-md rounded-xl p-6 mb-8">
+				<div className="flex flex-col md:flex-row items-center gap-6">
+					<div className="w-24 h-24 flex-shrink-0">
+						<img
+							src={`${process.env.NEXT_PUBLIC_API_URL}/${property?.logo}`}
+							alt="University Logo"
+							className="w-full h-full object-contain rounded-lg"
+						/>
+					</div>
+					<div className="flex-1">
+						<h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+							{tab ? (
+								<>
+									{property?.property_name}, {location?.[0]?.city} - {tab}
+								</>
+							) : (
+								<>
+									{property?.property_name}, {location?.[0]?.city}
+								</>
+							)}
+						</h1>
+						<div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm mb-4">
+							<div className="flex items-center gap-1">
+								<MapPin size={16} />
+								<span>
+									{location?.[0]?.city}, {location?.[0]?.state}
+								</span>
+							</div>
+							<span className="hidden md:inline-block">|</span>
+							<div>
+								{property?.college_or_university_type?.[0]?.value}{" "}
+								{property?.property_type}
+							</div>
+							<span className="hidden md:inline-block">|</span>
+							<div>
+								{Array.isArray(property?.affiliated_by)
+									? property.affiliated_by.map((item) => item.value).join(", ")
+									: "N/A"}{" "}
+								Approved
+							</div>
+							<span className="hidden md:inline-block">|</span>
+							<div>NAAC Grade A+</div>
 						</div>
-
-						{/* Info */}
-						<div className="flex-1">
-							<h1 className="text-2xl font-bold text-gray-900">
-								{property?.property_name}, {location?.[0]?.city} - Course & Fees
-								Details
-							</h1>
-
-							<div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-								<div className="flex items-center gap-1">
-									<MapPin size={16} />
-									<span>
-										{location?.[0]?.city}, {location?.[0]?.state}
-									</span>
-								</div>
-								<span className="text-gray-300">|</span>
-								<span>
-									{property ? (
-										<span>
-											{property?.college_or_university_type[0]?.value}{" "}
-											{property?.property_type}
-										</span>
-									) : null}
+						<div className="flex flex-wrap items-center gap-6 text-sm">
+							<div className="flex items-center gap-1 text-yellow-500">
+								<FaStar size={16} />
+								<span className="text-gray-800">
+									{averageRating !== 0 ? `${averageRating}/5` : "No Reviews"} (
+									{reviews.length} Reviews)
 								</span>
-								<span className="text-gray-300">|</span>
-								<span>
-									{Array.isArray(property?.affiliated_by)
-										? property.affiliated_by
-												.map((item) => item.value)
-												.join(", ")
-										: "N/A"}{" "}
-									{"Approved"}
-								</span>
-								<span className="text-gray-300">|</span>
-								<span>NAAC Grade A+</span>
 							</div>
-
-							<div className="mt-4 flex items-center gap-6">
-								<div className="flex items-center gap-2">
-									<span className="text-yellow-400">★</span>
-									{/* <span className="font-semibold">8/10</span>
-									<span className="text-sm text-gray-600">| (85 Reviews)</span> */}
-									<span className="text-sm text-gray-600 hover:underline">
-										{averageRating !== 0
-											? `${averageRating}/5 |`
-											: "No reviews yet"}{" "}
-										({reviews?.length} Reviews){" "}
-									</span>
-								</div>
-								|
-								<button className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 cursor-pointer hover:underline">
-									<Navigation2 size={16} />
-									<span>Apply Now</span>
-								</button>
-								|
-								<button className="flex items-center gap-1 px-3 py-1 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white cursor-pointer">
-									<Download size={16} />
-									<span>Download Brochure</span>
-								</button>
-							</div>
+							<button className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition font-medium cursor-pointer">
+								<Navigation2 size={18} />
+								Apply Now
+							</button>
+							<button className="flex items-center gap-2 px-4 py-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-md transition font-medium cursor-pointer">
+								<Download size={18} />
+								Download Brochure
+							</button>
 						</div>
 					</div>
 				</div>
+			</section>
 
-				{/* Tabs */}
-				<div className="max-w-7xl mx-auto px-4">
-					<div className="flex items-center gap-8 overflow-x-auto pb-px">
-						{tabs.map((tab) => (
-							<button
-								key={tab.id}
-								className={`py-4 px-1 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
-									activeTab === tab.id
-										? "border-indigo-600 text-indigo-600"
-										: "border-transparent text-gray-600 hover:text-gray-900"
-								}`}
-								onClick={() => setActiveTab(tab.id)}
-							>
-								{tab.label}
-							</button>
-						))}
-					</div>
+			{/* Tabs */}
+			<div className="bg-white rounded-lg shadow overflow-x-auto">
+				<div className="flex min-w-max md:min-w-0">
+					{tabs.map((tab) => (
+						<button
+							key={tab.id}
+							className={`flex-1 text-center whitespace-nowrap px-4 py-3 text-sm font-medium transition border-b-2 cursor-pointer ${
+								activeTab === tab.id
+									? "border-indigo-600 text-indigo-600"
+									: "border-transparent text-gray-600 hover:text-gray-900"
+							}`}
+							onClick={() => handleTabClick(tab.id)}
+						>
+							{tab.label}
+						</button>
+					))}
 				</div>
 			</div>
 
 			{/* Content */}
-			<div className="max-w-7xl mx-auto px-4 py-8">
-				<div className="bg-white rounded-lg shadow p-6">
+			<div className="mt-6">
+				<div className="bg-white rounded-lg shadow-md p-6">
 					{renderTabContent()}
 				</div>
 			</div>

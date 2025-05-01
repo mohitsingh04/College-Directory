@@ -4,22 +4,34 @@ import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
 import Dropdown from "react-dropdown-select";
+import JoditEditor from "jodit-react";
 
 export default function AddSeo() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const descriptionRef = useRef(null);
-    const [description, setDescription] = useState("");
+    const [propertyData, setPropertyData] = useState("");
     const [count, setCount] = useState(0);
     const maxChars = 200;
 
+    const fetchPropertyData = async () => {
+        const response = await API.get(`/property/${uniqueId}`);
+        setPropertyData(response.data);
+    };
+
+    useEffect(() => {
+        fetchPropertyData();
+    }, [uniqueId]);
+
+    const slugify = (text) => text?.toLowerCase()?.replace(/\s+/g, "-")?.replace(/[^\w\-]+/g, "");
+
+    const seo_slug = slugify(propertyData?.property_name?.toLowerCase());
+
     const initialValues = {
         propertyId: uniqueId,
-        title: "",
-        slug: "",
+        title: propertyData?.property_name || "",
+        slug: seo_slug || "",
         meta_tags: "",
         primary_focus_keywords: "",
         json_schema: "",
@@ -35,8 +47,6 @@ export default function AddSeo() {
 
     const handleSubmit = async (values) => {
         try {
-            values.description = descriptionRef.current.getContent();
-
             const response = await API.post(`/seo`, values);
 
             if (response.status === 200) {
@@ -64,6 +74,7 @@ export default function AddSeo() {
         initialValues: initialValues,
         validationSchema: validationSchema,
         onSubmit: handleSubmit,
+        enableReinitialize: true
     });
 
     useEffect(() => {
@@ -91,6 +102,7 @@ export default function AddSeo() {
                                 value={formik.values.title}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
+                                disabled
                             />
                             {formik.touched.title && formik.errors.title ? (
                                 <div className="text-danger">
@@ -112,6 +124,7 @@ export default function AddSeo() {
                                 value={formik.values.slug}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
+                                disabled
                             />
                             {formik.touched.slug && formik.errors.slug ? (
                                 <div className="text-danger">
@@ -182,24 +195,14 @@ export default function AddSeo() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Description</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => descriptionRef.current = editor}
-                                onChange={(e) => setDescription(descriptionRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.description}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("description", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>

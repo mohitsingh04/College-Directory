@@ -3,12 +3,13 @@
 import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import SearchBar from "../SearchBar/SearchBar";
 
 export default function Navbar() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 	return (
-		<nav className="bg-white shadow-lg nav-fixed">
+		<nav className="bg-white shadow-sm nav-fixed">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex justify-between h-16">
 					{/* Logo and primary nav */}
@@ -48,9 +49,10 @@ export default function Navbar() {
 
 					{/* Secondary Nav */}
 					<div className="hidden sm:flex sm:items-center sm:space-x-6">
-						<button className="text-gray-500 hover:text-gray-700 cursor-pointer">
-							<Search className="h-5 w-5" />
-						</button>
+						<span className="text-gray-500 hover:text-gray-700 cursor-pointer">
+							{/* <Search className="h-5 w-5" /> */}
+							<SearchBar />
+						</span>
 						<button className="text-gray-500 hover:text-gray-700 cursor-pointer">
 							<ShoppingCart className="h-5 w-5" />
 						</button>

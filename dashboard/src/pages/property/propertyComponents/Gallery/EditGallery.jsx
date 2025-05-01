@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { useParams } from "react-router-dom";
 import { API } from '../../../../services/API';
 import { toast } from 'react-hot-toast';
+import Skeleton from 'react-loading-skeleton';
 
 export default function EditGallery({ galleryUniqueId }) {
     const [images, setImages] = useState([]);
@@ -124,7 +125,7 @@ export default function EditGallery({ galleryUniqueId }) {
     return (
         <Fragment>
             {loading ? (
-                <div>Loading...</div>
+                <Skeleton height={300} />
             ) : (
                 <>
                     <form onSubmit={formik.handleSubmit} className="p-4" encType="multipart/form-data">

@@ -9,7 +9,7 @@ import LoadingBar from 'react-top-loading-bar';
 
 export default function ViewExam() {
   const navigate = useNavigate();
-  const { Id } = useParams();
+  const { objectId } = useParams();
   const [exam, setExam] = useState(null);
   const [authUser, setAuthUser] = useState(null);
   const loadingBarRef = useRef(null);
@@ -40,7 +40,7 @@ export default function ViewExam() {
       try {
         startLoadingBar();
         setLoading(true);
-        const { data } = await API.get(`/exam/${Id}`);
+        const { data } = await API.get(`/exam/${objectId}`);
         setExam(data);
       } catch (error) {
         toast.error('Error fetching exam: ' + error.message);
@@ -51,7 +51,7 @@ export default function ViewExam() {
     };
 
     getExam();
-  }, [Id]);
+  }, [objectId]);
 
   useEffect(() => {
     document.title = "AJ | View Exam";

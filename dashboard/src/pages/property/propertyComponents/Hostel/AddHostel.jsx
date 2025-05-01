@@ -1,15 +1,14 @@
-import React, { Fragment, useRef } from "react";
-import { useParams } from "react-router-dom";
+import React, { Fragment } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { useFormik } from "formik";
 import { toast } from "react-hot-toast";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
 
 export default function AddHostel() {
+    const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const boysEditorRef = useRef(null);
-    const girlsEditorRef = useRef(null);
 
     const initialValues = {
         propertyId: uniqueId,
@@ -21,12 +20,7 @@ export default function AddHostel() {
 
     const handleSubmit = async (values) => {
         try {
-            const payload = {
-                ...values,
-                boys_hostel_description: boysEditorRef.current?.getContent() || "",
-                girls_hostel_description: girlsEditorRef.current?.getContent() || "",
-            };
-            const response = await API.post(`/hostel`, payload);
+            const response = await API.post(`/hostel`, values);
 
             if (response.status === 200) {
                 toast.success(response.data.message);
@@ -78,26 +72,14 @@ export default function AddHostel() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Boys Hostel Description</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => (boysEditorRef.current = editor)}
-                                onChange={(content) => formik.setFieldValue("boys_hostel_description", content)}
-                                // onChange={(e) => setDescription(editorRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 200,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.boys_hostel_description}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("boys_hostel_description", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>
@@ -121,26 +103,14 @@ export default function AddHostel() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Girls Hostel Description</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => (girlsEditorRef.current = editor)}
-                                onChange={(content) => formik.setFieldValue("girls_hostel_description", content)}
-                                // onChange={(e) => setDescription(editorRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 200,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.girls_hostel_description}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("girls_hostel_description", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>

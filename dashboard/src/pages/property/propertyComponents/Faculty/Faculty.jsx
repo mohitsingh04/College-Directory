@@ -76,8 +76,7 @@ export default function Faculty() {
                     :
                     <img
                         src={`${import.meta.env.VITE_API_URL}${row.profile}`}
-                        className='rounded-circle'
-                        width={53}
+                        className='rounded-circle w-12 h-12'
                         alt="Profile"
                     />
             ),
@@ -100,14 +99,14 @@ export default function Faculty() {
         },
         {
             name: "Action",
-            selector: (row) => [
+            selector: (row) => (
                 <button className="btn btn-sm btn-primary me-1" data-bs-toggle="tooltip" title="Edit" onClick={() => handleEditFaculty(row.uniqueId)}>
                     <i className="fe fe-edit"></i>
                 </button>,
                 <button className="btn btn-sm btn-danger me-1" data-bs-toggle="tooltip" title="Delete" onClick={() => handleDeleteFaculty(row.uniqueId)}>
                     <i className="fe fe-trash"></i>
                 </button>
-            ],
+            ),
         },
     ];
 

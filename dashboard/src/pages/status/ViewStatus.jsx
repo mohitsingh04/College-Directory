@@ -8,7 +8,7 @@ import LoadingBar from 'react-top-loading-bar';
 
 export default function ViewStatus() {
     const navigate = useNavigate();
-    const { Id } = useParams();
+    const { objectId } = useParams();
     const [status, setStatus] = useState(null);
     const [error, setError] = useState(null);
     const [authUser, setAuthUser] = useState(null);
@@ -40,7 +40,7 @@ export default function ViewStatus() {
             try {
                 startLoadingBar();
                 setLoading(true);
-                const { data } = await API.get(`/status/${Id}`);
+                const { data } = await API.get(`/status/${objectId}`);
                 setStatus(data[0] || {});
             } catch (error) {
                 setError('Failed to load status');
@@ -52,7 +52,7 @@ export default function ViewStatus() {
         };
 
         getStatus();
-    }, [Id]);
+    }, [objectId]);
 
     if (error) return <p>{error}</p>;
 

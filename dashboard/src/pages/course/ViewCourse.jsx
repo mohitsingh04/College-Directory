@@ -9,7 +9,7 @@ import LoadingBar from 'react-top-loading-bar';
 
 export default function ViewCourse() {
   const navigate = useNavigate();
-  const { Id } = useParams();
+  const { objectId } = useParams();
   const [course, setCourse] = useState(null);
   const [authUser, setAuthUser] = useState(null);
   const loadingBarRef = useRef(null);
@@ -38,7 +38,7 @@ export default function ViewCourse() {
     const getCourse = async () => {
       try {
         startLoadingBar();
-        const { data } = await API.get(`/course/${Id}`);
+        const { data } = await API.get(`/course/${objectId}`);
         setCourse(data);
       } catch (error) {
         toast.error('Error fetching course: ' + error.message);
@@ -48,7 +48,7 @@ export default function ViewCourse() {
     };
 
     getCourse();
-  }, [Id]);
+  }, [objectId]);
 
   const options = {
     loop: true,
@@ -180,7 +180,7 @@ export default function ViewCourse() {
                   ].map((item, index) => (
                     <div key={index} className="item flex justify-center items-center">
                       <div
-                        className="p-5 border border-gray-300 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 w-64 bg-white"
+                        className="p-5 border border-gray-300 rounded-lg w-64 bg-light"
                         style={{ minHeight: "120px" }}
                       >
                         <h4 className="text-lg font-semibold text-gray-700 mb-2">

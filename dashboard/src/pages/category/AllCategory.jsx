@@ -102,20 +102,9 @@ export default function AllCategory() {
             selector: row => (
                 row.logo === "image.png"
                     ?
-                    <div className="avatar-list-stacked">
-                        <span className="avatar avatar-rounded">
-                            <img src={ALLImages('noImage')} alt="logo" />
-                        </span>
-                    </div>
+                    <img src={ALLImages('noImage')} alt="logo" className="list-logo" />
                     :
-                    <div className="avatar-list-stacked">
-                        <span className="avatar avatar-rounded">
-                            <img
-                                src={`${import.meta.env.VITE_API_URL}${row.logo}`}
-                                alt="Exam Logo"
-                            />
-                        </span>
-                    </div>
+                    <img src={`${import.meta.env.VITE_API_URL}${row.logo}`} alt="logo" className="list-logo" />
             ),
             sortable: false,
         },
@@ -126,23 +115,20 @@ export default function AllCategory() {
         },
         {
             name: 'Status',
-            selector: row => [
-                <>
-                    {row.status === "Active"
-                        ? <span className="badge bg-success">Active</span>
-                        : row.status === "Suspended"
-                            ? <span className="badge bg-danger">Suspended</span>
-                            : row.status === "Pending"
-                                ? <span className="badge bg-warning">Pending</span>
-                                : <span className="badge bg-secondary">Unknown</span>
-                    }
-                </>
-            ],
+            selector: row => (
+                row.status === "Active"
+                    ? <span className="badge bg-success">Active</span>
+                    : row.status === "Suspended"
+                        ? <span className="badge bg-danger">Suspended</span>
+                        : row.status === "Pending"
+                            ? <span className="badge bg-warning">Pending</span>
+                            : <span className="badge bg-secondary">Unknown</span>
+            ),
             sortable: true,
         },
         {
             name: "Action",
-            selector: (row) => [
+            selector: (row) => (
                 <>
                     {authUser?.permission.some((items) => items.value !== "Read Category") ? (
                         <button className="btn btn-sm btn-success me-1" data-bs-toggle="tooltip" title="View" onClick={() => handleViewCategory(row._id)}>
@@ -166,7 +152,7 @@ export default function AllCategory() {
                         null
                     )}
                 </>
-            ],
+            ),
         },
     ];
 
@@ -270,8 +256,7 @@ export default function AllCategory() {
                                         pagination
                                         striped
                                         highlightOnHover
-                                        pointerOnHover
-                                        dense
+                                    // dense
                                     />
                                 </DataTableExtensions>
                             )}

@@ -8,7 +8,6 @@ import store from '../../../common/redux/Store';
 import { SUPERADMINMENUITEMS } from '../../../common/Sidemenudata';
 import { Badge, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import SimpleBar from 'simplebar-react';
-import { API } from '../../../services/API';
 
 export function closeMenuRecursively(items) {
     items?.forEach((item) => {
@@ -22,21 +21,6 @@ const Sidebar = ({ local_varaiable, ThemeChanger }) => {
     const location = useLocation();
 
     const [menuitems, setMenuitems] = useState(SUPERADMINMENUITEMS);
-
-    const [User, setUser] = useState(null);
-
-    useEffect(() => {
-        const getUserData = async () => {
-            try {
-                const { data } = await API.get("/profile");
-                setUser(data?.data);
-            } catch (error) {
-                toast.error(error.message);
-            }
-        }
-
-        getUserData();
-    }, []);
 
     function closeMenuFn() {
 

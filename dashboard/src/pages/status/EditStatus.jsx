@@ -14,7 +14,7 @@ const validationSchema = Yup.object({
 });
 
 const EditStatus = () => {
-    const { Id } = useParams();
+    const { objectId } = useParams();
     const navigate = useNavigate();
     const editorRef = useRef(null);
     const [description, setDescription] = useState("");
@@ -63,7 +63,7 @@ const EditStatus = () => {
         const getStatus = async () => {
             try {
                 startLoadingBar();
-                const { data } = await API.get(`/status/${Id}`);
+                const { data } = await API.get(`/status/${objectId}`);
                 setStatus(data);
             } catch (error) {
                 console.log(error.message)
@@ -84,7 +84,7 @@ const EditStatus = () => {
     const handleSubmit = async (values) => {
         try {
             startLoadingBar();
-            const response = await API.put(`/status/${Id}`, values);
+            const response = await API.put(`/status/${objectId}`, values);
             if (response.data.message) {
                 toast.success(response.data.message);
                 navigate('/dashboard/status');

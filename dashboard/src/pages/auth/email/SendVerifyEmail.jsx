@@ -10,6 +10,7 @@ export default function SendVerifyEmail() {
     const email = searchParams.get("email");
     const [user, setUser] = useState([]);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -38,8 +39,30 @@ export default function SendVerifyEmail() {
         fetchUser();
     }, []);
 
+    const handleSendMail = async () => {
+        try {
+            setLoading(true);
+            const response = await API.post(`/resend-email/${email}`);
+            toast.success(response.data.message);
+        } catch (error) {
+            if (error.response) {
+                if (error.response.status === 400) {
+                    console.log(error.response.data.error || "Bad Request");
+                } else if (error.response.status === 500) {
+                    console.log(error.response, "Internal server error, please try again later.");
+                } else {
+                    console.log("Something went wrong, please try again.");
+                }
+            } else {
+                console.log(`Registration failed: ${error.message}`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (user[0]?.isVerified === true) {
-        navigate("/login");
+        navigate("/");
     }
 
     return (
@@ -60,7 +83,11 @@ export default function SendVerifyEmail() {
                                     A verification email has been sent to your email address. The verification email will expire after 24 hours.
                                 </p>
                                 <p>
-                                    Didn’t receive an email? <span type="button"><u>Resend the verification email</u></span>
+                                    Didn’t receive an email?
+                                    <br />
+                                    <button className="btn btn-primary" type="button" onClick={handleSendMail}>
+                                        <>Resend the verification email</>
+                                    </button>
                                 </p>
                             </div>
                         </Card.Body>

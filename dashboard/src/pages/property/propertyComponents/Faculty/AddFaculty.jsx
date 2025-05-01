@@ -1,10 +1,11 @@
-import React, { Fragment, useRef, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { API } from "../../../../services/API";
+import ALLImages from "../../../../common/Imagesdata";
 
 export default function AddFaculty() {
     const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function AddFaculty() {
 
             if (response.status === 200) {
                 toast.success(response.data.message);
-                window.location.reload();
+                navigate(0);
             }
         } catch (error) {
             if (error.response) {
@@ -145,16 +146,26 @@ export default function AddFaculty() {
                     {/* Profile */}
                     <Col md={6}>
                         <Form.Group className="mb-3">
-                            <Form.Label htmlFor="profile">Profile</Form.Label>
+                            <div className="flex justify-content-between">
+                                <p><strong>Profile</strong></p>
+                            </div>
                             <Form.Control
                                 type="file"
                                 id="profile"
                                 name="profile"
+                                hidden
+                                accept="image/png, image/jpeg"
                                 className={`form-control`}
                                 onChange={handleFileChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {previewProfile ? <img src={previewProfile} width={150} height={150} className="mt-1" alt="" /> : null}
+                            <div className="hover-effect w-32 rounded-circle">
+                                <Form.Label htmlFor="profile"><i className="fe fe-upload me-1"></i>Upload Profile</Form.Label>
+                                {previewProfile
+                                    ? <img src={previewProfile} alt="Profile Preview" className="w-32 logo-ratio" />
+                                    : <img src={ALLImages('noImage')} alt="Profile Preview" className="w-32 logo-ratio" />
+                                }
+                            </div>
                         </Form.Group>
                     </Col>
 

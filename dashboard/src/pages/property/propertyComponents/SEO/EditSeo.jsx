@@ -4,27 +4,30 @@ import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
 import Dropdown from "react-dropdown-select";
+import Skeleton from "react-loading-skeleton";
+import JoditEditor from "jodit-react";
 
 export default function EditSeo() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const descriptionRef = useRef(null);
-    const [description, setDescription] = useState("");
     const [seo, setSeo] = useState([]);
     const [count, setCount] = useState(0);
     const maxChars = 200;
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchSeo = async () => {
             try {
+                setLoading(true);
                 const response = await API.get(`/seo`);
                 const filteredSeo = response.data.filter((seo) => seo.propertyId === Number(uniqueId));
                 setSeo(filteredSeo);
             } catch (error) {
                 console.error('Error fetching seo:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -88,142 +91,136 @@ export default function EditSeo() {
 
     return (
         <Fragment>
-            <Form onSubmit={formik.handleSubmit} onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                    e.preventDefault(); // Prevent form submission
-                }
-            }}>
-                <Row>
-                    {/* Title */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="title">Title</Form.Label>
-                            <Form.Control
-                                type="text"
-                                id="title"
-                                placeholder="Seo title"
-                                name="title"
-                                className={`form-control ${formik.touched.title && formik.errors.title ? 'is-invalid' : ''}`}
-                                value={formik.values.title}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.title && formik.errors.title ? (
-                                <div className="text-danger">
-                                    {formik.errors.title}
-                                </div>
-                            ) : null}
-                        </Form.Group>
-                    </Col>
-                    {/* Slug */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="slug">Slug</Form.Label>
-                            <Form.Control
-                                type="text"
-                                id="slug"
-                                placeholder="Slug"
-                                name="slug"
-                                className={`form-control ${formik.touched.slug && formik.errors.slug ? 'is-invalid' : ''}`}
-                                value={formik.values.slug}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.slug && formik.errors.slug ? (
-                                <div className="text-danger">
-                                    {formik.errors.slug}
-                                </div>
-                            ) : null}
-                        </Form.Group>
-                    </Col>
-                    {/* Meta Tags */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="meta_tags">Meta Tags</Form.Label>
-                            <Dropdown
-                                options={[]}
-                                create={true}
-                                placeholder="Meta Tags...    "
-                                searchable={true}
-                                dropdownHandle={false}
-                                multi={true}
-                                values={seo[0]?.meta_tags}
-                                value={formik.values.meta_tags}
-                                onChange={(value) => formik.setFieldValue("meta_tags", value)}
-                                onBlur={formik.handleBlur}
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* Primary focus keyword */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="primary_foucus_keyword">Primary focus keyword</Form.Label>
-                            <Dropdown
-                                options={[]}
-                                create={true}
-                                placeholder="Primary focus keyword...    "
-                                searchable={true}
-                                dropdownHandle={false}
-                                multi={true}
-                                values={seo[0]?.primary_focus_keywords}
-                                value={formik.values.primary_focus_keywords}
-                                onChange={(value) => formik.setFieldValue("primary_focus_keywords", value)}
-                                onBlur={formik.handleBlur}
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* Json Schema */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="json_schema">Json Schema</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                id="json_schema"
-                                placeholder="Json Schema"
-                                name="json_schema"
-                                className={`form-control ${formik.touched.json_schema && formik.errors.json_schema ? 'is-invalid' : ''}`}
-                                value={formik.values.json_schema}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.json_schema && formik.errors.json_schema ? (
-                                <div className="text-danger">
-                                    {formik.errors.json_schema}
-                                </div>
-                            ) : null}
-                            <p className="text-end">{count}/{maxChars}</p>
-                        </Form.Group>
-                    </Col>
-                    {/* Description */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Description</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => descriptionRef.current = editor}
-                                onChange={(e) => setDescription(descriptionRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                }}
-                                initialValue={seo[0]?.description}
-                            />
-                        </Form.Group>
-                    </Col>
+            {loading
+                ?
+                <Skeleton height={300} />
+                :
+                <Form onSubmit={formik.handleSubmit} onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault(); // Prevent form submission
+                    }
+                }}>
+                    <Row>
+                        {/* Title */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="title">Title</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    id="title"
+                                    placeholder="Seo title"
+                                    name="title"
+                                    className={`form-control ${formik.touched.title && formik.errors.title ? 'is-invalid' : ''}`}
+                                    value={formik.values.title}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.title && formik.errors.title ? (
+                                    <div className="text-danger">
+                                        {formik.errors.title}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                        </Col>
+                        {/* Slug */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="slug">Slug</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    id="slug"
+                                    placeholder="Slug"
+                                    name="slug"
+                                    className={`form-control ${formik.touched.slug && formik.errors.slug ? 'is-invalid' : ''}`}
+                                    value={formik.values.slug}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.slug && formik.errors.slug ? (
+                                    <div className="text-danger">
+                                        {formik.errors.slug}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                        </Col>
+                        {/* Meta Tags */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="meta_tags">Meta Tags</Form.Label>
+                                <Dropdown
+                                    options={[]}
+                                    create={true}
+                                    placeholder="Meta Tags...    "
+                                    searchable={true}
+                                    dropdownHandle={false}
+                                    multi={true}
+                                    values={seo[0]?.meta_tags}
+                                    value={formik.values.meta_tags}
+                                    onChange={(value) => formik.setFieldValue("meta_tags", value)}
+                                    onBlur={formik.handleBlur}
+                                />
+                            </Form.Group>
+                        </Col>
+                        {/* Primary focus keyword */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="primary_foucus_keyword">Primary focus keyword</Form.Label>
+                                <Dropdown
+                                    options={[]}
+                                    create={true}
+                                    placeholder="Primary focus keyword...    "
+                                    searchable={true}
+                                    dropdownHandle={false}
+                                    multi={true}
+                                    values={seo[0]?.primary_focus_keywords}
+                                    value={formik.values.primary_focus_keywords}
+                                    onChange={(value) => formik.setFieldValue("primary_focus_keywords", value)}
+                                    onBlur={formik.handleBlur}
+                                />
+                            </Form.Group>
+                        </Col>
+                        {/* Json Schema */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="json_schema">Json Schema</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    id="json_schema"
+                                    placeholder="Json Schema"
+                                    name="json_schema"
+                                    className={`form-control ${formik.touched.json_schema && formik.errors.json_schema ? 'is-invalid' : ''}`}
+                                    value={formik.values.json_schema}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.json_schema && formik.errors.json_schema ? (
+                                    <div className="text-danger">
+                                        {formik.errors.json_schema}
+                                    </div>
+                                ) : null}
+                                <p className="text-end">{count}/{maxChars}</p>
+                            </Form.Group>
+                        </Col>
+                        {/* Description */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Description</Form.Label>
+                                <JoditEditor
+                                    config={{
+                                        height: 300,
+                                    }}
+                                    value={formik.values.description}
+                                    onBlur={(newContent) =>
+                                        formik.setFieldValue("description", newContent)
+                                    }
+                                />
+                            </Form.Group>
+                        </Col>
 
-                </Row>
-                <Button type="submit">Update</Button>
-            </Form>
+                    </Row>
+                    <Button type="submit">Update</Button>
+                </Form>
+            }
         </Fragment>
     );
 }

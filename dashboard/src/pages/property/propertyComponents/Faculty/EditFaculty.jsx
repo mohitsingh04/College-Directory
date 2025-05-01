@@ -6,20 +6,25 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import ALLImages from "../../../../common/Imagesdata";
+import Skeleton from "react-loading-skeleton";
 
 export default function EditFaculty({ facultyUniqueId }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [previewProfile, setPreviewProfile] = useState("");
     const [faculty, setFaculty] = useState("");
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchFaculty = async () => {
             try {
+                setLoading(true);
                 const response = await API.get(`/faculty/${facultyUniqueId}`);
                 setFaculty(response.data);
             } catch (error) {
                 console.error('Error fetching faculty:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -57,7 +62,7 @@ export default function EditFaculty({ facultyUniqueId }) {
 
             if (response.status === 200) {
                 toast.success(response.data.message);
-                window.location.reload();
+                navigate(0);
             }
         } catch (error) {
             if (error.response) {
@@ -93,97 +98,108 @@ export default function EditFaculty({ facultyUniqueId }) {
 
     return (
         <Fragment>
-            <Form onSubmit={formik.handleSubmit} encType="multipart/form-data">
-                <Row>
-                    {/* Name */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="name">Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                id="name"
-                                placeholder="Name"
-                                name="name"
-                                className={`form-control ${formik.touched.name && formik.errors.name ? 'is-invalid' : ''}`}
-                                value={formik.values.name}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.name && formik.errors.name ? (
-                                <div className="text-danger">
-                                    {formik.errors.name}
+            {loading
+                ?
+                <Skeleton height={300} />
+                :
+                <Form onSubmit={formik.handleSubmit} encType="multipart/form-data">
+                    <Row>
+                        {/* Name */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="name">Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    id="name"
+                                    placeholder="Name"
+                                    name="name"
+                                    className={`form-control ${formik.touched.name && formik.errors.name ? 'is-invalid' : ''}`}
+                                    value={formik.values.name}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.name && formik.errors.name ? (
+                                    <div className="text-danger">
+                                        {formik.errors.name}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                        </Col>
+                        {/* Designation */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="designation">Designation</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    id="designation"
+                                    placeholder="Designation"
+                                    name="designation"
+                                    className={`form-control ${formik.touched.designation && formik.errors.designation ? 'is-invalid' : ''}`}
+                                    value={formik.values.designation}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.designation && formik.errors.designation ? (
+                                    <div className="text-danger">
+                                        {formik.errors.designation}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                        </Col>
+                        {/* Department */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="department">Department</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    id="department"
+                                    placeholder="Department"
+                                    name="department"
+                                    className={`form-control ${formik.touched.department && formik.errors.department ? 'is-invalid' : ''}`}
+                                    value={formik.values.department}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.department && formik.errors.department ? (
+                                    <div className="text-danger">
+                                        {formik.errors.department}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                        </Col>
+                        {/* Profile */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <div className="flex justify-content-between">
+                                    <p><strong>Profile</strong></p>
                                 </div>
-                            ) : null}
-                        </Form.Group>
-                    </Col>
-                    {/* Designation */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="designation">Designation</Form.Label>
-                            <Form.Control
-                                type="text"
-                                id="designation"
-                                placeholder="Designation"
-                                name="designation"
-                                className={`form-control ${formik.touched.designation && formik.errors.designation ? 'is-invalid' : ''}`}
-                                value={formik.values.designation}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.designation && formik.errors.designation ? (
-                                <div className="text-danger">
-                                    {formik.errors.designation}
+                                <Form.Control
+                                    type="file"
+                                    id="profile"
+                                    name="profile"
+                                    hidden
+                                    accept="image/png, image/jpeg"
+                                    className={`form-control`}
+                                    onChange={handleFileChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                <div className="hover-effect w-32 rounded-circle">
+                                    <Form.Label htmlFor="profile"><i className="fe fe-upload me-1"></i>Upload Profile</Form.Label>
+                                    {previewProfile ? (
+                                        <img src={previewProfile} alt="Profile Preview" className="w-32 logo-ratio" />
+                                    ) : faculty[0]?.profile !== "image.png" ? (
+                                        <img src={`${import.meta.env.VITE_API_URL}${faculty[0]?.profile}`} alt="Profile Preview" className="w-32 logo-ratio" />
+                                    ) : (
+                                        <img src={ALLImages('noImage')} alt="logo" className="w-32 logo-ratio" />
+                                    )}
                                 </div>
-                            ) : null}
-                        </Form.Group>
-                    </Col>
-                    {/* Department */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="department">Department</Form.Label>
-                            <Form.Control
-                                type="text"
-                                id="department"
-                                placeholder="Department"
-                                name="department"
-                                className={`form-control ${formik.touched.department && formik.errors.department ? 'is-invalid' : ''}`}
-                                value={formik.values.department}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.department && formik.errors.department ? (
-                                <div className="text-danger">
-                                    {formik.errors.department}
-                                </div>
-                            ) : null}
-                        </Form.Group>
-                    </Col>
-                    {/* Profile */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="profile">Profile</Form.Label>
-                            <Form.Control
-                                type="file"
-                                id="profile"
-                                name="profile"
-                                className={`form-control`}
-                                onChange={handleFileChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {previewProfile
-                                ?
-                                <img src={previewProfile} width={80} height={80} className="mt-1" alt="" />
-                                : faculty[0]?.profile !== "image.png"
-                                    ?
-                                    <img src={`${import.meta.env.VITE_API_URL}${faculty[0]?.profile}`} width={80} height={80} className="mt-1" alt="" />
-                                    : <img src={ALLImages('avatar')} alt="profile" width={53} className="Profile" />
-                            }
-                        </Form.Group>
-                    </Col>
+                            </Form.Group>
+                        </Col>
 
-                </Row>
-                <Button type="submit">Update</Button>
-            </Form>
+                    </Row>
+                    <Button type="submit">Update</Button>
+                </Form>
+            }
         </Fragment>
     );
 }

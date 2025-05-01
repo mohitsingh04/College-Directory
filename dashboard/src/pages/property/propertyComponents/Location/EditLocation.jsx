@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import { API } from "../../../../services/API";
+import Skeleton from "react-loading-skeleton";
 
 export default function EditLocation() {
     const navigate = useNavigate();
@@ -12,33 +13,37 @@ export default function EditLocation() {
     const [location, setLocation] = useState([]);
     const [states, setStates] = useState([]);
     const [city, setCity] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const getStatesData = async () => {
+        const fetchInitialData = async () => {
+            setLoading(true);
             try {
-                const response = await API.get("/fetch-states");
-                setStates(response?.data);
-            } catch (error) {
-                toast.error(error.message);
-            }
-        };
+                const [statesResponse, locationResponse] = await Promise.all([
+                    API.get("/fetch-states"),
+                    API.get("/location"),
+                ]);
 
-        getStatesData();
-    }, []);
+                setStates(statesResponse?.data);
 
-    useEffect(() => {
-        const fetchLocation = async () => {
-            try {
-                const response = await API.get(`/location`);
-                const filteredLocation = response.data.filter((location) => location.propertyId === Number(uniqueId));
+                const filteredLocation = locationResponse.data.filter(
+                    (location) => location.propertyId === Number(uniqueId)
+                );
                 setLocation(filteredLocation);
+
             } catch (error) {
-                console.error('Error fetching location:', error);
+                toast.error(error.message || "Error fetching data");
+                console.error('Error fetching initial data:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchLocation();
+        if (uniqueId) {
+            fetchInitialData();
+        }
     }, [uniqueId]);
+
 
     const initialValues = {
         address: location[0]?.address || "",
@@ -105,90 +110,95 @@ export default function EditLocation() {
 
     return (
         <Fragment>
-            <Form onSubmit={formik.handleSubmit} encType="multipart/form-data">
-                <Row>
-                    {/* Address */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            {/* <Form.Label htmlFor="address">Address</Form.Label> */}
-                            <Form.Control
-                                type="text"
-                                id="address"
-                                placeholder="Address"
-                                name="address"
-                                className={`form-control ${formik.touched.address && formik.errors.address ? 'is-invalid' : ''}`}
-                                value={formik.values.address}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.address && formik.errors.address ? (
-                                <div className="text-danger">
-                                    {formik.errors.address}
-                                </div>
-                            ) : null}
-                        </Form.Group>
-                    </Col>
-                    {/* Pincode */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            {/* <Form.Label htmlFor="pincode">Pincode</Form.Label> */}
-                            <Form.Control
-                                type="text"
-                                id="pincode"
-                                placeholder="Pincode"
-                                name="pincode"
-                                className={`form-control ${formik.touched.pincode && formik.errors.pincode ? 'is-invalid' : ''}`}
-                                value={formik.values.pincode}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.pincode && formik.errors.pincode ? (
-                                <div className="text-danger">
-                                    {formik.errors.pincode}
-                                </div>
-                            ) : null}
-                        </Form.Group>
-                    </Col>
-                    {/* State */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="exampleInputState">State</Form.Label>
-                            <Form.Select
-                                name="state"
-                                value={formik.values.state}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            >
-                                <option value="">Select State</option>
-                                {states.map((items) => (
-                                    <option key={items.id} value={items.name}>{items.name}</option>
-                                ))}
-                            </Form.Select>
-                            {formik.errors.state && formik.touched.state ? <div className="text-danger">{formik.errors.state}</div> : null}
-                        </Form.Group>
-                    </Col>
-                    {/* City */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="exampleInputcity">City</Form.Label>
-                            <Form.Select
-                                name="city"
-                                value={formik.values.city}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            >
-                                <option value="">Select City</option>
-                                {city.map((items) => (
-                                    <option key={items.id} value={items.name}>{items.name}</option>
-                                ))}
-                            </Form.Select>
-                            {formik.errors.city && formik.touched.city ? <div className="text-danger">{formik.errors.city}</div> : null}
-                        </Form.Group>
-                    </Col>
+            {loading
+                ?
+                <Skeleton height={200} />
+                :
+                <Form onSubmit={formik.handleSubmit} encType="multipart/form-data">
+                    <Row>
+                        {/* Address */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                {/* <Form.Label htmlFor="address">Address</Form.Label> */}
+                                <Form.Control
+                                    type="text"
+                                    id="address"
+                                    placeholder="Address"
+                                    name="address"
+                                    className={`form-control ${formik.touched.address && formik.errors.address ? 'is-invalid' : ''}`}
+                                    value={formik.values.address}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.address && formik.errors.address ? (
+                                    <div className="text-danger">
+                                        {formik.errors.address}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                        </Col>
+                        {/* Pincode */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                {/* <Form.Label htmlFor="pincode">Pincode</Form.Label> */}
+                                <Form.Control
+                                    type="text"
+                                    id="pincode"
+                                    placeholder="Pincode"
+                                    name="pincode"
+                                    className={`form-control ${formik.touched.pincode && formik.errors.pincode ? 'is-invalid' : ''}`}
+                                    value={formik.values.pincode}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.pincode && formik.errors.pincode ? (
+                                    <div className="text-danger">
+                                        {formik.errors.pincode}
+                                    </div>
+                                ) : null}
+                            </Form.Group>
+                        </Col>
+                        {/* State */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="exampleInputState">State</Form.Label>
+                                <Form.Select
+                                    name="state"
+                                    value={formik.values.state}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                >
+                                    <option value="">Select State</option>
+                                    {states.map((items) => (
+                                        <option key={items.id} value={items.name}>{items.name}</option>
+                                    ))}
+                                </Form.Select>
+                                {formik.errors.state && formik.touched.state ? <div className="text-danger">{formik.errors.state}</div> : null}
+                            </Form.Group>
+                        </Col>
+                        {/* City */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Label htmlFor="exampleInputcity">City</Form.Label>
+                                <Form.Select
+                                    name="city"
+                                    value={formik.values.city}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                >
+                                    <option value="">Select City</option>
+                                    {city.map((items) => (
+                                        <option key={items.id} value={items.name}>{items.name}</option>
+                                    ))}
+                                </Form.Select>
+                                {formik.errors.city && formik.touched.city ? <div className="text-danger">{formik.errors.city}</div> : null}
+                            </Form.Group>
+                        </Col>
 
-                </Row>
-                <Button type="submit">Update</Button>
-            </Form>
+                    </Row>
+                    <Button type="submit">Update</Button>
+                </Form>
+            }
         </Fragment>
     );
 }

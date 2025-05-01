@@ -5,18 +5,11 @@ import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
 
 export default function AddOtherBasicInformation() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const shortDescriptionRef = useRef(null);
-    const fullDescriptionRef = useRef(null);
-    const admissionProcessRef = useRef(null);
-    const loanProcessRef = useRef(null);
-    const [shortDescription, setShortDescription] = useState("");
-    const [fullDescription, setFullDescription] = useState("");
-    const [admissionProcess, setAdmissionProcess] = useState("");
-    const [loanProcess, setLoanProcess] = useState("");
 
     const initialValues = {
         propertyId: uniqueId,
@@ -34,11 +27,6 @@ export default function AddOtherBasicInformation() {
 
     const handleSubmit = async (values) => {
         try {
-            values.short_description = shortDescriptionRef.current.getContent();
-            values.full_description = fullDescriptionRef.current.getContent();
-            values.admission_process = admissionProcessRef.current.getContent();
-            values.loan_process = loanProcessRef.current.getContent();
-
             const formData = new FormData();
             formData.append("propertyId", uniqueId);
             formData.append("youtube_link", values.youtube_link);
@@ -206,25 +194,14 @@ export default function AddOtherBasicInformation() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Short Description</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => shortDescriptionRef.current = editor}
-                                onChange={(e) => setShortDescription(shortDescriptionRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.short_description}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("short_description", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>
@@ -232,24 +209,14 @@ export default function AddOtherBasicInformation() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Full Description</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => fullDescriptionRef.current = editor}
-                                onChange={(e) => setFullDescription(fullDescriptionRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.full_description}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("full_description", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>
@@ -257,25 +224,14 @@ export default function AddOtherBasicInformation() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Admission Process</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => admissionProcessRef.current = editor}
-                                onChange={(e) => setAdmissionProcess(admissionProcessRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.admission_process}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("admission_process", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>
@@ -283,24 +239,14 @@ export default function AddOtherBasicInformation() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Loan Process</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => loanProcessRef.current = editor}
-                                onChange={(e) => setLoanProcess(loanProcessRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.loan_process}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("loan_process", newContent)
+                                }
                             />
                         </Form.Group>
                     </Col>

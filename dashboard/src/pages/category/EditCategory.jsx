@@ -10,7 +10,7 @@ import ALLImages from "../../common/Imagesdata";
 import JoditEditor from "jodit-react";
 
 export default function EditCategory() {
-    const { Id } = useParams();
+    const { objectId } = useParams();
     const navigate = useNavigate();
     const editorRef = useRef(null);
     const [PreviewLogo, setPreviewLogo] = useState(null);
@@ -46,7 +46,7 @@ export default function EditCategory() {
         const getCategory = async () => {
             try {
                 startLoadingBar();
-                const { data } = await API.get(`/category/${Id}`);
+                const { data } = await API.get(`/category/${objectId}`);
                 setCategory(data);
                 setLoading(false);
             } catch (error) {
@@ -58,7 +58,7 @@ export default function EditCategory() {
         };
 
         getCategory();
-    }, [Id]);
+    }, [objectId]);
 
     useEffect(() => {
         const getCategoryData = async () => {
@@ -115,7 +115,7 @@ export default function EditCategory() {
                 for (let value in values) {
                     formData.append(value, values[value]);
                 }
-                const response = await API.put(`/category/${Id}`, formData, {
+                const response = await API.put(`/category/${objectId}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -288,20 +288,13 @@ export default function EditCategory() {
                             <Col md={12}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Description</Form.Label>
-                                    {/* <JoditEditor
-                                        ref={editorRef}
-                                        value={formik.values.description}
-                                        onChange={(newContent) => formik.setFieldValue("description", newContent)}
-                                        onBlur={() => formik.setFieldTouched("description", true)}
-                                    /> */}
                                     <JoditEditor
-                                        ref={editorRef}
                                         config={{
                                             height: 300,
                                         }}
                                         value={formik.values.description}
                                         onBlur={(newContent) =>
-                                            setFieldValue("description", newContent)
+                                            formik.setFieldValue("description", newContent)
                                         }
                                     />
                                 </Form.Group>
@@ -309,45 +302,57 @@ export default function EditCategory() {
                             {/* Logo */}
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label htmlFor="logo">Logo</Form.Label>
+                                    <div className="flex justify-content-between">
+                                        <p><strong>Logo</strong></p>
+                                    </div>
                                     <Form.Control
                                         type="file"
                                         id="logo"
                                         name="logo"
-                                        className={`form-control ${formik.touched.logo && formik.errors.logo ? 'is-invalid' : ''}`}
+                                        hidden
+                                        accept="image/png, image/jpeg"
+                                        className={`form-control`}
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "logo", setPreviewLogo)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    {PreviewLogo ? (
-                                        <img src={PreviewLogo} alt="Logo Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    ) : category?.logo !== "image.png" ? (
-                                        <img src={`${import.meta.env.VITE_API_URL}${category?.logo}`} alt="Logo Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    ) : (
-                                        <img src={ALLImages('logo4')} alt="logo" width={56} className="mt-2" />
-                                    )}
-                                    {formik.errors.logo && formik.touched.logo ? <div className="text-danger mt-1">{formik.errors.logo}</div> : null}
+                                    <div className="hover-effect w-32 rounded-circle">
+                                        <Form.Label htmlFor="logo"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
+                                        {PreviewLogo ? (
+                                            <img src={PreviewLogo} alt="Logo Preview" className="w-32 logo-ratio" />
+                                        ) : category?.logo !== "image.png" ? (
+                                            <img src={`${import.meta.env.VITE_API_URL}${category?.logo}`} alt="Logo Preview" className="w-32 logo-ratio" />
+                                        ) : (
+                                            <img src={ALLImages('noImage')} alt="logo" className="w-32 logo-ratio" />
+                                        )}
+                                    </div>
                                 </Form.Group>
                             </Col>
                             {/* Featured Image  */}
-                            <Col md={6}>
+                            <Col md={4}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label htmlFor="featured_image">Featured Image</Form.Label>
+                                    <div className="flex justify-content-between">
+                                        <p><strong>Featured Image</strong></p>
+                                    </div>
                                     <Form.Control
                                         type="file"
                                         id="featured_image"
                                         name="featured_image"
-                                        className={`form-control ${formik.touched.featured_image && formik.errors.featured_image ? 'is-invalid' : ''}`}
+                                        className={`form-control`}
+                                        hidden
+                                        accept="image/png, image/jpeg"
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "featured_image", setPreviewFeaturedImage)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    {PreviewFeaturedImage ? (
-                                        <img src={PreviewFeaturedImage} alt="Featured Image Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    ) : category?.featured_image !== "image.png" ? (
-                                        <img src={`${import.meta.env.VITE_API_URL}${category?.featured_image}`} alt="Featured Image Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    ) : (
-                                        <img src={ALLImages('logo4')} alt="logo" width={150} height={50} className="mt-2" />
-                                    )}
-                                    {formik.errors.featured_image && formik.touched.featured_image ? <div className="text-danger mt-1">{formik.errors.featured_image}</div> : null}
+                                    <div className="hover-effect rounded">
+                                        <Form.Label htmlFor="featured_image" ><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
+                                        {PreviewFeaturedImage ? (
+                                            <img src={PreviewFeaturedImage} alt="Featured Image Preview" className="shadow-sm banner-ratio" />
+                                        ) : category?.featured_image !== "image.png" ? (
+                                            <img src={`${import.meta.env.VITE_API_URL}${category?.featured_image}`} alt="Featured Image Preview" className="shadow-sm banner-ratio" />
+                                        ) : (
+                                            <img src={ALLImages('noImage')} alt="logo" width={150} height={50} className="shadow-sm banner-ratio" />
+                                        )}
+                                    </div>
                                 </Form.Group>
                             </Col>
                             {/* Status */}

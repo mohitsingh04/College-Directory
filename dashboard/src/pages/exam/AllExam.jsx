@@ -22,37 +22,34 @@ export default function AllExam() {
     const stopLoadingBar = () => loadingBarRef.current?.complete();
 
     useEffect(() => {
-        const getAuthUserData = async () => {
+        const fetchData = async () => {
             try {
-                setHandlePermissionLoading(true)
-                const { data } = await API.get("/profile");
-                setAuthUser(data?.data);
+                setLoading(true);
+                setHandlePermissionLoading(true);
+                startLoadingBar();
+
+                const [authResponse, examResponse] = await Promise.all([
+                    API.get("/profile"),
+                    API.get("/exam"),
+                ]);
+
+                setAuthUser(authResponse?.data?.data);
+
+                const filteredExams = examResponse?.data?.filter((exam) => !exam.isDeleted);
+                setExam(filteredExams);
+
             } catch (error) {
-                toast.error(error.message);
+                toast.error(error.message || "Something went wrong while fetching data.");
             } finally {
-                setHandlePermissionLoading(false)
+                setLoading(false);
+                setHandlePermissionLoading(false);
+                stopLoadingBar();
             }
-        }
+        };
 
-        getAuthUserData();
+        fetchData();
     }, []);
 
-    const getExam = async () => {
-        try {
-            startLoadingBar();
-            const response = await API.get("/exam");
-            setExam(response.data.filter((filterData) => !filterData.isDeleted));
-        } catch (error) {
-            toast.error("Something went wrong while fetching exams.");
-        } finally {
-            stopLoadingBar();
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        getExam();
-    }, []);
 
     const handleViewExam = (_id) => {
         navigate("/dashboard/exam/view/" + _id);
@@ -77,7 +74,7 @@ export default function AllExam() {
                     startLoadingBar();
                     const response = await API.delete(`/exam/${_id}`);
                     toast.success(response.data.message);
-                    getExam();
+                    fetchData();
                 } catch (error) {
                     toast.error("Failed to delete exam: " + error.message);
                 } finally {
@@ -98,14 +95,9 @@ export default function AllExam() {
             selector: row => (
                 row.logo === "image.png"
                     ?
-                    <img src={ALLImages('logo4')} alt="logo" width={53} className="Exam Logo" />
+                    <img src={ALLImages('logo4')} alt="logo" className="list-logo" />
                     :
-                    <img
-                        src={`${import.meta.env.VITE_API_URL}${row.logo}`}
-                        width={53}
-                        alt="Exam Logo"
-                        onError={(e) => { e.target.src = <Skeleton width={53} height={53} />; }}
-                    />
+                    <img src={`${import.meta.env.VITE_API_URL}${row.logo}`} alt="Exam Logo" className="list-logo" />
             ),
             sortable: false,
         },
@@ -121,7 +113,7 @@ export default function AllExam() {
         },
         {
             name: 'Status',
-            selector: row => [
+            selector: row => (
                 <>
                     {row.status === "Active"
                         ? <span className="badge bg-success">Active</span>
@@ -132,7 +124,7 @@ export default function AllExam() {
                                 : <span className="badge bg-secondary">Unknown</span>
                     }
                 </>
-            ],
+            ),
             sortable: true,
         },
         {
@@ -163,7 +155,7 @@ export default function AllExam() {
                 </>
             ),
             ignoreRowClick: true,
-            allowOverflow: true,
+            allowoverflow: true,
         }
     ];
 

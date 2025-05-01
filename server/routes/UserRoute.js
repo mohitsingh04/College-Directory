@@ -1,5 +1,5 @@
 import express from "express";
-import { addUser, changePassword, deleteUser, forgotPassword, getPermissions, getRoles, getUser, getUserById, login, logout, myProfile, register, resetPassword, sendOtp, softDelete, token, updateProfile, updateUser, verifyEmail } from "../controller/UserController.js";
+import { addUser, changePassword, deleteUser, forgotPassword, getPermissions, getRoles, getUser, getUserById, login, logout, myProfile, register, resendEmail, resetPassword, sendOtp, softDelete, token, updateProfile, updateUser, verifyEmail } from "../controller/UserController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import multer from "multer";
 import fs from "fs";
@@ -42,6 +42,7 @@ userRouter.get("/token", token);
 userRouter.put("/changepassword", changePassword);
 userRouter.get("/roles", authMiddleware, getRoles);
 userRouter.get("/permissions", authMiddleware, getPermissions);
+userRouter.post("/resend-email/:email",  resendEmail);
 
 // User Manage API's
 userRouter.get("/user", getUser);

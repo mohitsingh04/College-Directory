@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import { toast } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { API } from "../../../../services/API";
+import Skeleton from "react-loading-skeleton";
 
 const amenitiesData = {
     "Mandatory": ["Air Conditioning", "Laundry", "Newspaper", "Parking"],
@@ -21,10 +22,12 @@ export default function EditAmenities() {
     const [wifiType, setWifiType] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [amenitiesListData, setAmenitiesListData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchAmenitiesData = async () => {
             try {
+                setLoading(true);
                 const response = await API.get(`/amenities`);
                 const filteredAmenities = response.data.filter(
                     (amenities) => amenities.propertyId === Number(uniqueId)
@@ -79,6 +82,8 @@ export default function EditAmenities() {
                 }
             } catch (error) {
                 console.log(error.message);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -237,53 +242,58 @@ export default function EditAmenities() {
 
     return (
         <Fragment>
-            <Form onSubmit={formik.handleSubmit} className="max-w-6xl mx-auto p-4">
-                <Row>
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label className="text-xl font-semibold mb-4">Property Amenities</Form.Label>
-                            <div className="flex w-full bg-white shadow-lg rounded-lg overflow-hidden">
-                                {/* Sidebar */}
-                                <div className="w-1/3 border-r border-gray-200">
-                                    {Object.keys(amenitiesData).map((category) => (
-                                        <button
-                                            key={category}
-                                            type="button"
-                                            onClick={() => setSelectedCategory(category)}
-                                            className={`block w-full text-left p-4 transition-colors ${selectedCategory === category
-                                                ? "bg-blue-600 text-white"
-                                                : "hover:bg-gray-50 text-gray-700"
-                                                }`}
-                                        >
-                                            {category} ({amenitiesData[category].length})
-                                        </button>
-                                    ))}
-                                </div>
+            {loading
+                ?
+                <Skeleton height={300} />
+                :
+                <Form onSubmit={formik.handleSubmit} className="max-w-6xl mx-auto p-4">
+                    <Row>
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label className="text-xl font-semibold mb-4">Property Amenities</Form.Label>
+                                <div className="flex w-full bg-white shadow-lg rounded-lg overflow-hidden">
+                                    {/* Sidebar */}
+                                    <div className="w-1/3 border-r border-gray-200">
+                                        {Object.keys(amenitiesData).map((category) => (
+                                            <button
+                                                key={category}
+                                                type="button"
+                                                onClick={() => setSelectedCategory(category)}
+                                                className={`block w-full text-left p-4 transition-colors ${selectedCategory === category
+                                                    ? "bg-blue-600 text-white"
+                                                    : "hover:bg-gray-50 text-gray-700"
+                                                    }`}
+                                            >
+                                                {category} ({amenitiesData[category].length})
+                                            </button>
+                                        ))}
+                                    </div>
 
-                                {/* Amenities Selection */}
-                                <div className="w-2/3 p-6">
-                                    <h2 className="text-xl font-semibold mb-4">{selectedCategory}</h2>
-                                    <div className="space-y-4">
-                                        {amenitiesData[selectedCategory].map((amenity) =>
-                                            renderAmenityItem(selectedCategory, amenity)
-                                        )}
+                                    {/* Amenities Selection */}
+                                    <div className="w-2/3 p-6">
+                                        <h2 className="text-xl font-semibold mb-4">{selectedCategory}</h2>
+                                        <div className="space-y-4">
+                                            {amenitiesData[selectedCategory].map((amenity) =>
+                                                renderAmenityItem(selectedCategory, amenity)
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </Form.Group>
-                    </Col>
-                </Row>
+                            </Form.Group>
+                        </Col>
+                    </Row>
 
-                <div className="mt-6 flex justify-end">
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                        {isSubmitting ? "Saving..." : "Save Amenities"}
-                    </Button>
-                </div>
-            </Form>
+                    <div className="mt-6 flex justify-end">
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        >
+                            {isSubmitting ? "Saving..." : "Save Amenities"}
+                        </Button>
+                    </div>
+                </Form>
+            }
         </Fragment>
     );
 }

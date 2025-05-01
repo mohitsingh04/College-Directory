@@ -4,7 +4,7 @@ import { addQuestionAndAnswer, getQuestionAndAnswer, getQuestionAndAnswerById, u
 
 const questionandanswerRouter = express.Router();
 
-questionandanswerRouter.get("/questionandanswer", authMiddleware, getQuestionAndAnswer);
+questionandanswerRouter.get("/questionandanswer", getQuestionAndAnswer);
 questionandanswerRouter.get("/questionandanswer/:uniqueId", getQuestionAndAnswerById);
 questionandanswerRouter.post("/questionandanswer", addQuestionAndAnswer);
 questionandanswerRouter.put("/questionandanswer/:uniqueId", updateQuestionAndAnswer);

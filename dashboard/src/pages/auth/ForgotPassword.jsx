@@ -99,7 +99,7 @@ export default function Forgotpassword() {
                                         </Button>
                                     </div>
                                     <div className="text-center mt-4">
-                                        <p className="text-dark mb-0">Forgot It?<Link className="text-primary ms-1" to={`/login`}>Send me Back</Link></p>
+                                        <p className="text-dark mb-0">Forgot It?<Link className="text-primary ms-1" to={`/`}>Send me Back</Link></p>
                                     </div>
                                 </div>
                             </Card.Body>

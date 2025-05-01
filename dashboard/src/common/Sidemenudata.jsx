@@ -237,22 +237,145 @@ export const ADMINMENUITEMS = [
 ];
 
 export const PROPERTYMANAGERMENUITEMS = [
-    // {
-    //     menutitle: "MAIN",
-    // },
 
-    { path: `${import.meta.env.BASE_URL}dashboard`, title: "Dashboard", icon: 'fe-home', type: "link", active: false, selected: false, dirchange: false },
+    // { path: `${import.meta.env.BASE_URL}dashboard`, title: "Dashboard", icon: 'fe-layout', type: "link", active: false, selected: false, dirchange: false },
 
     // {
-    //     menutitle: "Property",
+    //     title: "Property", icon: 'fe-map', type: "sub", menusub: true, active: false, selected: false, dirchange: false, children: [
+
+    //         { path: `${import.meta.env.BASE_URL}dashboard/property`, type: "link", active: false, selected: false, dirchange: false, title: "Property" },
+    //         { path: `${import.meta.env.BASE_URL}dashboard/property/add`, type: "link", active: false, selected: false, dirchange: false, title: "Add Property" },
+    //     ]
     // },
 
+    // {
+    //     menutitle: "Pages",
+    // },
     {
-        title: "Property", icon: 'fe-home', type: "sub", menusub: true, active: false, selected: false, dirchange: false, children: [
-
-            { path: `${import.meta.env.BASE_URL}dashboard/property`, type: "link", active: false, selected: false, dirchange: false, title: "Property" },
-            { path: `${import.meta.env.BASE_URL}dashboard/property/add`, type: "link", active: false, selected: false, dirchange: false, title: "Add Property" },
-        ]
+        tab: "info",
+        title: "Basic Info",
+        icon: 'fe-sliders',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "location",
+        title: "Location",
+        icon: 'fe-map-pin',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "gallery",
+        title: "Gallery",
+        icon: 'fe-image',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "hostel",
+        title: "Hostel",
+        icon: 'fe-home',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "amenities",
+        title: "Amenities",
+        icon: 'fe-grid',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "faqs",
+        title: "Faqs",
+        icon: 'fe-help-circle',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "scholarship",
+        title: "Scholarship",
+        icon: 'fe-award',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "announcement",
+        title: "Announcement",
+        icon: 'fe-bell',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "faculty",
+        title: "Faculty",
+        icon: 'fe-users',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "reviews",
+        title: "Reviews",
+        icon: 'fe-star',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "qna",
+        title: "QnA",
+        icon: 'fe-message-circle',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "others",
+        title: "Other Details",
+        icon: 'fe-more-horizontal',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "seo",
+        title: "Seo",
+        icon: 'fe-bar-chart',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
+    },
+    {
+        tab: "courses",
+        title: "Courses",
+        icon: 'fe-book-open',
+        type: "link",
+        active: false,
+        selected: false,
+        dirchange: false
     },
 ];
 

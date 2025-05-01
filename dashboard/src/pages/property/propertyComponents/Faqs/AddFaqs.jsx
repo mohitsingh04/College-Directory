@@ -4,27 +4,26 @@ import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
 
 export default function AddFaqs() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const editorRef = useRef(null);
-    const [answer, setAnswer] = useState("");
 
     const initialValues = {
         propertyId: uniqueId,
         question: "",
+        answer: "",
     }
 
     const validationSchema = Yup.object({
         question: Yup.string().required("Question is required."),
+        answer: Yup.string().required("Answer is required."),
     });
 
     const handleSubmit = async (values) => {
         try {
-            values = { ...values, answer: editorRef.current.getContent() }
             const response = await API.post(`/faqs`, values);
 
             if (response.status === 200) {
@@ -83,26 +82,20 @@ export default function AddFaqs() {
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Answer</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => editorRef.current = editor}
-                                onChange={(e) => setAnswer(editorRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                            <JoditEditor
+                                config={{
+                                    height: 300,
                                 }}
+                                value={formik.values.answer}
+                                onBlur={(newContent) =>
+                                    formik.setFieldValue("answer", newContent)
+                                }
                             />
+                            {formik.touched.answer && formik.errors.answer ? (
+                                <div className="text-danger">
+                                    {formik.errors.answer}
+                                </div>
+                            ) : null}
                         </Form.Group>
                     </Col>
 

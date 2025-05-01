@@ -3,34 +3,33 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
+import JoditEditor from "jodit-react";
+import Skeleton from "react-loading-skeleton";
 
 export default function EditOtherDetails() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const naacRef = useRef(null);
-    const nirfRef = useRef(null);
-    const nbaRef = useRef(null);
-    const ajRankingRef = useRef(null);
-    const [naac, setNaac] = useState("");
-    const [nirf, setNirf] = useState("");
-    const [nba, setNba] = useState("");
-    const [ajRanking, setAJRanking] = useState("");
     const [otherDetails, setOtherDetails] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchOtherDetails = async () => {
+        setLoading(true);
+        try {
+            const { data } = await API.get(`/other-details`);
+            const filtered = data.filter(item => item.propertyId === Number(uniqueId));
+            setOtherDetails(filtered);
+        } catch (error) {
+            console.error('Error fetching details:', error.message || error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchOtherDetails = async () => {
-            try {
-                const response = await API.get(`/other-details`);
-                const filteredOtherDetails = response.data.filter((otherDetails) => otherDetails.propertyId === Number(uniqueId));
-                setOtherDetails(filteredOtherDetails);
-            } catch (error) {
-                console.error('Error fetching details:', error);
-            }
-        };
-
-        fetchOtherDetails();
+        if (uniqueId) {
+            fetchOtherDetails();
+        }
     }, [uniqueId]);
 
     const initialValues = {
@@ -45,11 +44,6 @@ export default function EditOtherDetails() {
 
     const handleSubmit = async (values) => {
         try {
-            values.naac = naacRef.current.getContent();
-            values.nirf = nirfRef.current.getContent();
-            values.nba = nbaRef.current.getContent();
-            values.aj_ranking = ajRankingRef.current.getContent();
-
             const response = await API.put(`/other-details/${otherDetails[0]?.uniqueId}`, values);
 
             if (response.status === 200) {
@@ -81,150 +75,109 @@ export default function EditOtherDetails() {
 
     return (
         <Fragment>
-            <Form onSubmit={formik.handleSubmit}>
-                <Row>
-                    {/* Bengal Credit Card */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Check
-                                inline
-                                label="Bengal Credit Card"
-                                value={true}
-                                name="bengal_credit_card"
-                                type="checkbox"
-                                id={`inline-1`}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                checked={formik.values.bengal_credit_card}
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* CUET */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Check
-                                inline
-                                label="CUET (Common University Entrance Test)"
-                                value={true}
-                                name="cuet"
-                                type="checkbox"
-                                id={`inline-2`}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                                checked={formik.values.cuet}
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* NAAC */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>NAAC</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => naacRef.current = editor}
-                                onChange={(e) => setNaac(naacRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                }}
-                                initialValue={otherDetails[0]?.naac}
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* NIRF */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>NIRF</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => nirfRef.current = editor}
-                                onChange={(e) => setNirf(nirfRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                }}
-                                initialValue={otherDetails[0]?.nirf}
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* NBA */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>NBA</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => nbaRef.current = editor}
-                                onChange={(e) => setNba(nbaRef.current.getContent())}
-                                onBlur={formik.handleBlur}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                }}
-                                initialValue={otherDetails[0]?.nba}
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* AJ Ranking */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>AJ Ranking</Form.Label>
-                            <Editor
-                                apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                onInit={(evt, editor) => ajRankingRef.current = editor}
-                                onChange={(e) => setAJRanking(ajRankingRef.current.getContent())}
-                                init={{
-                                    height: 250,
-                                    menubar: false,
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | blocks | ' +
-                                        'bold italic forecolor | alignleft aligncenter ' +
-                                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                                        'removeformat',
-                                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                }}
-                                initialValue={otherDetails[0]?.aj_ranking}
-                            />
-                        </Form.Group>
-                    </Col>
+            {loading
+                ?
+                <Skeleton height={300} />
+                :
+                <Form onSubmit={formik.handleSubmit}>
+                    <Row>
+                        {/* Bengal Credit Card */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Check
+                                    inline
+                                    label="Bengal Credit Card"
+                                    value={true}
+                                    name="bengal_credit_card"
+                                    type="checkbox"
+                                    id={`inline-1`}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    checked={formik.values.bengal_credit_card}
+                                />
+                            </Form.Group>
+                        </Col>
+                        {/* CUET */}
+                        <Col md={6}>
+                            <Form.Group className="mb-3">
+                                <Form.Check
+                                    inline
+                                    label="CUET (Common University Entrance Test)"
+                                    value={true}
+                                    name="cuet"
+                                    type="checkbox"
+                                    id={`inline-2`}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    checked={formik.values.cuet}
+                                />
+                            </Form.Group>
+                        </Col>
+                        {/* NAAC */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>NAAC</Form.Label>
+                                <JoditEditor
+                                    config={{
+                                        height: 300,
+                                    }}
+                                    value={formik.values.naac}
+                                    onBlur={(newContent) =>
+                                        formik.setFieldValue("naac", newContent)
+                                    }
+                                />
+                            </Form.Group>
+                        </Col>
+                        {/* NIRF */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>NIRF</Form.Label>
+                                <JoditEditor
+                                    config={{
+                                        height: 300,
+                                    }}
+                                    value={formik.values.nirf}
+                                    onBlur={(newContent) =>
+                                        formik.setFieldValue("nirf", newContent)
+                                    }
+                                />
+                            </Form.Group>
+                        </Col>
+                        {/* NBA */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>NBA</Form.Label>
+                                <JoditEditor
+                                    config={{
+                                        height: 300,
+                                    }}
+                                    value={formik.values.nba}
+                                    onBlur={(newContent) =>
+                                        formik.setFieldValue("nba", newContent)
+                                    }
+                                />
+                            </Form.Group>
+                        </Col>
+                        {/* AJ Ranking */}
+                        <Col md={12}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>AJ Ranking</Form.Label>
+                                <JoditEditor
+                                    config={{
+                                        height: 300,
+                                    }}
+                                    value={formik.values.aj_ranking}
+                                    onBlur={(newContent) =>
+                                        formik.setFieldValue("aj_ranking", newContent)
+                                    }
+                                />
+                            </Form.Group>
+                        </Col>
 
-                </Row>
-                <Button type="submit">Update</Button>
-            </Form>
+                    </Row>
+                    <Button type="submit">Update</Button>
+                </Form>
+            }
         </Fragment>
     );
 }

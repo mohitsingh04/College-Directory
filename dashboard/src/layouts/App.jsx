@@ -22,12 +22,10 @@ const App = () => {
   const [lateLoad, setLateLoad] = useState(false);
   const [User, setUser] = useState(null);
 
-  // Set late load state
   useEffect(() => {
     setLateLoad(true);
   }, []);
 
-  // Fetch user data
   useEffect(() => {
     const getUserData = async () => {
       try {
@@ -40,7 +38,6 @@ const App = () => {
     getUserData();
   }, []);
 
-  // Function to render the sidebar based on user role
   const renderSidebar = () => {
     switch (User?.role) {
       case 'Super Admin':

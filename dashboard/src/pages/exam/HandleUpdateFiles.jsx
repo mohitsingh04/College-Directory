@@ -9,10 +9,8 @@ import LoadingBar from 'react-top-loading-bar';
 
 export default function HandleUpdateFiles() {
     const navigate = useNavigate();
-    const { Id } = useParams();
+    const { objectId } = useParams();
     const [exam, setExam] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [PreviewLogo, setPreviewLogo] = useState(null);
     const [PreviewFeaturedImage, setPreviewFeaturedImage] = useState(null);
     const loadingBarRef = useRef(null);
@@ -24,11 +22,9 @@ export default function HandleUpdateFiles() {
         const getExam = async () => {
             try {
                 startLoadingBar();
-                const { data } = await API.get(`/exam/${Id}`);
+                const { data } = await API.get(`/exam/${objectId}`);
                 setExam(data);
-                setLoading(false);
             } catch (error) {
-                setError('Failed to load exam');
                 setLoading(false);
                 toast.error('Error fetching exam' + error.message);
             } finally {
@@ -37,7 +33,7 @@ export default function HandleUpdateFiles() {
         };
 
         getExam();
-    }, [Id]);
+    }, [objectId]);
 
     const initialValues = {
         logo: exam?.logo || "",
@@ -52,7 +48,7 @@ export default function HandleUpdateFiles() {
                 for (let value in values) {
                     formData.append(value, values[value]);
                 }
-                const response = await API.put(`/update-files/${Id}`, formData, {
+                const response = await API.put(`/update-files/${objectId}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -114,43 +110,57 @@ export default function HandleUpdateFiles() {
                             {/* Logo */}
                             <Col md={6}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label htmlFor="logo">Logo</Form.Label>
+                                    <div className="flex justify-content-between">
+                                        <p><strong>Logo</strong></p>
+                                    </div>
                                     <Form.Control
                                         type="file"
                                         id="logo"
                                         name="logo"
+                                        hidden
+                                        accept="image/png, image/jpeg"
                                         className={`form-control`}
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "logo", setPreviewLogo)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    {PreviewLogo ? (
-                                        <img src={PreviewLogo} alt="Logo Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    ) : exam?.logo === "image.png" ? (
-                                        <img src={ALLImages('face1')} alt="logo" width={53} className="mt-2" />
-                                    ) : (
-                                        <img src={`${import.meta.env.VITE_API_URL}${exam?.logo}`} alt="Logo Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    )}
+                                    <div className="hover-effect w-32 rounded-circle">
+                                        <Form.Label htmlFor="logo"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
+                                        {PreviewLogo ? (
+                                            <img src={PreviewLogo} alt="Logo Preview" className="w-32 logo-ratio" />
+                                        ) : exam?.logo !== "image.png" ? (
+                                            <img src={`${import.meta.env.VITE_API_URL}${exam?.logo}`} alt="Logo Preview" className="w-32 logo-ratio" />
+                                        ) : (
+                                            <img src={ALLImages('noImage')} alt="logo" className="w-32 logo-ratio" />
+                                        )}
+                                    </div>
                                 </Form.Group>
                             </Col>
                             {/* Featured Image */}
-                            <Col md={6}>
+                            <Col md={4}>
                                 <Form.Group className="mb-3">
-                                    <Form.Label htmlFor="featured_image">Featured Image</Form.Label>
+                                    <div className="flex justify-content-between">
+                                        <p><strong>Featured Image</strong></p>
+                                    </div>
                                     <Form.Control
                                         type="file"
                                         id="featured_image"
                                         name="featured_image"
                                         className={`form-control`}
+                                        hidden
+                                        accept="image/png, image/jpeg"
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "featured_image", setPreviewFeaturedImage)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    {PreviewFeaturedImage ? (
-                                        <img src={PreviewFeaturedImage} alt="Featured Image Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    ) : exam?.featured_image === "image.png" ? (
-                                        <img src={ALLImages('face1')} alt="logo" width={250} className="mt-2 h-24" />
-                                    ) : (
-                                        <img src={`${import.meta.env.VITE_API_URL}${exam?.featured_image}`} alt="Logo Preview" className="mt-2" style={{ maxWidth: "100px" }} />
-                                    )}
+                                    <div className="hover-effect rounded">
+                                        <Form.Label htmlFor="featured_image" ><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
+                                        {PreviewFeaturedImage ? (
+                                            <img src={PreviewFeaturedImage} alt="Featured Image Preview" className="shadow-sm banner-ratio" />
+                                        ) : exam?.featured_image !== "image.png" ? (
+                                            <img src={`${import.meta.env.VITE_API_URL}${exam?.featured_image}`} alt="Featured Image Preview" className="shadow-sm banner-ratio" />
+                                        ) : (
+                                            <img src={ALLImages('noImage')} alt="logo" width={150} height={50} className="shadow-sm banner-ratio" />
+                                        )}
+                                    </div>
                                 </Form.Group>
                             </Col>
 

@@ -101,27 +101,24 @@ export default function Faqs() {
                             {faqs.length > 0 ? (
                                 <Accordion id="accordionExample">
                                     {faqs.map((item, index) => (
-                                        <>
-                                            <div className="mt-1">
-                                                <Accordion.Item eventKey={item.uniqueId} key={index}>
-                                                    <div className="d-flex justify-content-between align-items-center px-2 py-1">
-                                                        <Accordion.Header className="flex-grow-1">{item.question}</Accordion.Header>
-                                                        <span className='ms-1'>
-                                                            <button className="btn btn-primary me-1" title="Edit" onClick={() => handleEditFaqs(item.uniqueId)}>
-                                                                <i className="fe fe-edit"></i>
-                                                            </button>
-                                                            <button className="btn btn-danger" title="Delete" onClick={() => handleDeleteFaqs(item.uniqueId)}>
-                                                                <i className="fe fe-trash"></i>
-                                                            </button>
-                                                        </span>
-                                                    </div>
-                                                    <Accordion.Body>
-                                                        <p dangerouslySetInnerHTML={{ __html: item.answer }} />
-                                                    </Accordion.Body>
-                                                </Accordion.Item>
-                                            </div>
-
-                                        </>
+                                        <div key={index} className="mt-1">
+                                            <Accordion.Item eventKey={item.uniqueId}>
+                                                <div className="d-flex justify-content-between align-items-center px-2 py-1">
+                                                    <Accordion.Header className="flex-grow-1">{item.question}</Accordion.Header>
+                                                    <span className='ms-1'>
+                                                        <button className="btn btn-primary me-1" title="Edit" onClick={() => handleEditFaqs(item.uniqueId)}>
+                                                            <i className="fe fe-edit"></i>
+                                                        </button>
+                                                        <button className="btn btn-danger" title="Delete" onClick={() => handleDeleteFaqs(item.uniqueId)}>
+                                                            <i className="fe fe-trash"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                                <Accordion.Body>
+                                                    <p dangerouslySetInnerHTML={{ __html: item.answer }} />
+                                                </Accordion.Body>
+                                            </Accordion.Item>
+                                        </div>
                                     ))}
                                 </Accordion>
                             ) : (

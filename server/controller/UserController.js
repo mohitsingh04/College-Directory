@@ -254,7 +254,7 @@ export const updateProfile = async (req, res) => {
         }
         const uniqueId = user.uniqueId;
 
-        const { name, pincode, address, city, state } = req.body;
+        const { name, pincode, address, country, city, state } = req.body;
 
         const profilePath = `./media/profile/${uniqueId}/`;
         ensureDirectoryExistence(profilePath);
@@ -275,6 +275,7 @@ export const updateProfile = async (req, res) => {
                 address,
                 city,
                 state,
+                country,
                 profile_image: profileImagePath
             }
         });
@@ -356,72 +357,6 @@ export const getPermissions = async (req, res) => {
     }
 };
 
-export const sendOtp = async (req, res) => {
-    const { name, email, phone } = req.body;
-
-    try {
-        const existUser = await User.findOne({ $or: [{ email }, { phone }] });
-
-        if (existUser) {
-            return res.status(400).json({ error: "Email or phone number already exists." });
-        }
-
-        const otp = Math.floor(1000 + Math.random() * 9000);
-        const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
-
-        await client.messages.create({
-            body: `Your OTP is ${otp}`,
-            from: `${process.env.TWILIO_PHONE_NUMBER}`,
-            to: phone,
-        });
-
-        const lastUser = await User.findOne().sort({ _id: -1 }).limit(1);
-        const uniqueId = lastUser ? lastUser.uniqueId + 1 : 1;
-
-        const newUser = new User({
-            uniqueId,
-            name,
-            email,
-            phone,
-            otp,
-            otpExpiresAt,
-        });
-
-        await newUser.save();
-
-        res.status(200).json({ message: "OTP sent successfully" });
-    } catch (error) {
-        return res.status(500).json({ error: error.message })
-    }
-};
-
-export const verifyOtp = async (req, res) => {
-    const { phone, otp } = req.body;
-
-    if (!otp) {
-        return res.status(400).json({ error: "OTP is required." });
-    }
-
-    try {
-        const otpEntry = await User.findOne({ phone });
-
-        if (!otpEntry) return res.status(400).json({ message: "Invalid OTP or expired." });
-
-        if (parseInt(otpEntry.otp) !== parseInt(otp))
-            return res.status(400).json({ message: "Incorrect OTP" });
-
-        if (new Date() > otpEntry.otpExpiresAt)
-            return res.status(400).json({ message: "OTP expired" });
-
-        // OTP verified, update the user record
-        await User.updateOne({ phone }, { $unset: { otp: 1, otpExpiresAt: 1 } });
-
-        res.status(200).json({ message: "OTP verified successfully" });
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    }
-};
-
 // Authentication End
 
 // Manage User
@@ -472,7 +407,9 @@ export const addUser = async (req, res) => {
             name,
             email,
             phone,
-            password: hashedPassword
+            password: hashedPassword,
+            role,
+            permission
         });
         const savedUser = await newUser.save();
 
@@ -494,15 +431,18 @@ export const updateUser = async (req, res) => {
             return res.status(404).json({ error: "ID not found." });
         }
 
-        const { name, address, pincode, city, state, role, permission, status } = req.body;
+        const { name, email, phone, address, pincode, country, city, state, role, permission, status } = req.body;
 
         const updatedUser = await User.findOneAndUpdate({ _id: Id }, {
             $set: {
                 name,
+                email,
+                phone,
                 address,
                 pincode,
                 city,
                 state,
+                country,
                 role,
                 permission,
                 status,

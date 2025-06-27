@@ -139,9 +139,15 @@ export default function Hostel() {
                                     </div>
                                 </>
                                 :
-                                <EditHostel />
+                                <EditHostel
+                                    setHostelData={setHostel}
+                                    setToggleHostelPage={setToggleHostelPage}
+                                />
                             :
-                            <AddHostel />
+                            <AddHostel
+                                setHostel={setHostel}
+                                setToggleHostelPage={setToggleHostelPage}
+                            />
                         }
                     </Card.Body>
                 </Card>

@@ -20,12 +20,11 @@ export default function HandleUpdateFiles() {
 
     useEffect(() => {
         const getExam = async () => {
+            startLoadingBar();
             try {
-                startLoadingBar();
                 const { data } = await API.get(`/exam/${objectId}`);
                 setExam(data);
             } catch (error) {
-                setLoading(false);
                 toast.error('Error fetching exam' + error.message);
             } finally {
                 stopLoadingBar();
@@ -41,38 +40,23 @@ export default function HandleUpdateFiles() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
+        startLoadingBar();
         try {
-            startLoadingBar();
-            if (typeof values.logo == 'object' || typeof values.featured_image == 'object' || typeof values.logo != 'object' && values.featured_image != 'object') {
-                let formData = new FormData();
-                for (let value in values) {
-                    formData.append(value, values[value]);
-                }
-                const response = await API.put(`/update-files/${objectId}`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+            const formData = new FormData();
+            formData.append("logo", values.logo);
+            formData.append("featured_image", values.featured_image);
 
-                if (response.status === 200) {
-                    toast.success(response.data.message);
-                    navigate('/dashboard/exam');
+            const response = await API.put(`/update-files/${objectId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
                 }
-            }
+            });
+
+            toast.success(response.data.message || "Updated successfully", { id: toastId });
+            navigate('/dashboard/exam');
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.data.error || "Not Found");
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         } finally {
             stopLoadingBar();
         }
@@ -123,8 +107,7 @@ export default function HandleUpdateFiles() {
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "logo", setPreviewLogo)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    <div className="hover-effect w-32 rounded-circle">
-                                        <Form.Label htmlFor="logo"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
+                                    <div className="mb-3">
                                         {PreviewLogo ? (
                                             <img src={PreviewLogo} alt="Logo Preview" className="w-32 logo-ratio" />
                                         ) : exam?.logo !== "image.png" ? (
@@ -133,6 +116,7 @@ export default function HandleUpdateFiles() {
                                             <img src={ALLImages('noImage')} alt="logo" className="w-32 logo-ratio" />
                                         )}
                                     </div>
+                                    <Form.Label htmlFor="logo" className="btn btn-primary btn-sm"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
                                 </Form.Group>
                             </Col>
                             {/* Featured Image */}
@@ -151,8 +135,7 @@ export default function HandleUpdateFiles() {
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "featured_image", setPreviewFeaturedImage)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    <div className="hover-effect rounded">
-                                        <Form.Label htmlFor="featured_image" ><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
+                                    <div className="mb-3">
                                         {PreviewFeaturedImage ? (
                                             <img src={PreviewFeaturedImage} alt="Featured Image Preview" className="shadow-sm banner-ratio" />
                                         ) : exam?.featured_image !== "image.png" ? (
@@ -161,11 +144,14 @@ export default function HandleUpdateFiles() {
                                             <img src={ALLImages('noImage')} alt="logo" width={150} height={50} className="shadow-sm banner-ratio" />
                                         )}
                                     </div>
+                                    <Form.Label htmlFor="featured_image" className="btn btn-primary btn-sm"><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
                                 </Form.Group>
                             </Col>
-
                         </Row>
-                        <Button type="submit">Update</Button>
+
+                        <Button type="submit" disabled={formik.isSubmitting}>
+                            {formik.isSubmitting ? "Updating..." : "Update"}
+                        </Button>
                     </Form>
                 </Card.Body>
             </Card>

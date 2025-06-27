@@ -5,8 +5,9 @@ import * as Yup from "yup";
 import { useParams } from "react-router-dom";
 import { API } from '../../../../services/API';
 import { toast } from 'react-hot-toast';
+import { Button } from 'react-bootstrap';
 
-export default function AddGallery() {
+export default function AddGallery({ onSuccess }) {
     const [images, setImages] = useState([]);
     const { uniqueId } = useParams();
 
@@ -14,7 +15,7 @@ export default function AddGallery() {
         return () => {
             images.forEach(file => URL.revokeObjectURL(file.preview));
         };
-    }, []);
+    }, [images]);
 
     const initialValues = {
         propertyId: uniqueId || "",
@@ -25,38 +26,27 @@ export default function AddGallery() {
     const validationSchema = Yup.object({
         title: Yup.string().required("Title is required."),
         gallery: Yup.array()
-            .min(1, 'You must select at least one image.')
+            .min(1, 'You must select at least one image')
             .max(8, 'You can upload a maximum of 8 images.')
-            .required('Image selection is required.'),
+            .required('Image is required'),
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const formData = new FormData();
-            if (uniqueId) {
-                formData.append('propertyId', uniqueId);
-            }
+            formData.append('propertyId', uniqueId);
             formData.append('title', values.title);
-            values.gallery.forEach(image => {
-                formData.append("gallery", image);
-            });
+            values.gallery.forEach(image => formData.append("gallery", image));
 
             const response = await API.post(`/gallery`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
 
-            if (response.status === 200) {
-                toast.success(response.data.message || "Gallery added successfully!");
-                window.location.reload();
-            }
+            toast.success(response.data.message || "Updated successfully", { id: toastId });
+            onSuccess();
         } catch (error) {
-            if (error.response) {
-                toast.error(error.response.data.error || "An error occurred!");
-            } else {
-                toast.error(`Error: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || error.message);
         }
     };
 
@@ -66,19 +56,11 @@ export default function AddGallery() {
         onSubmit: handleSubmit,
     });
 
-    const onDrop = useCallback(
-        (acceptedFiles) => {
-            const filePreviews = acceptedFiles.map((file) =>
-                Object.assign(file, { preview: URL.createObjectURL(file) })
-            );
-            setImages((prev) => [...prev, ...filePreviews]);
-            formik.setFieldValue("gallery", [
-                ...formik.values.gallery,
-                ...acceptedFiles,
-            ]);
-        },
-        [formik]
-    );
+    const onDrop = useCallback((acceptedFiles) => {
+        const filePreviews = acceptedFiles.map(file => Object.assign(file, { preview: URL.createObjectURL(file) }));
+        setImages(prev => [...prev, ...filePreviews]);
+        formik.setFieldValue("gallery", [...formik.values.gallery, ...acceptedFiles]);
+    }, [formik]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -86,76 +68,39 @@ export default function AddGallery() {
     });
 
     const removeImage = (index) => {
-        setImages((prev) => prev.filter((_, i) => i !== index));
-
-        const updatedGallery = formik.values.gallery.filter((_, i) => i !== index);
-        formik.setFieldValue("gallery", updatedGallery);
-
-        // Manually trigger validation
+        setImages(prev => prev.filter((_, i) => i !== index));
+        formik.setFieldValue("gallery", formik.values.gallery.filter((_, i) => i !== index));
         formik.setTouched({ gallery: true });
     };
 
     return (
         <form onSubmit={formik.handleSubmit} className="p-4" encType="multipart/form-data">
             <div className="mb-4">
-                <label htmlFor="title" className="block mb-2 font-medium">Title</label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.title}
-                    className="w-full p-2 border rounded-md"
-                />
-                {formik.touched.title && formik.errors.title ? (
-                    <div className="text-red-500 mt-1">{formik.errors.title}</div>
-                ) : null}
+                <label htmlFor="title">Title</label>
+                <input type="text" name="title" id="title" className="w-full border p-2 rounded" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} />
+                {formik.touched.title && formik.errors.title && <div className="text-red-500">{formik.errors.title}</div>}
             </div>
 
-            <div
-                {...getRootProps({
-                    className:
-                        'border border-dashed p-4 rounded-md cursor-pointer text-center',
-                })}
-            >
+            <div {...getRootProps({ className: 'border-dashed border p-4 text-center cursor-pointer rounded' })}>
                 <input {...getInputProps()} />
-                {isDragActive ? (
-                    <p>Drop the files here ...</p>
-                ) : (
-                    <p>Drag 'n' drop some files here, or click to select files</p>
-                )}
+                <p>{isDragActive ? "Drop the files here ..." : "Drag and drop or click to upload"}</p>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 my-3">
                 {images.map((file, index) => (
                     <div key={index} className="relative">
-                        <img
-                            src={file.preview}
-                            alt="Preview"
-                            className="w-full h-32 object-cover rounded-md"
-                        />
-                        <button
-                            type="button"
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full px-2 py-1 text-sm"
-                            onClick={() => removeImage(index)}
-                        >
-                            Remove
-                        </button>
+                        <img src={file.preview} className="h-32 w-full object-cover rounded" />
+                        <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 text-white bg-red-600 px-2 py-1 rounded-full text-sm">Remove</button>
                     </div>
                 ))}
             </div>
 
-            {formik.touched.gallery && formik.errors.gallery ? (
-                <div className="text-red-500 mt-2">{formik.errors.gallery}</div>
-            ) : null}
+            {formik.touched.gallery && formik.errors.gallery && <div className="text-red-500 my-2">{formik.errors.gallery}</div>}
 
-            <button
-                type="submit"
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
-            >
-                Add
-            </button>
+            {/* <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded mt-4">Add</button> */}
+            <Button type="submit" disabled={formik.isSubmitting}>
+                {formik.isSubmitting ? "Adding..." : "Add"}
+            </Button>
         </form>
     );
 }

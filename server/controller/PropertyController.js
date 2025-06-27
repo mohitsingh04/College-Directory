@@ -50,7 +50,7 @@ export const addProperty = async (req, res) => {
         }
 
         if (user?.role === "Property Manager") {
-            const existingProperty = await Property.findOne({ uniqueId: uniqueId });
+            const existingProperty = await Property.findOne({ userId: uniqueId });
             if (existingProperty) {
                 return res.status(400).json({ error: "Property Manager already has a property" });
             }
@@ -115,57 +115,6 @@ export const updateProperty = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
-
-// export const handleUpdateFiles = async (req, res) => {
-//     try {
-//         const { uniqueId } = req.params;
-
-//         if (!uniqueId) {
-//             return res.status(400).json({ error: "Property ID is required!" });
-//         }
-
-//         const property = await Property.findOne({ uniqueId });
-//         if (!property) {
-//             return res.status(404).json({ error: "Property not found." })
-//         }
-
-//         const propertyId = property?.uniqueId;
-
-//         const propertyPath = `./media/property/${propertyId}/`;
-//         ensureDirectoryExistence(propertyPath + "logo/");
-//         ensureDirectoryExistence(propertyPath + "featured/");
-
-//         let updatePropertyLogoImagePath = property.logo;
-//         let updatePropertyFeaturedImagePath = property.featured_image;
-
-//         if (req.files && req.files.logo) {
-//             const logoFile = req.files.logo[0];
-//             const newLogoPath = `${propertyPath}logo/${logoFile.filename}`;
-//             fs.renameSync(logoFile.path, newLogoPath);
-//             updatePropertyLogoImagePath = newLogoPath;
-//         }
-
-//         if (req.files && req.files.featured_image) {
-//             const featuredFile = req.files.featured_image[0];
-//             const newFeaturedPath = `${propertyPath}featured/${featuredFile.filename}`;
-//             fs.renameSync(featuredFile.path, newFeaturedPath);
-//             updatePropertyFeaturedImagePath = newFeaturedPath;
-//         }
-
-//         const updatedProperty = await Property.findOneAndUpdate({ uniqueId }, {
-//             $set: {
-//                 logo: updatePropertyLogoImagePath,
-//                 featured_image: updatePropertyFeaturedImagePath,
-//             }
-//         },
-//             { new: true }
-//         );
-
-//         return res.status(200).json({ message: "Updated successfully.", updatedProperty });
-//     } catch (error) {
-//         return res.status(500).json({ error: error.message });
-//     }
-// };
 
 export const handleUpdateFiles = async (req, res) => {
     try {

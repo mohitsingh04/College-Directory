@@ -104,7 +104,7 @@ export default function AllCategory() {
                     ?
                     <img src={ALLImages('noImage')} alt="logo" className="list-logo" />
                     :
-                    <img src={`${import.meta.env.VITE_API_URL}${row.logo}`} alt="logo" className="list-logo" />
+                    <img src={`${import.meta.env.VITE_API_URL}${row.logo}`} alt="logo" className="list-logo" loading="lazy" />
             ),
             sortable: false,
         },

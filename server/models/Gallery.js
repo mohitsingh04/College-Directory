@@ -15,7 +15,7 @@ const GallerySchema = new mongoose.Schema({
         type: String,
     },
     gallery: {
-        type: [String], // Array of image URLs or file paths
+        type: [String],
         required: true,
     },
     createdAt: {

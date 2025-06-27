@@ -7,7 +7,7 @@ import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 
-export default function AddQnA() {
+export default function AddQnA({ onQnaAdded }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
 
@@ -18,31 +18,23 @@ export default function AddQnA() {
     }
 
     const validationSchema = Yup.object({
-        question: Yup.string().required("Question is required."),
+        question: Yup.string()
+            .required("Question is required."),
+        answer: Yup.string()
+            .required("Answer is required.")
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post(`/questionAndAnswer`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                onQnaAdded();
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 
@@ -90,11 +82,18 @@ export default function AddQnA() {
                                     formik.setFieldValue("answer", newContent)
                                 }
                             />
+                            {formik.touched.answer && formik.errors.answer ? (
+                                <div className="text-danger">
+                                    {formik.errors.answer}
+                                </div>
+                            ) : null}
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

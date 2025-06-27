@@ -10,7 +10,7 @@ export default function SendVerifyEmail() {
     const email = searchParams.get("email");
     const [user, setUser] = useState([]);
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -40,8 +40,8 @@ export default function SendVerifyEmail() {
     }, []);
 
     const handleSendMail = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await API.post(`/resend-email/${email}`);
             toast.success(response.data.message);
         } catch (error) {
@@ -85,8 +85,11 @@ export default function SendVerifyEmail() {
                                 <p>
                                     Didn’t receive an email?
                                     <br />
-                                    <button className="btn btn-primary" type="button" onClick={handleSendMail}>
-                                        <>Resend the verification email</>
+                                    <button className="btn btn-primary" type="button" onClick={handleSendMail} disabled={loading}>
+                                        {loading
+                                            ? <span>Resending...</span>
+                                            : <span>Resend the verification email</span>
+                                        }
                                     </button>
                                 </p>
                             </div>

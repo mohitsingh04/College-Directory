@@ -108,7 +108,7 @@ export default function AllUser() {
         },
         {
             name: 'Phone',
-            selector: row => row.phone || "Null",
+            selector: row => `+${row.phone}` || "Null",
             sortable: true,
         },
         {

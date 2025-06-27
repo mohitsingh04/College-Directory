@@ -30,7 +30,7 @@ export const getOtherBasicDetailsById = async (req, res) => {
 
 export const addOtherBasicDetails = async (req, res) => {
     try {
-        const { propertyId, youtube_link, bitly_link, website_url, short_description, full_description, admission_process, loan_process } = req.body;
+        const { propertyId, youtube_link, bitly_link, website_url, short_description, full_description } = req.body;
 
         const otherBasicDetails = await OtherBasicDetails.findOne({ propertyId });
         if (otherBasicDetails) {
@@ -90,8 +90,6 @@ export const addOtherBasicDetails = async (req, res) => {
             english_podcast: updatePropertyPodcastEnglishPath,
             short_description,
             full_description,
-            admission_process,
-            loan_process
         })
 
         const savedOtherBasicDetails = newOtherBasicDetails.save();
@@ -115,7 +113,7 @@ export const updateOtherBasicDetails = async (req, res) => {
             return res.status(404).json({ error: "Details not found!" });
         }
 
-        const { youtube_link, bitly_link, website_url, short_description, full_description, admission_process, loan_process } = req.body;
+        const { youtube_link, bitly_link, website_url, short_description, full_description } = req.body;
 
         const propertyPath = `./media/property/${otherBasicDetails?.propertyId}/`;
         ensureDirectoryExistence(propertyPath + "brochure/");
@@ -157,8 +155,6 @@ export const updateOtherBasicDetails = async (req, res) => {
                 english_podcast: updatePropertyPodcastEnglishPath,
                 short_description,
                 full_description,
-                admission_process,
-                loan_process
             }
         },
             { new: true }

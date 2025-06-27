@@ -25,6 +25,8 @@ import seoRouter from "./routes/SeoRouter.js";
 import galleryRouter from "./routes/GalleryRouter.js";
 import propertyCourseRouter from "./routes/PropertyCourseRouter.js";
 import amenitiesRouter from "./routes/AmenitiesRouter.js";
+import admissionProcessRouter from "./routes/AdmissionProcessRoute.js";
+import loanProcessRouter from "./routes/LoanProcessRoute.js";
 
 dotenv.config();
 
@@ -44,10 +46,6 @@ app.use(
         credentials: true,
     })
 );
-
-app.get("/", (req, res) => {
-    return res.json("Hello");
-});
 
 app.use("/api/", userRouter);
 app.use("/api/", statusRouter);
@@ -69,6 +67,8 @@ app.use("/api/", seoRouter);
 app.use("/api/", galleryRouter);
 app.use("/api/", propertyCourseRouter);
 app.use("/api/", amenitiesRouter);
+app.use("/api/", admissionProcessRouter);
+app.use("/api/", loanProcessRouter);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on http://localhost:${process.env.PORT}`);

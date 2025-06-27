@@ -6,8 +6,9 @@ import { useParams } from "react-router-dom";
 import { API } from '../../../../services/API';
 import { toast } from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
+import { Button } from 'react-bootstrap';
 
-export default function EditGallery({ galleryUniqueId }) {
+export default function EditGallery({ galleryUniqueId, onSuccess }) {
     const [images, setImages] = useState([]);
     const { uniqueId } = useParams();
     const [gallery, setGallery] = useState("");
@@ -16,27 +17,22 @@ export default function EditGallery({ galleryUniqueId }) {
     useEffect(() => {
         const fetchGallery = async () => {
             try {
-                setLoading(true);
                 const response = await API.get(`/gallery/${galleryUniqueId}`);
-                const galleryData = response.data;
+                setGallery(response.data);
 
-                setGallery(galleryData);
-
-                const existingImages = galleryData.gallery.map((img) => ({
+                const existing = response.data.gallery.map(img => ({
                     preview: `${import.meta.env.VITE_API_URL}${img}`,
-                    id: img,
+                    id: img
                 }));
-                setImages(existingImages);
-            } catch (error) {
-                console.error('Error fetching gallery:', error);
+                setImages(existing);
+            } catch (err) {
+                toast.error("Failed to fetch gallery");
             } finally {
                 setLoading(false);
             }
         };
-
         fetchGallery();
     }, [galleryUniqueId]);
-
 
     const initialValues = {
         propertyId: uniqueId || "",
@@ -48,15 +44,15 @@ export default function EditGallery({ galleryUniqueId }) {
         title: Yup.string().required("Title is required."),
         gallery: Yup.array()
             .min(1, 'You must select at least one image')
-            .required('Image selection is required'),
+            .max(8, 'You can upload a maximum of 8 images.')
+            .required('Image is required'),
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const formData = new FormData();
-            if (uniqueId) {
-                formData.append('propertyId', uniqueId);
-            }
+            formData.append('propertyId', uniqueId);
             formData.append('title', values.title);
             values.gallery.forEach(image => {
                 if (image instanceof File) {
@@ -72,10 +68,8 @@ export default function EditGallery({ galleryUniqueId }) {
                 },
             });
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
-            }
+            toast.success(response.data.message || "Updated successfully", { id: toastId });
+            onSuccess();
         } catch (error) {
             console.log("Error : " + error)
         }
@@ -100,7 +94,7 @@ export default function EditGallery({ galleryUniqueId }) {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: 'image/*',
-        maxFiles: 4,
+        maxFiles: 8,
     });
 
     const removeImage = (index) => {
@@ -145,51 +139,29 @@ export default function EditGallery({ galleryUniqueId }) {
                             ) : null}
                         </div>
 
-                        <div
-                            {...getRootProps({
-                                className:
-                                    'border border-dashed p-4 rounded-md cursor-pointer text-center',
-                            })}
-                        >
+                        <div {...getRootProps({ className: 'border-dashed border p-4 text-center cursor-pointer rounded' })}>
                             <input {...getInputProps()} />
-                            {isDragActive ? (
-                                <p>Drop the files here ...</p>
-                            ) : (
-                                <p>Drag 'n' drop some files here, or click to select files</p>
-                            )}
+                            <p>{isDragActive ? "Drop the files here ..." : "Drag and drop or click to upload"}</p>
                         </div>
 
                         <div className="mt-4 grid grid-cols-3 gap-4">
                             {images.map((file, index) => (
                                 <div key={index} className="relative">
-                                    <img
-                                        src={file.preview}
-                                        alt="Preview"
-                                        className="w-full h-32 object-cover rounded-md"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full px-2 py-1 text-sm"
-                                        onClick={() => removeImage(index)}
-                                    >
+                                    <img src={file.preview} alt="Preview" className="w-full h-32 object-cover rounded-md" />
+                                    <button type="button" className="absolute top-1 right-1 bg-red-500 text-white rounded-full px-2 py-1 text-sm" onClick={() => removeImage(index)} >
                                         Remove
                                     </button>
                                 </div>
                             ))}
                         </div>
 
-
                         {formik.touched.gallery && formik.errors.gallery && (
                             <div className="text-red-500 mt-2">{formik.errors.gallery}</div>
                         )}
 
-
-                        <button
-                            type="submit"
-                            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
-                        >
-                            Update
-                        </button>
+                        <Button type="submit" disabled={formik.isSubmitting}>
+                            {formik.isSubmitting ? "Updating..." : "Update"}
+                        </Button>
                     </form>
                 </>
             )}

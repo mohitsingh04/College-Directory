@@ -19,6 +19,10 @@ const LocationSchema = new mongoose.Schema({
         type: Number,
         required: [true, "Pincode is required."]
     },
+    country: {
+        type: String,
+        required: [true, "country is required."]
+    },
     city: {
         type: String,
         required: [true, "City is required."]

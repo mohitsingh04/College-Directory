@@ -3,10 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
+import * as Yup from 'yup';
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 
-export default function AddAnnouncement() {
+const validationSchema = Yup.object({
+    announcement: Yup.string()
+        .required("Announcement description is required.")
+});
+
+export default function AddAnnouncement({ setAnnouncement, setToggleAnnouncementPage }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
 
@@ -16,32 +22,25 @@ export default function AddAnnouncement() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post(`/announcement`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                const newAnnouncement = await API.get('/announcement');
+                const filtered = newAnnouncement.data.filter((announce) => announce.propertyId === Number(uniqueId));
+                setAnnouncement(filtered);
+                setToggleAnnouncementPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
     const formik = useFormik({
         initialValues: initialValues,
+        validationSchema: validationSchema,
         onSubmit: handleSubmit,
     });
 
@@ -62,11 +61,16 @@ export default function AddAnnouncement() {
                                     formik.setFieldValue("announcement", newContent)
                                 }
                             />
+                            {formik.touched.announcement && formik.errors.announcement ? (
+                                <div className="text-red-500 mt-1">{formik.errors.announcement}</div>
+                            ) : null}
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

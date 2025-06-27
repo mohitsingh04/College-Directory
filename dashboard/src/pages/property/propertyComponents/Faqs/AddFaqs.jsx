@@ -1,5 +1,5 @@
-import React, { Fragment, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { Fragment } from "react";
+import { useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
@@ -7,15 +7,14 @@ import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 
-export default function AddFaqs() {
-    const navigate = useNavigate();
+export default function AddFaqs({ onFaqAdded }) {
     const { uniqueId } = useParams();
 
     const initialValues = {
         propertyId: uniqueId,
         question: "",
         answer: "",
-    }
+    };
 
     const validationSchema = Yup.object({
         question: Yup.string().required("Question is required."),
@@ -23,33 +22,22 @@ export default function AddFaqs() {
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post(`/faqs`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                if (onFaqAdded) onFaqAdded();
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 
     const formik = useFormik({
-        initialValues: initialValues,
-        validationSchema: validationSchema,
+        initialValues,
+        validationSchema,
         onSubmit: handleSubmit,
     });
 
@@ -57,7 +45,6 @@ export default function AddFaqs() {
         <Fragment>
             <Form onSubmit={formik.handleSubmit}>
                 <Row>
-                    {/* Question */}
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="question">Question</Form.Label>
@@ -71,36 +58,29 @@ export default function AddFaqs() {
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {formik.touched.question && formik.errors.question ? (
-                                <div className="text-danger">
-                                    {formik.errors.question}
-                                </div>
-                            ) : null}
+                            {formik.touched.question && formik.errors.question && (
+                                <div className="text-danger">{formik.errors.question}</div>
+                            )}
                         </Form.Group>
                     </Col>
-                    {/* Answer */}
                     <Col md={12}>
                         <Form.Group className="mb-3">
                             <Form.Label>Answer</Form.Label>
                             <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
+                                config={{ height: 300 }}
                                 value={formik.values.answer}
-                                onBlur={(newContent) =>
-                                    formik.setFieldValue("answer", newContent)
-                                }
+                                onBlur={(newContent) => formik.setFieldValue("answer", newContent)}
                             />
-                            {formik.touched.answer && formik.errors.answer ? (
-                                <div className="text-danger">
-                                    {formik.errors.answer}
-                                </div>
-                            ) : null}
+                            {formik.touched.answer && formik.errors.answer && (
+                                <div className="text-danger">{formik.errors.answer}</div>
+                            )}
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

@@ -1,5 +1,5 @@
 import express from "express";
-import { addUser, changePassword, deleteUser, forgotPassword, getPermissions, getRoles, getUser, getUserById, login, logout, myProfile, register, resendEmail, resetPassword, sendOtp, softDelete, token, updateProfile, updateUser, verifyEmail } from "../controller/UserController.js";
+import { addUser, changePassword, deleteUser, forgotPassword, getPermissions, getRoles, getUser, getUserById, login, logout, myProfile, register, resendEmail, resetPassword, softDelete, token, updateProfile, updateUser, verifyEmail } from "../controller/UserController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import multer from "multer";
 import fs from "fs";
@@ -30,7 +30,6 @@ const upload = multer({ storage: storage })
 
 // Authentication API's
 userRouter.post("/register", register);
-userRouter.post("/register-with-otp", sendOtp);
 userRouter.post("/login", login);
 userRouter.post("/logout", logout);
 userRouter.post("/verifyemail", verifyEmail);
@@ -42,7 +41,7 @@ userRouter.get("/token", token);
 userRouter.put("/changepassword", changePassword);
 userRouter.get("/roles", authMiddleware, getRoles);
 userRouter.get("/permissions", authMiddleware, getPermissions);
-userRouter.post("/resend-email/:email",  resendEmail);
+userRouter.post("/resend-email/:email", resendEmail);
 
 // User Manage API's
 userRouter.get("/user", getUser);

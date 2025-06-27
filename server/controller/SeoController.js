@@ -13,7 +13,7 @@ export const getSeo = async (req, res) => {
 
 export const addSeo = async (req, res) => {
     try {
-        const { propertyId, title, slug, meta_tags, primary_focus_keywords, json_schema, description } = req.body;
+        const { propertyId, title, slug, primary_focus_keywords, json_schema, description } = req.body;
         const converted_slug = slug.toLowerCase().replace(/\s+/g, "-");
 
         const seo = await Seo.findOne({ propertyId });
@@ -38,7 +38,6 @@ export const addSeo = async (req, res) => {
             propertyId,
             title,
             slug: converted_slug,
-            meta_tags,
             primary_focus_keywords,
             json_schema,
             description
@@ -64,14 +63,13 @@ export const updateSeo = async (req, res) => {
             return res.status(404).json({ error: "Seo not found!" });
         }
 
-        const { title, slug, meta_tags, primary_focus_keywords, json_schema, description } = req.body;
+        const { title, slug, primary_focus_keywords, json_schema, description } = req.body;
         const converted_slug = slug.toLowerCase().replace(/\s+/g, "-");
 
         const updatedSeo = await Seo.findOneAndUpdate({ uniqueId }, {
             $set: {
                 title,
                 slug: converted_slug,
-                meta_tags,
                 primary_focus_keywords,
                 json_schema,
                 description

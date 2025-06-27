@@ -8,7 +8,7 @@ import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
 
-export default function EditQuestionAndAnswer({ questionAndAnswerUniqueId }) {
+export default function EditQuestionAndAnswer({ questionAndAnswerUniqueId, onQnaUpdated }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [questionAndAnswer, setQuestionAndAnswer] = useState("");
@@ -38,30 +38,20 @@ export default function EditQuestionAndAnswer({ questionAndAnswerUniqueId }) {
 
     const validationSchema = Yup.object({
         question: Yup.string().required("Question is required."),
+        answer: Yup.string().required("Answer is required.")
     });
 
     const handleSubmit = async (values) => {
+            const toastId = toast.loading("Updating...");
         try {
             const response = await API.put(`/questionAndAnswer/${questionAndAnswerUniqueId}`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                onQnaUpdated();
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 
@@ -114,11 +104,18 @@ export default function EditQuestionAndAnswer({ questionAndAnswerUniqueId }) {
                                         formik.setFieldValue("answer", newContent)
                                     }
                                 />
+                                {formik.touched.answer && formik.errors.answer ? (
+                                    <div className="text-danger">
+                                        {formik.errors.answer}
+                                    </div>
+                                ) : null}
                             </Form.Group>
                         </Col>
-
                     </Row>
-                    <Button type="submit">Update</Button>
+
+                    <Button type="submit" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? "Updating..." : "Update"}
+                    </Button>
                 </Form>
             }
         </Fragment>

@@ -103,9 +103,15 @@ export default function Announcement() {
                                     }
                                 </>
                                 :
-                                <EditAnnouncement />
+                                <EditAnnouncement
+                                    setAnnouncement={setAnnouncement}
+                                    setToggleAnnouncementPage={setToggleAnnouncementPage}
+                                />
                             :
-                            <AddAnnouncement />
+                            <AddAnnouncement
+                                setAnnouncement={setAnnouncement}
+                                setToggleAnnouncementPage={setToggleAnnouncementPage}
+                            />
                         }
                     </Card.Body>
                 </Card>

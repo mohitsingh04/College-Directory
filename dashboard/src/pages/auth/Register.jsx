@@ -29,8 +29,8 @@ export default function Register() {
     }
 
     const handleSubmit = async (values) => {
+        setLoading(true)
         try {
-            setLoading(true)
             const response = await API.post("/register", values);
 
             if (response.status === 200) {
@@ -114,16 +114,6 @@ export default function Register() {
                             </div>
 
                             <div className="wrap-input100 validate-input" data-bs-validate="Phone is required.">
-                                {/* <Form.Control
-                                    type="phone"
-                                    className={`form-control input100 ${formik.touched.phone && formik.errors.phone ? "is-invalid" : ""}`}
-                                    name="phone"
-                                    id="input2"
-                                    placeholder="Phone"
-                                    value={formik.values.phone}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                /> */}
                                 <PhoneInput
                                     country={'in'}
                                     value={formik.values.phone}
@@ -134,10 +124,6 @@ export default function Register() {
                                     onBlur={formik.handleBlur("phone")}
                                 />
                                 {formik.errors.phone && formik.touched.phone ? <small className="text-danger">{formik.errors.phone}</small> : null}
-                                {/* <span className="focus-input100"></span>
-                                <span className="symbol-input100">
-                                    {formik.errors.phone && formik.touched.phone ? <i className="ri-mail-fill fixed-icon" aria-hidden="true"></i> : <i className="ri-mail-fill" aria-hidden="true"></i>}
-                                </span> */}
                             </div>
 
                             <div className="wrap-input100 validate-input" data-bs-validate="Password is required">

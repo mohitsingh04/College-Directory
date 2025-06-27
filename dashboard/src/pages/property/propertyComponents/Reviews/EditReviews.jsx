@@ -10,7 +10,7 @@ import StarIcon from '@mui/icons-material/Star';
 import PhoneInput from 'react-phone-input-2';
 import Skeleton from 'react-loading-skeleton';
 
-export default function EditReviews({ reviewsUniqueId }) {
+export default function EditReviews({ reviewsUniqueId, onReviewUpdated }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [reviews, setReviews] = useState("");
@@ -31,8 +31,6 @@ export default function EditReviews({ reviewsUniqueId }) {
         fetchReviews();
     }, [fetchReviews]);
 
-    console.log(reviews)
-
     const initialValues = {
         propertyId: uniqueId,
         name: reviews[0]?.name || "",
@@ -40,40 +38,25 @@ export default function EditReviews({ reviewsUniqueId }) {
         phone_number: reviews[0]?.phone_number || "",
         rating: reviews[0]?.rating || "",
         review: reviews[0]?.review || "",
-        gender: reviews[0]?.gender || "",
     }
 
     const validationSchema = Yup.object({
         name: Yup.string().required("Name is required."),
-        email: Yup.string().required("Email is required."),
-        phone_number: Yup.string().required("Phone number is required."),
         rating: Yup.string().required("Rating is required."),
         review: Yup.string().required("Review is required."),
-        gender: Yup.string().required("Gender is required."),
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.put(`/reviews/${reviewsUniqueId}`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                onReviewUpdated();
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -127,27 +110,12 @@ export default function EditReviews({ reviewsUniqueId }) {
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                {formik.touched.email && formik.errors.email ? (
-                                    <div className="text-danger">
-                                        {formik.errors.email}
-                                    </div>
-                                ) : null}
                             </Form.Group>
                         </Col>
                         {/* Phone number */}
                         <Col md={6}>
                             <Form.Group className="mb-3">
                                 <Form.Label htmlFor="phone_number">Phone number</Form.Label>
-                                {/* <Form.Control
-                                type="text"
-                                id="phone_number"
-                                placeholder="Phone number"
-                                name="phone_number"
-                                className={`form-control ${formik.touched.phone_number && formik.errors.phone_number ? 'is-invalid' : ''}`}
-                                value={formik.values.phone_number}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            /> */}
                                 <PhoneInput
                                     country={'in'}
                                     value={formik.values.phone_number}
@@ -157,38 +125,6 @@ export default function EditReviews({ reviewsUniqueId }) {
                                     onChange={(value) => formik.setFieldValue("phone_number", value)}
                                     onBlur={formik.handleBlur("phone_number")}
                                 />
-                                {formik.touched.phone_number && formik.errors.phone_number ? (
-                                    <div className="text-danger">
-                                        {formik.errors.phone_number}
-                                    </div>
-                                ) : null}
-                            </Form.Group>
-                        </Col>
-                        {/* Gender */}
-                        <Col md={6}>
-                            <Form.Group>
-                                <Form.Label htmlFor="gender">Gender</Form.Label>
-                                {["radio"].map((type) => (
-                                    <div key={`inline-${type}`} className="mb-3">
-                                        {["Male", "Female", "Other"].map((gender, index) => (
-                                            <Form.Check
-                                                key={index}
-                                                inline
-                                                label={gender}
-                                                value={gender}
-                                                name="gender"
-                                                type={type}
-                                                id={`inline-${type}-${index + 1}`}
-                                                onChange={formik.handleChange}
-                                                onBlur={formik.handleBlur}
-                                                checked={formik.values.gender === gender}
-                                            />
-                                        ))}
-                                    </div>
-                                ))}
-                                {formik.touched.gender && formik.errors.gender && (
-                                    <div className="text-danger">{formik.errors.gender}</div>
-                                )}
                             </Form.Group>
                         </Col>
                         {/* Rating */}
@@ -231,9 +167,11 @@ export default function EditReviews({ reviewsUniqueId }) {
                                 ) : null}
                             </Form.Group>
                         </Col>
-
                     </Row>
-                    <Button type="submit">Update</Button>
+
+                    <Button type="submit" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? "Updating..." : "Update"}
+                    </Button>
                 </Form>
             }
         </Fragment>

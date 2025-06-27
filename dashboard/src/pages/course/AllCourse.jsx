@@ -22,8 +22,8 @@ export default function AllCourse() {
 
   useEffect(() => {
     const getAuthUserData = async () => {
+      setHandlePermissionLoading(true)
       try {
-        setHandlePermissionLoading(true)
         const { data } = await API.get("/profile");
         setAuthUser(data?.data);
       } catch (error) {
@@ -37,9 +37,9 @@ export default function AllCourse() {
   }, []);
 
   const getCourse = useCallback(async () => {
+    startLoadingBar();
+    setLoading(true);
     try {
-      startLoadingBar();
-      setLoading(true);
       const response = await API.get("/course");
       setCourse(response.data);
     } catch (error) {
@@ -94,9 +94,9 @@ export default function AllCourse() {
       confirmButtonText: "Yes, delete it!"
     }).then(async (result) => {
       if (result.isConfirmed) {
+        startLoadingBar();
+        setLoading(true);
         try {
-          startLoadingBar();
-          setLoading(true);
           const response = await API.delete(`/course/${id}`);
           toast.success(response.data.message);
           getCourse();
@@ -112,10 +112,10 @@ export default function AllCourse() {
 
 
   const columns = [
-    { name: 'ID', selector: row => row.uniqueId, sortable: true },
+    // { name: 'ID', selector: row => row.uniqueId, sortable: true },
     { name: 'Name', selector: row => row.name, sortable: true },
     { name: 'Short Name', selector: row => row.short_name, sortable: true },
-    // { name: 'Specialization', selector: row => row.specialization || "Null", sortable: true },
+    { name: 'Specialization', selector: row => row.specialization || "Null", sortable: true },
     {
       name: 'Status',
       selector: row => (

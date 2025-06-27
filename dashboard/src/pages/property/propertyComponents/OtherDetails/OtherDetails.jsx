@@ -194,9 +194,15 @@ export default function OtherDetails() {
                                     </Row>
                                 </>
                                 :
-                                <EditOtherDetails />
+                                <EditOtherDetails
+                                    setOtherDetails={setOtherDetails}
+                                    setToggleOtherDetailsPage={setToggleOtherDetailsPage}
+                                />
                             :
-                            <AddOtherDetails />
+                            <AddOtherDetails
+                                setOtherDetails={setOtherDetails}
+                                setToggleOtherDetailsPage={setToggleOtherDetailsPage}
+                            />
                         }
                     </Card.Body>
                 </Card>

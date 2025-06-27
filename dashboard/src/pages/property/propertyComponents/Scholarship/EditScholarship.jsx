@@ -3,11 +3,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
+import * as Yup from 'yup';
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
 
-export default function EditScholarship() {
+const validationSchema = Yup.object({
+    scholarship: Yup.string()
+        .required("Scholarship description is required.")
+});
+
+export default function EditScholarship({ setScholarship, setToggleScholarshipPage }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [scholarshipData, setScholarshipData] = useState("");
@@ -36,33 +42,26 @@ export default function EditScholarship() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.put(`/scholarship/${scholarshipData[0]?.uniqueId}`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                const newScholarship = await API.get('/scholarship');
+                const filtered = newScholarship.data.filter((scholar) => scholar.propertyId === Number(uniqueId));
+                setScholarship(filtered);
+                setToggleScholarshipPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
     const formik = useFormik({
         initialValues: initialValues,
         onSubmit: handleSubmit,
+        validationSchema: validationSchema,
         enableReinitialize: true
     });
 
@@ -87,11 +86,16 @@ export default function EditScholarship() {
                                         formik.setFieldValue("scholarship", newContent)
                                     }
                                 />
+                                {formik.touched.scholarship && formik.errors.scholarship ? (
+                                    <div className="text-red-500 mt-1">{formik.errors.scholarship}</div>
+                                ) : null}
                             </Form.Group>
                         </Col>
-
                     </Row>
-                    <Button type="submit">Update</Button>
+
+                    <Button type="submit" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? "Updating..." : "Update"}
+                    </Button>
                 </Form>
             }
         </Fragment>

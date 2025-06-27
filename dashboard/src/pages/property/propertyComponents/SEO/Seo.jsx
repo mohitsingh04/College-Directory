@@ -90,20 +90,6 @@ export default function Seo() {
                                             {seo[0]?.slug}
                                         </Col>
                                         <Col md={6} className='mb-3'>
-                                            <strong>Meta tags:</strong>
-                                            <br />
-                                            {Array.isArray(seo[0]?.meta_tags) ? (
-                                                seo[0]?.meta_tags.map((item, index) => (
-                                                    <span key={index}>
-                                                        {item.label}
-                                                        {index < seo[0]?.meta_tags.length - 1 ? ", " : ""}
-                                                    </span>
-                                                ))
-                                            ) : (
-                                                "N/A"
-                                            )}
-                                        </Col>
-                                        <Col md={6} className='mb-3'>
                                             <strong>Primary focus keyword:</strong>
                                             <br />
                                             {Array.isArray(seo[0]?.primary_focus_keywords) ? (
@@ -152,9 +138,15 @@ export default function Seo() {
                                 </>
 
                                 :
-                                <EditSeo />
+                                <EditSeo
+                                    setSeo={setSeo}
+                                    setToggleSeoPage={setToggleSeoPage}
+                                />
                             :
-                            <AddSeo />
+                            <AddSeo
+                                setSeo={setSeo}
+                                setToggleSeoPage={setToggleSeoPage}
+                            />
                         }
                     </Card.Body>
                 </Card>

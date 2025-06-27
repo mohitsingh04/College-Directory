@@ -9,10 +9,9 @@ import Dropdown from "react-dropdown-select";
 import Skeleton from "react-loading-skeleton";
 import JoditEditor from "jodit-react";
 
-export default function EditSeo() {
-    const navigate = useNavigate();
+export default function EditSeo({ setSeo, setToggleSeoPage }) {
     const { uniqueId } = useParams();
-    const [seo, setSeo] = useState([]);
+    const [seoData, setSeoData] = useState([]);
     const [count, setCount] = useState(0);
     const maxChars = 200;
     const [loading, setLoading] = useState(true);
@@ -23,7 +22,7 @@ export default function EditSeo() {
                 setLoading(true);
                 const response = await API.get(`/seo`);
                 const filteredSeo = response.data.filter((seo) => seo.propertyId === Number(uniqueId));
-                setSeo(filteredSeo);
+                setSeoData(filteredSeo);
             } catch (error) {
                 console.error('Error fetching seo:', error);
             } finally {
@@ -36,12 +35,11 @@ export default function EditSeo() {
 
     const initialValues = {
         propertyId: uniqueId,
-        title: seo[0]?.title || "",
-        slug: seo[0]?.slug || "",
-        meta_tags: seo[0]?.meta_tags || "",
-        primary_focus_keywords: seo[0]?.primary_focus_keywords || "",
-        json_schema: seo[0]?.json_schema || "",
-        description: seo[0]?.description || "",
+        title: seoData[0]?.title || "",
+        slug: seoData[0]?.slug || "",
+        primary_focus_keywords: seoData[0]?.primary_focus_keywords || "",
+        json_schema: seoData[0]?.json_schema || "",
+        description: seoData[0]?.description || "",
     }
 
     const validationSchema = Yup.object({
@@ -52,29 +50,19 @@ export default function EditSeo() {
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
-            values.description = descriptionRef.current.getContent();
-
-            const response = await API.put(`/seo/${seo[0]?.uniqueId}`, values);
+            const response = await API.put(`/seo/${seoData[0]?.uniqueId}`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                const newSeo = await API.get('/seo');
+                const filtered = newSeo.data.filter((seo) => seo.propertyId === Number(uniqueId));
+                setSeo(filtered);
+                setToggleSeoPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -114,6 +102,7 @@ export default function EditSeo() {
                                     value={formik.values.title}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
+                                    disabled
                                 />
                                 {formik.touched.title && formik.errors.title ? (
                                     <div className="text-danger">
@@ -135,30 +124,13 @@ export default function EditSeo() {
                                     value={formik.values.slug}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
+                                    disabled
                                 />
                                 {formik.touched.slug && formik.errors.slug ? (
                                     <div className="text-danger">
                                         {formik.errors.slug}
                                     </div>
                                 ) : null}
-                            </Form.Group>
-                        </Col>
-                        {/* Meta Tags */}
-                        <Col md={6}>
-                            <Form.Group className="mb-3">
-                                <Form.Label htmlFor="meta_tags">Meta Tags</Form.Label>
-                                <Dropdown
-                                    options={[]}
-                                    create={true}
-                                    placeholder="Meta Tags...    "
-                                    searchable={true}
-                                    dropdownHandle={false}
-                                    multi={true}
-                                    values={seo[0]?.meta_tags}
-                                    value={formik.values.meta_tags}
-                                    onChange={(value) => formik.setFieldValue("meta_tags", value)}
-                                    onBlur={formik.handleBlur}
-                                />
                             </Form.Group>
                         </Col>
                         {/* Primary focus keyword */}
@@ -172,7 +144,7 @@ export default function EditSeo() {
                                     searchable={true}
                                     dropdownHandle={false}
                                     multi={true}
-                                    values={seo[0]?.primary_focus_keywords}
+                                    values={seoData[0]?.primary_focus_keywords}
                                     value={formik.values.primary_focus_keywords}
                                     onChange={(value) => formik.setFieldValue("primary_focus_keywords", value)}
                                     onBlur={formik.handleBlur}
@@ -216,9 +188,11 @@ export default function EditSeo() {
                                 />
                             </Form.Group>
                         </Col>
-
                     </Row>
-                    <Button type="submit">Update</Button>
+
+                    <Button type="submit" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? "Updating..." : "Update"}
+                    </Button>
                 </Form>
             }
         </Fragment>

@@ -80,30 +80,16 @@ export default function AddCourse() {
   });
 
   const handleSubmit = async (values) => {
+    const toastId = toast.loading("Updating...");
+    startLoadingBar();
     try {
       const formData = { ...values, duration: `${values.course_duration} ${values.course_duration_unit}` };
-      startLoadingBar();
       const response = await API.post("/course", formData);
-      if (response.data.message) {
-        toast.success(response.data.message);
-        navigate('/dashboard/course');
-      } else {
-        toast.error(response.data.error);
-      }
+
+      toast.success(response.data.message || "Added successfully", { id: toastId });
+      navigate('/dashboard/course');
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 400) {
-          toast.error(error.response.data.error || "Bad Request");
-        } else if (error.response.status === 404) {
-          toast.error(error.response.status);
-        } else if (error.response.status === 500) {
-          toast.error("Internal server error, please try again later.");
-        } else {
-          toast.error("Something went wrong, please try again.");
-        }
-      } else {
-        toast.error(`Failed: ${error.message}`);
-      }
+      toast.error(error.response?.data?.error || "Failed", { id: toastId });
     } finally {
       stopLoadingBar();
     }
@@ -428,9 +414,11 @@ export default function AddCourse() {
                   />
                 </Form.Group>
               </Col>
-
             </Row>
-            <Button type="submit">Add Course</Button>
+
+            <Button type="submit" disabled={formik.isSubmitting}>
+              {formik.isSubmitting ? "Adding..." : "Add"}
+            </Button>
           </Form>
         </Card.Body>
       </Card>

@@ -12,11 +12,11 @@ import ALLImages from "../../common/Imagesdata";
 
 export default function AddCategory() {
     const navigate = useNavigate();
-    const [PreviewLogo, setPreviewLogo] = useState(null);
-    const [PreviewFeaturedImage, setPreviewFeaturedImage] = useState(null);
+    const loadingBarRef = useRef(null);
     const [category, setCategory] = useState([]);
     const [authUser, setAuthUser] = useState(null);
-    const loadingBarRef = useRef(null);
+    const [PreviewLogo, setPreviewLogo] = useState(null);
+    const [PreviewFeaturedImage, setPreviewFeaturedImage] = useState(null);
     const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
 
     const startLoadingBar = () => loadingBarRef.current?.continuousStart();
@@ -24,8 +24,8 @@ export default function AddCategory() {
 
     useEffect(() => {
         const getAuthUserData = async () => {
+            setHandlePermissionLoading(true)
             try {
-                setHandlePermissionLoading(true)
                 const { data } = await API.get("/profile");
                 setAuthUser(data?.data);
             } catch (error) {
@@ -40,8 +40,8 @@ export default function AddCategory() {
 
     useEffect(() => {
         const getCategory = async () => {
+            startLoadingBar();
             try {
-                startLoadingBar();
                 const { data } = await API.get("/category");
                 setCategory(data);
             } catch (error) {
@@ -65,12 +65,12 @@ export default function AddCategory() {
     const validationSchema = Yup.object({
         category_name: Yup.string().required("Please select a category."),
         parent_category: Yup.string().required("Parent category is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Parent category can contain only alphabets and single spaces.').min(2, "Parent category name must contain atleast 2 characters"),
-        description: Yup.string().required("Description is required."),
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
+        startLoadingBar();
         try {
-            startLoadingBar();
             const formData = new FormData();
             formData.append("category_name", values.category_name);
             formData.append("parent_category", values.parent_category);
@@ -84,22 +84,10 @@ export default function AddCategory() {
                 }
             });
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate('/dashboard/category');
-            }
+            toast.success(response.data.message || "Added successfully", { id: toastId });
+            navigate('/dashboard/category');
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         } finally {
             stopLoadingBar();
         }
@@ -255,7 +243,6 @@ export default function AddCategory() {
                                             formik.setFieldValue("description", newContent)
                                         }
                                     />
-                                    {formik.errors.description && formik.touched.description ? <div className="text-danger mt-1">{formik.errors.description}</div> : null}
                                 </Form.Group>
                             </Col>
                             {/* Logo */}
@@ -274,13 +261,13 @@ export default function AddCategory() {
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "logo", setPreviewLogo)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    <div className="hover-effect w-32 rounded-circle">
-                                        <Form.Label htmlFor="logo"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
+                                    <div className="mb-3">
                                         {PreviewLogo
                                             ? <img src={PreviewLogo} alt="Logo Preview" className="w-32 logo-ratio" />
                                             : <img src={ALLImages('noImage')} alt="Logo Preview" className="w-32 logo-ratio" />
                                         }
                                     </div>
+                                    <Form.Label htmlFor="logo" className="btn btn-primary btn-sm"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
                                 </Form.Group>
                             </Col>
                             {/* Featured Image */}
@@ -299,18 +286,20 @@ export default function AddCategory() {
                                         onChange={(e) => handleFileChange(e, formik.setFieldValue, "featured_image", setPreviewFeaturedImage)}
                                         onBlur={formik.handleBlur}
                                     />
-                                    <div className="hover-effect rounded">
-                                        <Form.Label htmlFor="featured_image" ><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
+                                    <div className="mb-3">
                                         {PreviewFeaturedImage
                                             ? <img src={PreviewFeaturedImage} alt="Featured image preview" className="shadow-sm banner-ratio" />
                                             : <img src={ALLImages('noImage')} alt="Featured image preview" className="shadow-sm banner-ratio" />
                                         }
                                     </div>
+                                    <Form.Label htmlFor="featured_image" className="btn btn-primary btn-sm"><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
                                 </Form.Group>
                             </Col>
-
                         </Row>
-                        <Button type="submit">Add Category</Button>
+
+                        <Button type="submit" disabled={formik.isSubmitting}>
+                            {formik.isSubmitting ? "Adding..." : "Add"}
+                        </Button>
                     </Form>
                 </Card.Body>
             </Card>

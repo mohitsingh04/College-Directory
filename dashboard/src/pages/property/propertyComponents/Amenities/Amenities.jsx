@@ -73,13 +73,13 @@ export default function Amenities() {
                                     <div className="row">
                                         {amenities[0]?.selectedAmenities?.map((amenityCategory, index) =>
                                             Object.entries(amenityCategory).map(([category, items]) => (
-                                                <div key={index} className="col-md-4">
+                                                <div key={`${index}-${category}`} className="col-md-4">
                                                     <h6 className="font-bold">{category}</h6>
                                                     <ul>
                                                         {Array.isArray(items) &&
                                                             items.map((item, i) =>
                                                                 Object.entries(item).map(([key, value]) => (
-                                                                    <li key={i}>
+                                                                    <li key={`${key}-${i}`}>
                                                                         • {key}{value && value !== true ? `: ${value}` : ""}
                                                                     </li>
                                                                 ))
@@ -95,10 +95,16 @@ export default function Amenities() {
 
                             </>
                         ) : (
-                            <EditAmenities />
+                            <EditAmenities
+                                setAmenitiesData={setAmenities}
+                                setToggleAmenitiesPage={setToggleAmenitiesPage}
+                            />
                         )
                     ) : (
-                        <AddAmenities />
+                        <AddAmenities
+                            setAmenitiesData={setAmenities}
+                            setToggleAmenitiesPage={setToggleAmenitiesPage}
+                        />
                     )}
                 </Card.Body>
             </Card>

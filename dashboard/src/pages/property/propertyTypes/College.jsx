@@ -13,10 +13,14 @@ export default function College() {
     const [property, setProperty] = useState([]);
 
     useEffect(() => {
-        const getProperty = async () => {
-            const response = await API.get(`/property`);
-            setProperty(response.data);
-        };
+        try {
+            const getProperty = async () => {
+                const response = await API.get(`/property`);
+                setProperty(response.data);
+            };
+        } catch (error) {
+
+        }
 
         getProperty();
     }, []);
@@ -40,27 +44,14 @@ export default function College() {
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post("/property", values);
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate('/dashboard/property');
-            }
+            toast.success(response.data.message || "Added successfully", { id: toastId });
+            navigate('/dashboard/property');
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 
@@ -126,15 +117,15 @@ export default function College() {
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="phone_number">Phone Number</Form.Label>
-                                <PhoneInput
-                                    country={'in'}
-                                    value={formik.values.phone_number}
-                                    inputClass={`border w-100 ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
-                                    inputStyle={{ height: "45px" }}
-                                    buttonClass={`bg-white border ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
-                                    onChange={(value) => formik.setFieldValue("phone_number", value)}
-                                    onBlur={formik.handleBlur("phone_number")}
-                                />
+                            <PhoneInput
+                                country={'in'}
+                                value={formik.values.phone_number}
+                                inputClass={`border w-100 ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
+                                inputStyle={{ height: "45px" }}
+                                buttonClass={`bg-white border ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
+                                onChange={(value) => formik.setFieldValue("phone_number", value)}
+                                onBlur={formik.handleBlur("phone_number")}
+                            />
                             {formik.touched.phone_number && formik.errors.phone_number ? (
                                 <div className="text-danger">
                                     {formik.errors.phone_number}
@@ -222,9 +213,11 @@ export default function College() {
                             />
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add Property</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </div>
     );

@@ -7,10 +7,10 @@ import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
 
-export default function EditOtherDetails() {
+export default function EditOtherDetails({ setOtherDetails, setToggleOtherDetailsPage }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const [otherDetails, setOtherDetails] = useState([]);
+    const [otherDetailsData, setOtherDetailsData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchOtherDetails = async () => {
@@ -18,7 +18,7 @@ export default function EditOtherDetails() {
         try {
             const { data } = await API.get(`/other-details`);
             const filtered = data.filter(item => item.propertyId === Number(uniqueId));
-            setOtherDetails(filtered);
+            setOtherDetailsData(filtered);
         } catch (error) {
             console.error('Error fetching details:', error.message || error);
         } finally {
@@ -34,36 +34,28 @@ export default function EditOtherDetails() {
 
     const initialValues = {
         propertyId: uniqueId,
-        bengal_credit_card: otherDetails[0]?.bengal_credit_card || null,
-        cuet: otherDetails[0]?.cuet || null,
-        naac: otherDetails[0]?.naac || "",
-        nirf: otherDetails[0]?.nirf || "",
-        nba: otherDetails[0]?.nba || "",
-        aj_ranking: otherDetails[0]?.aj_ranking || "",
+        bengal_credit_card: otherDetailsData[0]?.bengal_credit_card || null,
+        cuet: otherDetailsData[0]?.cuet || null,
+        naac: otherDetailsData[0]?.naac || "",
+        nirf: otherDetailsData[0]?.nirf || "",
+        nba: otherDetailsData[0]?.nba || "",
+        aj_ranking: otherDetailsData[0]?.aj_ranking || "",
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
-            const response = await API.put(`/other-details/${otherDetails[0]?.uniqueId}`, values);
+            const response = await API.put(`/other-details/${otherDetailsData[0]?.uniqueId}`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                const newOtherDetails = await API.get('/other-details');
+                const filtered = newOtherDetails.data.filter((otherDetails) => otherDetails.propertyId === Number(uniqueId));
+                setOtherDetails(filtered);
+                setToggleOtherDetailsPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -173,9 +165,11 @@ export default function EditOtherDetails() {
                                 />
                             </Form.Group>
                         </Col>
-
                     </Row>
-                    <Button type="submit">Update</Button>
+
+                    <Button type="submit" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? "Updating..." : "Update"}
+                    </Button>
                 </Form>
             }
         </Fragment>

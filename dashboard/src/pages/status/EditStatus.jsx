@@ -4,7 +4,6 @@ import { Col, Row, Card, Form, Breadcrumb, Button } from "react-bootstrap";
 import * as Yup from "yup";
 import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
-import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../services/API";
 import LoadingBar from 'react-top-loading-bar';
 
@@ -16,8 +15,6 @@ const validationSchema = Yup.object({
 const EditStatus = () => {
     const { objectId } = useParams();
     const navigate = useNavigate();
-    const editorRef = useRef(null);
-    const [description, setDescription] = useState("");
     const [status, setStatus] = useState("");
     const [statusData, setStatusData] = useState([]);
     const [authUser, setAuthUser] = useState(null);
@@ -82,17 +79,16 @@ const EditStatus = () => {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
+        startLoadingBar();
         try {
-            startLoadingBar();
             const response = await API.put(`/status/${objectId}`, values);
             if (response.data.message) {
-                toast.success(response.data.message);
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
                 navigate('/dashboard/status');
-            } else {
-                toast.success(response.data.error);
             }
         } catch (error) {
-            toast.error(error.message);
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         } finally {
             stopLoadingBar();
         }
@@ -250,37 +246,12 @@ const EditStatus = () => {
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
                                     />
-                                    {formik.touched.description && formik.errors.description ? (
-                                        <div className="text-danger">
-                                            {formik.errors.description}
-                                        </div>
-                                    ) : null}
-                                    {/* <Editor
-                                        apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
-                                        onInit={(evt, editor) => editorRef.current = editor}
-                                        onChange={(e) => setDescription(editorRef.current.getContent())}
-                                        onBlur={formik.handleBlur}
-                                        init={{
-                                            height: 250,
-                                            menubar: false,
-                                            plugins: [
-                                                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                                                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                                                'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-                                            ],
-                                            toolbar: 'undo redo | blocks | ' +
-                                                'bold italic forecolor | alignleft aligncenter ' +
-                                                'alignright alignjustify | bullist numlist outdent indent | ' +
-                                                'removeformat',
-                                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                                        }}
-                                        initialValue={status[0]?.description}
-                                    /> */}
                                 </Form.Group>
                             </Col>
                         </Row>
-                        <Button type="submit" variant="primary">
-                            Update
+
+                        <Button type="submit" disabled={formik.isSubmitting}>
+                            {formik.isSubmitting ? "Updating..." : "Update"}
                         </Button>
                     </Form>
                 </Card.Body>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
@@ -8,6 +8,7 @@ import { API } from "../../../services/API";
 
 export default function ChangePassword() {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     const initialValues = {
         current_password: "",
@@ -29,11 +30,13 @@ export default function ChangePassword() {
     });
 
     const handleSubmit = async (values) => {
+        setLoading(true)
         try {
             const response = await API.put("/changepassword", values);
 
             if (response.status === 200) {
                 toast.success(response.data.message);
+                formik.resetForm();
             }
         } catch (error) {
             if (error.response) {
@@ -47,6 +50,8 @@ export default function ChangePassword() {
             } else {
                 toast.error(`Registration failed: ${error.message}`);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -100,7 +105,12 @@ export default function ChangePassword() {
                 </Form.Group>
                 <hr />
                 <div className="text-end">
-                    <Button type="submit">Update</Button>
+                    <Button type="submit" disabled={loading}>
+                        {loading
+                            ? <span>Updating...</span>
+                            : <span>Update</span>
+                        }
+                    </Button>
                 </div>
             </Form>
         </>

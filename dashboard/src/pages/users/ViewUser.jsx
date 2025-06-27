@@ -11,7 +11,6 @@ export default function ViewUser() {
   const navigate = useNavigate();
   const { objectId } = useParams();
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
   const loadingBarRef = useRef(null);
   const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
@@ -38,7 +37,6 @@ export default function ViewUser() {
   useEffect(() => {
     const getUser = async () => {
       try {
-        setLoading(true);
         startLoadingBar();
         const { data } = await API.get(`/user/${objectId}`);
         setUser(data);
@@ -46,7 +44,6 @@ export default function ViewUser() {
         toast.error('Error fetching user: ' + error.message);
       } finally {
         stopLoadingBar();
-        setLoading(false);
       }
     };
 
@@ -117,7 +114,7 @@ export default function ViewUser() {
         </Card.Header>
         <Card.Body>
           <div>
-            {loading ? (
+            {!user ? (
               <>
                 <Skeleton width={100} height={100} className="rounded-circle" />
                 <Skeleton width={300} className="mt-3" />

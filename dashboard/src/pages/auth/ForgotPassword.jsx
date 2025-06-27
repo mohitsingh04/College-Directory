@@ -22,8 +22,8 @@ export default function Forgotpassword() {
     }
 
     const handleSubmit = async (values) => {
+        setLoading(true)
         try {
-            setLoading(true)
             const response = await API.post("/forgotpassword", values);
 
             if (response.status === 200) {
@@ -91,7 +91,7 @@ export default function Forgotpassword() {
                                         {formik.errors.email && formik.touched.email ? <div className="text-danger">{formik.errors.email}</div> : null}
                                     </Form.Group>
                                     <div className="container-login100-form-btn">
-                                        <Button type="submit" className="login100-form-btn btn-primary">
+                                        <Button type="submit" className="login100-form-btn btn-primary" disabled={loading}>
                                             {loading
                                                 ? <span>Wait for mail...</span>
                                                 : <span>Submit</span>

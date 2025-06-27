@@ -10,7 +10,6 @@ import LoadingBar from 'react-top-loading-bar';
 const validationSchema = Yup.object({
     parent_status: Yup.string().required("Parent Status is required."),
     status_name: Yup.string().required("Status Name is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Status name can contain only alphabets and single spaces.').min(2, "Status name must contain atleast 2 characters"),
-    description: Yup.string().required("Description is required."),
 });
 
 const AddStatus = () => {
@@ -25,8 +24,8 @@ const AddStatus = () => {
 
     useEffect(() => {
         const getAuthUserData = async () => {
+            setHandlePermissionLoading(true)
             try {
-                setHandlePermissionLoading(true)
                 const { data } = await API.get("/profile");
                 setAuthUser(data?.data);
             } catch (error) {
@@ -41,8 +40,8 @@ const AddStatus = () => {
 
     useEffect(() => {
         const getStatus = async () => {
+            startLoadingBar();
             try {
-                startLoadingBar();
                 const { data } = await API.get("/status");
                 setStatus(data);
             } catch (error) {
@@ -62,17 +61,17 @@ const AddStatus = () => {
     };
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
+        startLoadingBar();
         try {
-            startLoadingBar();
             const response = await API.post("/status", values);
+            
             if (response.data.message) {
-                toast.success(response.data.message);
+                toast.success(response.data.message || "Added successfully", { id: toastId });
                 navigate('/dashboard/status');
-            } else {
-                toast.error(response.data.error);
             }
         } catch (error) {
-            toast.error(`Submission failed: ${error.message}`);
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         } finally {
             stopLoadingBar();
         }
@@ -221,11 +220,6 @@ const AddStatus = () => {
                                         onChange={formik.handleChange}
                                         onBlur={formik.handleBlur}
                                     />
-                                    {formik.touched.description && formik.errors.description ? (
-                                        <div className="text-danger">
-                                            {formik.errors.description}
-                                        </div>
-                                    ) : null}
                                     {/* <Editor
                                         apiKey={`${import.meta.env.VITE_TEXT_EDITOR_API}`}
                                         onInit={(evt, editor) => (editorRef.current = editor)}
@@ -248,8 +242,9 @@ const AddStatus = () => {
                                 </Form.Group>
                             </Col>
                         </Row>
-                        <Button type="submit" variant="primary">
-                            Add Status
+
+                        <Button type="submit" disabled={formik.isSubmitting}>
+                            {formik.isSubmitting ? "Adding..." : "Add"}
                         </Button>
                     </Form>
                 </Card.Body>

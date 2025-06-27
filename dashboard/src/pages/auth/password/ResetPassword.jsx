@@ -15,6 +15,7 @@ const validationSchema = Yup.object({
 const ResetPassword = () => {
     const navigate = useNavigate();
     const [token, setToken] = useState("");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const urlToken = new URLSearchParams(window.location.search).get("token");
@@ -31,6 +32,7 @@ const ResetPassword = () => {
     }
 
     const handleSubmit = async (values) => {
+        setLoading(true)
         try {
             values = { ...values, token: token }
             const response = await API.post("/resetpassword", values);
@@ -51,6 +53,8 @@ const ResetPassword = () => {
             } else {
                 toast.error(`Failed: ${error.message}`);
             }
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -118,26 +122,14 @@ const ResetPassword = () => {
                                 </span>
                             </div>
 
-                            {/* <div className="text-end pt-1">
-                                <Link to="/forgot-password" className="text-primary">
-                                    Forgot Password?
-                                </Link>
-                            </div> */}
-
                             <div className="container-login100-form-btn">
-                                <Button type="submit" className="login100-form-btn btn-primary">
-                                    Reset
+                                <Button type="submit" className="login100-form-btn btn-primary" disabled={loading}>
+                                    {loading
+                                        ? <span>Reseting...</span>
+                                        : <span>Reset</span>
+                                    }
                                 </Button>
                             </div>
-
-                            {/* <div className="text-center pt-3">
-                                <p className="text-dark mb-0">
-                                    Not a member?{" "}
-                                    <Link to="/register" className="text-primary">
-                                        Create an Account
-                                    </Link>
-                                </p>
-                            </div> */}
 
                         </Form>
                     </Card.Body>

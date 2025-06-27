@@ -7,6 +7,7 @@ import ALLImages from "../../../../common/Imagesdata";
 import { API } from "../../../../services/API";
 
 export default function PropertyImage() {
+    const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [property, setProperty] = useState(null);
     const [PreviewLogo, setPreviewLogo] = useState(null);
@@ -31,6 +32,7 @@ export default function PropertyImage() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const formData = new FormData();
             formData.append("logo", values.logo);
@@ -43,8 +45,7 @@ export default function PropertyImage() {
             });
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
             }
         } catch (error) {
             if (error.response) {
@@ -97,8 +98,7 @@ export default function PropertyImage() {
                                 onChange={(e) => handleFileChange(e, formik.setFieldValue, "logo", setPreviewLogo)}
                                 onBlur={formik.handleBlur}
                             />
-                            <div className="hover-effect w-32 rounded-circle">
-                                <Form.Label htmlFor="logo"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
+                            <div className="mb-3">
                                 {PreviewLogo ? (
                                     <img src={PreviewLogo} alt="Logo Preview" className="w-32 logo-ratio" />
                                 ) : property?.logo !== "image.png" ? (
@@ -107,6 +107,7 @@ export default function PropertyImage() {
                                     <img src={ALLImages('noImage')} alt="logo" className="w-32 logo-ratio" />
                                 )}
                             </div>
+                            <Form.Label htmlFor="logo" className="btn btn-primary btn-sm"><i className="fe fe-upload me-1"></i>Upload Logo</Form.Label>
                         </Form.Group>
                     </Col>
 
@@ -126,8 +127,7 @@ export default function PropertyImage() {
                                 onChange={(e) => handleFileChange(e, formik.setFieldValue, "featured_image", setPreviewFeaturedImage)}
                                 onBlur={formik.handleBlur}
                             />
-                            <div className="hover-effect rounded">
-                                <Form.Label htmlFor="featured_image" ><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
+                            <div className="mb-3">
                                 {PreviewFeaturedImage ? (
                                     <img src={PreviewFeaturedImage} alt="Featured Image Preview" className="shadow-sm banner-ratio" />
                                 ) : property?.featured_image !== "image.png" ? (
@@ -136,11 +136,14 @@ export default function PropertyImage() {
                                     <img src={ALLImages('noImage')} alt="logo" width={150} height={50} className="shadow-sm banner-ratio" />
                                 )}
                             </div>
+                            <Form.Label htmlFor="featured_image" className="btn btn-primary btn-sm"><i className="fe fe-upload me-1"></i>Upload Image</Form.Label>
                         </Form.Group>
                     </Col>
 
                 </Row>
-                <Button type="submit">Update</Button>
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Updating..." : "Update"}
+                </Button>
             </Form>
         </Fragment>
     );

@@ -26,6 +26,7 @@ export default function AddOtherBasicInformation() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const formData = new FormData();
             formData.append("propertyId", uniqueId);
@@ -47,23 +48,11 @@ export default function AddOtherBasicInformation() {
             });
 
             if (response.status === 200) {
-                toast.success(response.data.message);
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                navigate(0);
             }
-            window.location.reload();
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -220,39 +209,11 @@ export default function AddOtherBasicInformation() {
                             />
                         </Form.Group>
                     </Col>
-                    {/* Admission Process */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Admission Process</Form.Label>
-                            <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
-                                value={formik.values.admission_process}
-                                onBlur={(newContent) =>
-                                    formik.setFieldValue("admission_process", newContent)
-                                }
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* Loan Process */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Loan Process</Form.Label>
-                            <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
-                                value={formik.values.loan_process}
-                                onBlur={(newContent) =>
-                                    formik.setFieldValue("loan_process", newContent)
-                                }
-                            />
-                        </Form.Group>
-                    </Col>
 
                 </Row>
-                <Button type="submit">Add</Button>
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

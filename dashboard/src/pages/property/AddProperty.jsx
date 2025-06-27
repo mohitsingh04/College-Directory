@@ -13,8 +13,8 @@ export default function AddProperty() {
 
     useEffect(() => {
         const getAuthUserData = async () => {
+            setHandlePermissionLoading(true)
             try {
-                setHandlePermissionLoading(true)
                 const { data } = await API.get("/profile");
                 setAuthUser(data?.data);
             } catch (error) {
@@ -44,8 +44,6 @@ export default function AddProperty() {
             );
         }
     }
-
-    console.log(authUser?.role)
 
     return (
         <Fragment>

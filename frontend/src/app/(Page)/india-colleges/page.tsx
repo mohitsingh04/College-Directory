@@ -273,12 +273,12 @@ export default function IndiaColleges() {
 
 	// Fiter Course
 	useEffect(() => {
-		const filteredData = propertyCourse.filter((course) => {
-			const searchValue = searchPropertyCourse.toLowerCase();
-			const nameMatch = course.name[0]?.value
+		const filteredData = propertyCourse?.filter((course) => {
+			const searchValue = searchPropertyCourse?.toLowerCase();
+			const nameMatch = course.name?.[0]?.value
 				?.toLowerCase()
 				?.includes(searchValue);
-			const shortNameMatch = course.short_name
+			const shortNameMatch = course?.short_name
 				?.toLowerCase()
 				.includes(searchValue);
 			return nameMatch || shortNameMatch;

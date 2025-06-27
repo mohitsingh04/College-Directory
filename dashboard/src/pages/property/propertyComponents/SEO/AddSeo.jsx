@@ -8,7 +8,7 @@ import { API } from "../../../../services/API";
 import Dropdown from "react-dropdown-select";
 import JoditEditor from "jodit-react";
 
-export default function AddSeo() {
+export default function AddSeo({ setSeo, setToggleSeoPage }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [propertyData, setPropertyData] = useState("");
@@ -32,7 +32,6 @@ export default function AddSeo() {
         propertyId: uniqueId,
         title: propertyData?.property_name || "",
         slug: seo_slug || "",
-        meta_tags: "",
         primary_focus_keywords: "",
         json_schema: "",
         description: "",
@@ -46,27 +45,19 @@ export default function AddSeo() {
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post(`/seo`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                const newSeo = await API.get('/seo');
+                const filtered = newSeo.data.filter((seo) => seo.propertyId === Number(uniqueId));
+                setSeo(filtered);
+                setToggleSeoPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -133,24 +124,6 @@ export default function AddSeo() {
                             ) : null}
                         </Form.Group>
                     </Col>
-                    {/* Meta Tags */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="meta_tags">Meta Tags</Form.Label>
-                            <Dropdown
-                                options={[]}
-                                values={[]}
-                                create={true}
-                                placeholder="Meta Tags...    "
-                                searchable={true}
-                                dropdownHandle={false}
-                                multi={true}
-                                value={formik.values.meta_tags}
-                                onChange={(value) => formik.setFieldValue("meta_tags", value)}
-                                onBlur={formik.handleBlur}
-                            />
-                        </Form.Group>
-                    </Col>
                     {/* Primary focus keyword */}
                     <Col md={6}>
                         <Form.Group className="mb-3">
@@ -206,9 +179,11 @@ export default function AddSeo() {
                             />
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

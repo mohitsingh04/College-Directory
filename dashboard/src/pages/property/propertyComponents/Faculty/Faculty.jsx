@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import DataTable from "react-data-table-component";
 import DataTableExtensions from "react-data-table-component-extensions";
-import { Accordion, Card } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { API } from '../../../../services/API';
 import AddFaculty from './AddFaculty';
@@ -12,6 +12,7 @@ import ALLImages from '../../../../common/Imagesdata';
 
 export default function Faculty() {
     const [toggleFacultyPage, setToggleFacultyPage] = useState(true);
+    const [showAddFacultyForm, setShowAddFacultyForm] = useState(false);
     const { uniqueId } = useParams();
     const [faculty, setFaculty] = useState([]);
     const [facultyUniqueId, setFacultyUniqueId] = useState("");
@@ -21,6 +22,12 @@ export default function Faculty() {
             const response = await API.get(`/faculty`);
             const filteredFaculty = response.data.filter((faculty) => faculty.propertyId === Number(uniqueId));
             setFaculty(filteredFaculty);
+
+            if (filteredFaculty.length === 0) {
+                setShowAddFacultyForm(true);
+            } else {
+                setShowAddFacultyForm(false);
+            }
         } catch (error) {
             console.error('Error fetching faculty:', error);
         }
@@ -32,7 +39,8 @@ export default function Faculty() {
 
     const handleShowFacultyPage = () => {
         setToggleFacultyPage(true);
-    }
+        setFacultyUniqueId("");
+    };
 
     const handleEditFaculty = (id) => {
         setToggleFacultyPage(false);
@@ -63,18 +71,11 @@ export default function Faculty() {
 
     const columns = [
         {
-            name: 'ID',
-            selector: row => row.uniqueId,
-            sortable: true,
-        },
-        {
             name: 'Profile',
             selector: row => (
                 row.profile === "image.png"
-                    ?
-                    <img src={ALLImages('avatar')} alt="profile" width={53} className="rounded-circle" />
-                    :
-                    <img
+                    ? <img src={ALLImages('avatar')} alt="profile" width={53} className="rounded-circle" />
+                    : <img
                         src={`${import.meta.env.VITE_API_URL}${row.profile}`}
                         className='rounded-circle w-12 h-12'
                         alt="Profile"
@@ -100,21 +101,21 @@ export default function Faculty() {
         {
             name: "Action",
             selector: (row) => (
-                <button className="btn btn-sm btn-primary me-1" data-bs-toggle="tooltip" title="Edit" onClick={() => handleEditFaculty(row.uniqueId)}>
-                    <i className="fe fe-edit"></i>
-                </button>,
-                <button className="btn btn-sm btn-danger me-1" data-bs-toggle="tooltip" title="Delete" onClick={() => handleDeleteFaculty(row.uniqueId)}>
-                    <i className="fe fe-trash"></i>
-                </button>
+                <div>
+                    <button className="btn btn-sm btn-primary me-1" title="Edit" onClick={() => handleEditFaculty(row.uniqueId)}>
+                        <i className="fe fe-edit"></i>
+                    </button>
+                    <button className="btn btn-sm btn-danger me-1" title="Delete" onClick={() => handleDeleteFaculty(row.uniqueId)}>
+                        <i className="fe fe-trash"></i>
+                    </button>
+                </div>
             ),
         },
     ];
 
-    const data = faculty;
-
     const tableData = {
         columns,
-        data,
+        data: faculty,
         export: false,
         print: false
     };
@@ -125,78 +126,75 @@ export default function Faculty() {
                 <Card.Header className='flex justify-between'>
                     <div className="media-heading">
                         <h5>
-                            {faculty.length > 0
-                                ?
-                                toggleFacultyPage
-                                    ?
-                                    <strong>Faculty</strong>
-                                    :
-                                    <strong>Edit Faculty</strong>
-                                :
-                                <strong>Faculty</strong>
-                            }
+                            <strong>
+                                {faculty.length > 0
+                                    ? toggleFacultyPage
+                                        ? showAddFacultyForm
+                                            ? "Add Faculty"
+                                            : "Faculty"
+                                        : "Edit Faculty"
+                                    : "Add Faculty"}
+                            </strong>
                         </h5>
                     </div>
                     <div>
-                        {faculty.length > 0
-                            ?
-                            toggleFacultyPage ?
-                                null
-                                :
-                                <button className="btn btn-danger btn-sm" title="Close" onClick={handleShowFacultyPage}>
-                                    <i className="fe fe-x"></i>
+                        {toggleFacultyPage ? (
+                            faculty.length > 0 && (
+                                <button
+                                    className={`btn btn-${showAddFacultyForm ? 'danger' : 'primary'} btn-sm`}
+                                    onClick={() => setShowAddFacultyForm(!showAddFacultyForm)}
+                                >
+                                    {showAddFacultyForm ? (
+                                        <i className="fe fe-x"></i>
+                                    ) : (
+                                        <>
+                                            <i className="fe fe-plus"></i> Add Faculty
+                                        </>
+                                    )}
                                 </button>
-                            :
-                            null
-                        }
+                            )
+                        ) : (
+                            <button className="btn btn-danger btn-sm" title="Cancel" onClick={handleShowFacultyPage}>
+                                <i className="fe fe-x"></i>
+                            </button>
+                        )}
                     </div>
                 </Card.Header>
-                <Card.Body>
-                    {toggleFacultyPage
-                        ?
-                        <>
-                            {faculty.length > 0 ? (
-                                <DataTableExtensions {...tableData}>
-                                    <DataTable
-                                        noHeader
-                                        defaultSortFieldId="id"
-                                        defaultSortAsc={false}
-                                        pagination
-                                        highlightOnHover
-                                    />
-                                </DataTableExtensions>
-                            ) : (
-                                <p>No Faculty Found</p>
-                            )}
 
-                        </>
-                        :
-                        <>
-                            <EditFaculty facultyUniqueId={facultyUniqueId} />
-                        </>
-                    }
+                <Card.Body>
+                    {toggleFacultyPage ? (
+                        showAddFacultyForm ? (
+                            <AddFaculty
+                                onFacultyAdded={() => {
+                                    fetchFaculty();
+                                    setShowAddFacultyForm(false);
+                                }}
+                            />
+                        ) : faculty.length > 0 ? (
+                            <DataTableExtensions {...tableData}>
+                                <DataTable
+                                    noHeader
+                                    defaultSortFieldId="id"
+                                    defaultSortAsc={false}
+                                    pagination
+                                    highlightOnHover
+                                />
+                            </DataTableExtensions>
+                        ) : (
+                            <p>No Faculty Found</p>
+                        )
+                    ) : (
+                        <EditFaculty
+                            facultyUniqueId={facultyUniqueId}
+                            onFacultyUpdated={() => {
+                                fetchFaculty();
+                                setToggleFacultyPage(true);
+                                setFacultyUniqueId("");
+                            }}
+                        />
+                    )}
                 </Card.Body>
             </Card>
-
-            {toggleFacultyPage
-                ?
-                <>
-                    <Card>
-                        <Card.Header>
-                            <div className="media-heading">
-                                <h5>
-                                    <strong>Add Faculty</strong>
-                                </h5>
-                            </div>
-                        </Card.Header>
-                        <Card.Body>
-                            <AddFaculty />
-                        </Card.Body>
-                    </Card>
-                </>
-                :
-                null
-            }
         </Fragment>
     );
 }

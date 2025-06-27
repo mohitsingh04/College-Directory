@@ -11,27 +11,67 @@ import Skeleton from "react-loading-skeleton";
 import LoadingBar from 'react-top-loading-bar';
 import PhoneInput from "react-phone-input-2";
 
+const validationSchema = Yup.object({
+    name: Yup.string()
+        .required("Name is required.")
+        .matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Name can contain only alphabets and single spaces.')
+        .min(2, "Name must contain atleast 2 characters"),
+    email: Yup.string()
+        .email("Invalid email")
+        .required("Email is required"),
+    phone: Yup.string()
+        .required("Phone number is required"),
+    pincode: Yup.string()
+        .required("Pincode is required"),
+    address: Yup.string()
+        .required("Address is required"),
+    city: Yup.string()
+        .required("City is required"),
+    state: Yup.string()
+        .required("State is required"),
+});
+
 export default function EditProfile() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [previewProfile, setPreviewProfile] = useState(null);
-    const [states, setStates] = useState([]);
-    const [city, setCity] = useState([]);
     const loadingBarRef = useRef(null);
+    const [countries, setCountries] = useState([]);
+    const [states, setStates] = useState([]);
+    const [cities, setCities] = useState([]);
 
     const startLoadingBar = () => loadingBarRef.current?.continuousStart();
     const stopLoadingBar = () => loadingBarRef.current?.complete();
 
     useEffect(() => {
         const fetchData = async () => {
+            startLoadingBar();
             try {
-                startLoadingBar();
-                const [userResponse, statesResponse] = await Promise.all([
-                    API.get("/profile"),
+                const [countryRes, stateRes, cityRes] = await Promise.all([
+                    API.get("/fetch-country"),
                     API.get("/fetch-states"),
+                    API.get("/fetch-city")
+                ]);
+                setCountries(countryRes?.data);
+                setStates(stateRes?.data);
+                setCities(cityRes?.data);
+            } catch (error) {
+                toast.error(error.message);
+            } finally {
+                stopLoadingBar();
+            }
+        };
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            startLoadingBar();
+            try {
+                const [userResponse] = await Promise.all([
+                    API.get("/profile"),
                 ]);
                 setUser(userResponse?.data?.data);
-                setStates(statesResponse?.data);
             } catch (error) {
                 toast.error(error.message);
             } finally {
@@ -51,18 +91,9 @@ export default function EditProfile() {
         address: user?.address || "",
         city: user?.city || "",
         state: user?.state || "",
+        country: user?.country || "",
         profile_image: user?.profile_image || "",
     }
-
-    const validationSchema = Yup.object({
-        name: Yup.string().required("Name is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Name can contain only alphabets and single spaces.').min(2, "Name must contain atleast 2 characters"),
-        email: Yup.string().email("Invalid email").required("Email is required"),
-        phone: Yup.string().required("Phone number is required"),
-        pincode: Yup.string().required("Pincode is required").matches(/^[1-9][0-9]{5}$/, 'Pincode must be a 6-digit number starting with 1-9'),
-        address: Yup.string().required("Address is required"),
-        city: Yup.string().required("City is required"),
-        state: Yup.string().required("State is required"),
-    });
 
     const handleSubmit = async (values) => {
         const formData = new FormData();
@@ -73,10 +104,12 @@ export default function EditProfile() {
         formData.append("address", values.address);
         formData.append("city", values.city);
         formData.append("state", values.state);
+        formData.append("country", values.country);
         formData.append("profile_image", values.profile_image);
 
+        startLoadingBar();
+        const toastId = toast.loading("Updating...");
         try {
-            startLoadingBar();
             const response = await API.put(`/profile`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -84,21 +117,11 @@ export default function EditProfile() {
             });
 
             if (response.status === 200) {
-                toast.success(response.data.message);
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
                 navigate('/dashboard/profile');
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Registration failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         } finally {
             stopLoadingBar();
         }
@@ -121,22 +144,8 @@ export default function EditProfile() {
         document.title = "AJ | Edit Profile";
     }, []);
 
-    const fetchCitiesByState = async (state_name) => {
-        if (!state_name) {
-            setCity([]);
-            return;
-        }
-        try {
-            const response = await API.get(`/fetch-city`);
-            setCity(response?.data.filter((items) => items.state_name === state_name));
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
-
-    useEffect(() => {
-        fetchCitiesByState(formik.values.state);
-    }, [formik.values.state]);
+    const filteredStates = states.filter((item) => item.country_name === formik.values.country);
+    const filteredCities = cities.filter((item) => item.state_name === formik.values.state);
 
     return (
         <Fragment>
@@ -188,6 +197,7 @@ export default function EditProfile() {
                                 <Card.Body>
                                     <Form onSubmit={formik.handleSubmit} encType="multipart/form-data">
                                         <Row>
+                                            {/* Profile Image */}
                                             <Col className="mb-4" xl={12} md={12} sm={12}>
                                                 <Row>
                                                     <Col xl={3} md={12} sm={12}>
@@ -200,18 +210,26 @@ export default function EditProfile() {
                                                     </Col>
                                                     <Col xl={9} md={12} sm={12}>
                                                         <Form.Group className="mb-3">
+                                                            {/* Hidden file input */}
                                                             <Form.Control
                                                                 type="file"
-                                                                className={`form-control`}
+                                                                id="profile_image"
                                                                 name="profile_image"
                                                                 accept="image/jpeg, image/png"
+                                                                hidden
                                                                 onChange={(e) => handleFileChange(e, formik.setFieldValue, "profile_image", setPreviewProfile)}
                                                                 onBlur={formik.handleBlur}
                                                             />
+
+                                                            {/* Label as button */}
+                                                            <Form.Label htmlFor="profile_image" className="btn btn-primary btn-sm">
+                                                                <i className="fe fe-upload me-1"></i>Upload Profile
+                                                            </Form.Label>
                                                         </Form.Group>
                                                     </Col>
                                                 </Row>
                                             </Col>
+                                            {/* Name */}
                                             <Col xl={12} md={12} sm={12}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="userName">Name</Form.Label>
@@ -228,6 +246,7 @@ export default function EditProfile() {
                                                     {formik.errors.name && formik.touched.name ? <div className="text-danger">{formik.errors.name}</div> : null}
                                                 </Form.Group>
                                             </Col>
+                                            {/* Email */}
                                             <Col xl={12} md={12} sm={12}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="exampleInputEmail1">Email</Form.Label>
@@ -245,6 +264,7 @@ export default function EditProfile() {
                                                     {formik.errors.email && formik.touched.email ? <div className="text-danger">{formik.errors.email}</div> : null}
                                                 </Form.Group>
                                             </Col>
+                                            {/* Phone */}
                                             <Col xl={12} md={12} sm={12}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="exampleInputnumber">Phone</Form.Label>
@@ -261,7 +281,8 @@ export default function EditProfile() {
                                                     {formik.errors.phone && formik.touched.phone ? <div className="text-danger">{formik.errors.phone}</div> : null}
                                                 </Form.Group>
                                             </Col>
-                                            <Col xl={8} md={12} sm={12}>
+                                            {/* Address */}
+                                            <Col xl={12} md={12} sm={12}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="exampleInputaddress">Address</Form.Label>
                                                     <Form.Control
@@ -277,7 +298,8 @@ export default function EditProfile() {
                                                     {formik.errors.address && formik.touched.address ? <div className="text-danger">{formik.errors.address}</div> : null}
                                                 </Form.Group>
                                             </Col>
-                                            <Col xl={4} md={12} sm={12}>
+                                            {/* Pincode */}
+                                            <Col xl={6} md={6} sm={12}>
                                                 <Form.Group className="mb-3">
                                                     <Form.Label htmlFor="exampleInputpincode">Pincode</Form.Label>
                                                     <Form.Control
@@ -293,26 +315,57 @@ export default function EditProfile() {
                                                     {formik.errors.pincode && formik.touched.pincode ? <div className="text-danger">{formik.errors.pincode}</div> : null}
                                                 </Form.Group>
                                             </Col>
-                                            <Col xl={6} md={12} sm={12}>
+                                            {/* Coutries */}
+                                            <Col md={6}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label htmlFor="exampleInputState">State</Form.Label>
+                                                    <Form.Label>Country</Form.Label>
+                                                    <Form.Select
+                                                        name="country"
+                                                        value={formik.values.country}
+                                                        onChange={(e) => {
+                                                            formik.setFieldValue("country", e.target.value);
+                                                            formik.setFieldValue("state", "");
+                                                            formik.setFieldValue("city", "");
+                                                        }}
+                                                        onBlur={formik.handleBlur}
+                                                    >
+                                                        <option value="">Select Country</option>
+                                                        {countries.map((item) => (
+                                                            <option key={item.id} value={item.country_name}>{item.country_name}</option>
+                                                        ))}
+                                                    </Form.Select>
+                                                    {formik.touched.country && formik.errors.country && (
+                                                        <div className="text-danger">{formik.errors.country}</div>
+                                                    )}
+                                                </Form.Group>
+                                            </Col>
+                                            {/* States */}
+                                            <Col md={6}>
+                                                <Form.Group className="mb-3">
+                                                    <Form.Label>State</Form.Label>
                                                     <Form.Select
                                                         name="state"
                                                         value={formik.values.state}
-                                                        onChange={formik.handleChange}
+                                                        onChange={(e) => {
+                                                            formik.setFieldValue("state", e.target.value);
+                                                            formik.setFieldValue("city", "");
+                                                        }}
                                                         onBlur={formik.handleBlur}
                                                     >
                                                         <option value="">Select State</option>
-                                                        {states.map((items) => (
-                                                            <option key={items.id} value={items.name}>{items.name}</option>
+                                                        {filteredStates.map((item) => (
+                                                            <option key={item.id} value={item.name}>{item.name}</option>
                                                         ))}
                                                     </Form.Select>
-                                                    {formik.errors.state && formik.touched.state ? <div className="text-danger">{formik.errors.state}</div> : null}
+                                                    {formik.touched.state && formik.errors.state && (
+                                                        <div className="text-danger">{formik.errors.state}</div>
+                                                    )}
                                                 </Form.Group>
                                             </Col>
-                                            <Col xl={6} md={12} sm={12}>
+                                            {/* Cities */}
+                                            <Col md={6}>
                                                 <Form.Group className="mb-3">
-                                                    <Form.Label htmlFor="exampleInputcity">City</Form.Label>
+                                                    <Form.Label>City</Form.Label>
                                                     <Form.Select
                                                         name="city"
                                                         value={formik.values.city}
@@ -320,17 +373,21 @@ export default function EditProfile() {
                                                         onBlur={formik.handleBlur}
                                                     >
                                                         <option value="">Select City</option>
-                                                        {city.map((items) => (
-                                                            <option key={items.id} value={items.name}>{items.name}</option>
+                                                        {filteredCities.map((item) => (
+                                                            <option key={item.id} value={item.name}>{item.name}</option>
                                                         ))}
                                                     </Form.Select>
-                                                    {formik.errors.city && formik.touched.city ? <div className="text-danger">{formik.errors.city}</div> : null}
+                                                    {formik.touched.city && formik.errors.city && (
+                                                        <div className="text-danger">{formik.errors.city}</div>
+                                                    )}
                                                 </Form.Group>
                                             </Col>
                                         </Row>
                                         <hr />
                                         <div className="text-end">
-                                            <Button type="submit">Update</Button>
+                                            <Button type="submit" disabled={formik.isSubmitting}>
+                                                {formik.isSubmitting ? "Updating..." : "Update"}
+                                            </Button>
                                         </div>
                                     </Form>
                                 </Card.Body>

@@ -1,5 +1,4 @@
 import express from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
 import { addScholarship, getScholarship, updateScholarship } from "../controller/ScholarshipController.js";
 
 const scholarshipRouter = express.Router();

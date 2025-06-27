@@ -17,9 +17,6 @@ const SeoSchema = new mongoose.Schema({
     slug: {
         type: String,
     },  
-    meta_tags: {
-        type: Array,
-    },
     primary_focus_keywords: {
         type: Array,
     },

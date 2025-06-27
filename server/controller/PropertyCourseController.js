@@ -28,34 +28,13 @@ export const getPropertyCourseById = async (req, res) => {
 
 export const addPropertyCourse = async (req, res) => {
     try {
-        const {
-            propertyId,
-            name,
-            short_name,
-            specialization,
-            description,
-            course_fees,
-            eligibility,
-            duration,
-            program_type,
-            course_type,
-            category,
-            sub_category,
-            stream
-        } = req.body;
+        const { propertyId, course_id, course_fees } = req.body;
 
-        let transformedName = [];
-        if (Array.isArray(name)) {
-            transformedName = name.map(item => ({
-                label: item,
-                value: item
-            }));
-        } else if (typeof name === 'string') {
-            transformedName = [{ label: name, value: name }];
+        if (!course_id) {
+            return res.status(404).json({ error: "Please select a course." });
         }
 
-        // const propertyCourse = await PropertyCourse.findOne({ propertyId, "name.value": transformedName[0].value, specialization });
-        const propertyCourse = await PropertyCourse.findOne({ propertyId, "name.value": typeof name === 'string' ? transformedName[0].value : name[0].value, specialization });
+        const propertyCourse = await PropertyCourse.findOne({ propertyId, course_id });
         if (propertyCourse) {
             return res.status(400).json({ error: "Course already exists" });
         }
@@ -71,40 +50,100 @@ export const addPropertyCourse = async (req, res) => {
 
         const userUniqueId = user.uniqueId;
 
-        if (Array.isArray(name)) {
-            transformedName = name.map(item => ({
-                label: item,
-                value: item
-            }));
-        } else if (typeof name === 'string') {
-            transformedName = [{ label: name, value: name }];
-        }
-
         const newPropertyCourse = new PropertyCourse({
             uniqueId: x,
             userId: userUniqueId,
             propertyId,
-            name: typeof name === 'string' ? transformedName : name,
-            short_name,
-            eligibility,
-            duration,
+            course_id,
             course_fees,
-            specialization,
-            course_type,
-            program_type,
-            category,
-            sub_category,
-            stream,
-            description
         });
 
         const savedPropertyCourse = await newPropertyCourse.save();
-        return res.status(200).json({ message: "Added successfully.", savedPropertyCourse });
+        return res.status(200).json({ message: "Course added successfully.", savedPropertyCourse });
     } catch (error) {
-        console.log(error.message);
         return res.status(500).send("Internal server error.");
     }
 };
+
+// export const addPropertyCourse = async (req, res) => {
+//     try {
+//         const {
+//             propertyId,
+//             name,
+//             short_name,
+//             specialization,
+//             description,
+//             course_fees,
+//             eligibility,
+//             duration,
+//             program_type,
+//             course_type,
+//             category,
+//             sub_category,
+//             stream
+//         } = req.body;
+
+//         let transformedName = [];
+//         if (Array.isArray(name)) {
+//             transformedName = name.map(item => ({
+//                 label: item,
+//                 value: item
+//             }));
+//         } else if (typeof name === 'string') {
+//             transformedName = [{ label: name, value: name }];
+//         }
+
+//         // const propertyCourse = await PropertyCourse.findOne({ propertyId, "name.value": transformedName[0].value, specialization });
+//         const propertyCourse = await PropertyCourse.findOne({ propertyId, "name.value": typeof name === 'string' ? transformedName[0].value : name[0].value, specialization });
+//         if (propertyCourse) {
+//             return res.status(400).json({ error: "Course already exists" });
+//         }
+
+//         const lastPropertyCourse = await PropertyCourse.findOne().sort({ _id: -1 }).limit(1);
+//         const x = lastPropertyCourse ? lastPropertyCourse.uniqueId + 1 : 1;
+
+//         const userId = await getDataFromToken(req);
+//         const user = await User.findOne({ _id: userId }).select("-password");
+//         if (!user) {
+//             return res.status(404).json({ error: "User not found" });
+//         }
+
+//         const userUniqueId = user.uniqueId;
+
+//         if (Array.isArray(name)) {
+//             transformedName = name.map(item => ({
+//                 label: item,
+//                 value: item
+//             }));
+//         } else if (typeof name === 'string') {
+//             transformedName = [{ label: name, value: name }];
+//         }
+
+//         const newPropertyCourse = new PropertyCourse({
+//             uniqueId: x,
+//             userId: userUniqueId,
+//             propertyId,
+//             name: typeof name === 'string' ? transformedName : name,
+//             short_name,
+//             eligibility,
+//             duration,
+//             course_fees,
+//             specialization,
+//             course_type,
+//             program_type,
+//             category,
+//             sub_category,
+//             stream,
+//             description
+//         });
+
+//         const savedPropertyCourse = await newPropertyCourse.save();
+//         return res.status(200).json({ message: "Added successfully.", savedPropertyCourse });
+//     } catch (error) {
+//         console.log(error.message);
+//         return res.status(500).send("Internal server error.");
+//     }
+// };
 
 export const updatePropertyCourse = async (req, res) => {
     try {

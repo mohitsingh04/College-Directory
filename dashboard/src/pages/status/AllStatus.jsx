@@ -37,9 +37,9 @@ export default function AllStatus() {
     }, []);
 
     const getStatus = useCallback(async () => {
+        startLoadingBar();
+        setLoading(true);
         try {
-            startLoadingBar();
-            setLoading(true);
             const response = await API.get("/status");
             setStatus(response.data);
         } catch (error) {

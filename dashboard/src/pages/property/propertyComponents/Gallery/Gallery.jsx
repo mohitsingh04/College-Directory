@@ -15,7 +15,6 @@ import Skeleton from "react-loading-skeleton";
 
 export default function Gallery() {
     const { uniqueId } = useParams();
-
     const [gallery, setGallery] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState("list"); // list | add | edit
@@ -70,7 +69,7 @@ export default function Gallery() {
     };
 
     const openLightboxHandler = (images) => {
-        setLightboxImages(images.map(img => ({ src: `${import.meta.env.VITE_API_URL}${img}` })));
+        setLightboxImages(images.map((img) => ({ src: `${import.meta.env.VITE_API_URL}${img}` })));
         setOpenLightbox(true);
     };
 
@@ -80,44 +79,26 @@ export default function Gallery() {
                 <Skeleton height={500} />
             ) : (
                 <>
-                    {/* Gallery List */}
                     {viewMode === "list" && (
                         <>
                             <div className="flex justify-end mb-3">
-                                <button
-                                    className="btn btn-success"
-                                    onClick={() => setViewMode("add")}
-                                >
+                                <button className="btn btn-success" onClick={() => setViewMode("add")}>
                                     <i className="fe fe-plus me-1"></i> Add Gallery
                                 </button>
                             </div>
 
                             {gallery.length === 0 ? (
-                                <Card>
-                                    <Card.Body>
-                                        <p>No gallery found.</p>
-                                    </Card.Body>
-                                </Card>
+                                <Card><Card.Body><p>No gallery found.</p></Card.Body></Card>
                             ) : (
                                 gallery.map((item) => (
                                     <Card key={item.uniqueId}>
                                         <Card.Header className="flex justify-between">
-                                            <div className="media-heading">
-                                                <h5>{item.title}</h5>
-                                            </div>
+                                            <div className="media-heading"><h5>{item.title}</h5></div>
                                             <div>
-                                                <button
-                                                    className="btn btn-primary btn-sm me-1"
-                                                    title="Edit"
-                                                    onClick={() => handleEditGallery(item.uniqueId)}
-                                                >
+                                                <button className="btn btn-primary btn-sm me-1" title="Edit" onClick={() => handleEditGallery(item.uniqueId)}>
                                                     <i className="fe fe-edit"></i>
                                                 </button>
-                                                <button
-                                                    className="btn btn-danger btn-sm"
-                                                    title="Delete"
-                                                    onClick={() => handleDeleteGallery(item.uniqueId)}
-                                                >
+                                                <button className="btn btn-danger btn-sm" title="Delete" onClick={() => handleDeleteGallery(item.uniqueId)}>
                                                     <i className="fe fe-trash"></i>
                                                 </button>
                                             </div>
@@ -125,17 +106,9 @@ export default function Gallery() {
                                         <Card.Body>
                                             <Row className="img-gallery">
                                                 {item.gallery.map((image, index) => (
-                                                    <Col key={index} lg={3} md={4} sm={6} xs={12}>
-                                                        <Link
-                                                            to="#"
-                                                            onClick={() => openLightboxHandler(item.gallery)}
-                                                            className="glightbox card w-32"
-                                                        >
-                                                            <img
-                                                                src={`${import.meta.env.VITE_API_URL}${image}`}
-                                                                alt={`image-${index + 1}`}
-                                                                className="img-fluid"
-                                                            />
+                                                    <Col key={index} md={3}>
+                                                        <Link to="#" onClick={() => openLightboxHandler(item.gallery)} className="glightbox card w-32">
+                                                            <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={`image-${index + 1}`} className="img-fluid" />
                                                         </Link>
                                                     </Col>
                                                 ))}
@@ -147,16 +120,11 @@ export default function Gallery() {
                         </>
                     )}
 
-                    {/* Add Gallery Form */}
                     {viewMode === "add" && (
                         <Card>
                             <Card.Header className="flex justify-between">
                                 <h5><strong>Add Gallery</strong></h5>
-                                <button
-                                    className="btn btn-danger btn-sm"
-                                    title="Close"
-                                    onClick={() => setViewMode("list")}
-                                >
+                                <button className="btn btn-danger btn-sm" onClick={() => setViewMode("list")}>
                                     <i className="fe fe-x"></i>
                                 </button>
                             </Card.Header>
@@ -171,16 +139,11 @@ export default function Gallery() {
                         </Card>
                     )}
 
-                    {/* Edit Gallery Form */}
                     {viewMode === "edit" && (
                         <Card>
                             <Card.Header className="flex justify-between">
                                 <h5><strong>Edit Gallery</strong></h5>
-                                <button
-                                    className="btn btn-danger btn-sm"
-                                    title="Close"
-                                    onClick={() => setViewMode("list")}
-                                >
+                                <button className="btn btn-danger btn-sm" onClick={() => setViewMode("list")}>
                                     <i className="fe fe-x"></i>
                                 </button>
                             </Card.Header>
@@ -196,14 +159,13 @@ export default function Gallery() {
                         </Card>
                     )}
 
-                    {/* Lightbox */}
                     {openLightbox && (
                         <Lightbox
                             open={openLightbox}
                             close={() => setOpenLightbox(false)}
                             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
-                            zoom={{ maxZoomPixelRatio: 10, scrollToZoom: true }}
                             slides={lightboxImages}
+                            zoom={{ maxZoomPixelRatio: 10, scrollToZoom: true }}
                         />
                     )}
                 </>

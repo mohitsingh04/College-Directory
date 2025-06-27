@@ -13,12 +13,11 @@ const validationSchema = Yup.object({
   name: Yup.string().required("Name is required.").matches(/^(?!.*\s{2})[A-Za-z\s]+$/, 'Name can contain only alphabets and single spaces.').min(2, "Name must contain atleast 2 characters"),
   email: Yup.string().required("Email is required."),
   phone: Yup.string().required("Phone Number is required."),
+  role: Yup.string().required("Role is required."),
 });
 
 const AddUser = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [authUser, setAuthUser] = useState(null);
   const loadingBarRef = useRef(null);
   const [role, setRole] = useState([]);
@@ -57,8 +56,8 @@ const AddUser = () => {
 
   useEffect(() => {
     const getAuthUserData = async () => {
+      setHandlePermissionLoading(true)
       try {
-        setHandlePermissionLoading(true)
         const { data } = await API.get("/profile");
         setAuthUser(data?.data);
       } catch (error) {
@@ -80,33 +79,29 @@ const AddUser = () => {
   };
 
   const handleSubmit = async (values) => {
+    const toastId = toast.loading("Updating...");
+    startLoadingBar();
+
     try {
-      startLoadingBar();
-      setLoading(true)
+      if (!values.permission || values.permission.length === 0) {
+        toast.error("Please select at least one permission.", { id: toastId });
+        stopLoadingBar();
+        return;
+      }
+
       const response = await API.post("/user", values);
 
       if (response.status === 200) {
-        toast.success(response.data.message);
+        toast.success(response.data.message || "Added successfully", { id: toastId });
         navigate('/dashboard/users');
       }
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 400) {
-          toast.error(error.response.data.error || "Bad Request");
-          setError(error.response.data.error);
-        } else if (error.response.status === 500) {
-          toast.error("Internal server error, please try again later.");
-        } else {
-          toast.error("Something went wrong, please try again.");
-        }
-      } else {
-        toast.error(`Registration failed: ${error.message}`);
-      }
+      toast.error(error.response?.data?.error || "Failed", { id: toastId });
     } finally {
       stopLoadingBar();
-      setLoading(false);
     }
   };
+
 
   const formik = useFormik({
     initialValues,
@@ -289,6 +284,11 @@ const AddUser = () => {
                       <option key={item.uniqueId} value={item.name}>{item.name}</option>
                     ))}
                   </select>
+                  {formik.touched.role && formik.errors.role ? (
+                    <div className="text-danger">
+                      {formik.errors.role}
+                    </div>
+                  ) : null}
                 </Form.Group>
               </Col>
               {/* Permission */}
@@ -301,7 +301,7 @@ const AddUser = () => {
                     multi={true}
                     values={formik.values.permission}
                     onChange={(value) => formik.setFieldValue("permission", value)}
-                    placeholder="Choose Permissions"
+                    placeholder="Choose Permissions...    "
                     labelField="label"
                     valueField="value"
                   />
@@ -315,12 +315,9 @@ const AddUser = () => {
                 </Form.Group>
               </Col>
             </Row>
-            {error ? <div className="alert alert-danger text-center">{error}</div> : null}
-            <Button type="submit" variant="primary">
-              {loading
-                ? <span>Add User</span>
-                : <span>Adding User...</span>
-              }
+
+            <Button type="submit" disabled={formik.isSubmitting}>
+              {formik.isSubmitting ? "Adding..." : "Add"}
             </Button>
           </Form>
         </Card.Body>

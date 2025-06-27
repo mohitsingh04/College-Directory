@@ -11,42 +11,11 @@ const PropertyCourseSchema = new mongoose.Schema({
     propertyId: {
         type: Number
     },
-    name: {
-        type: Array,
-        required: [true, "Please provide a course name."]
-    },
-    short_name: {
-        type: String,
-        required: [true, "Please provide a short name."]
-    },
-    eligibility: {
-        type: String,
-    },
-    duration: {
-        type: String,
-    },
-    course_type: {
-        type: Array,
-    },
-    program_type: {
-        type: String,
-    },
-    specialization: {
-        type: String,
-    },
-    category: {
-        type: Array,
-    },
-    sub_category: {
-        type: Array,
-    },
-    stream: {
-        type: Array,
+    course_id: {
+        type: Number,
+        ref:"Course"
     },
     course_fees: {
-        type: String,
-    },
-    description: {
         type: String,
     },
     createdAt: {

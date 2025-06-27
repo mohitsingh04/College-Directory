@@ -14,7 +14,7 @@ const validationSchema = Yup.object({
   email: Yup.string().required("Email is required."),
   phone: Yup.string().required("Phone Number is required."),
   address: Yup.string().min(2, "Address must contain atleast 2 characters"),
-  pincode: Yup.string().matches(/^[1-9][0-9]{5}$/, 'Pincode must be a 6-digit number starting with 1-9')
+  pincode: Yup.string().required("Pincode is required."),
 });
 
 const EditUser = () => {
@@ -26,8 +26,9 @@ const EditUser = () => {
   const [authUser, setAuthUser] = useState(null);
   const loadingBarRef = useRef(null);
   const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
+  const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
-  const [city, setCity] = useState([]);
+  const [cities, setCities] = useState([]);
   const [status, setStatus] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
@@ -35,9 +36,30 @@ const EditUser = () => {
   const stopLoadingBar = () => loadingBarRef.current?.complete();
 
   useEffect(() => {
-    const getAuthUserData = async () => {
+    const fetchData = async () => {
+      startLoadingBar();
       try {
-        setHandlePermissionLoading(true)
+        const [countryRes, stateRes, cityRes] = await Promise.all([
+          API.get("/fetch-country"),
+          API.get("/fetch-states"),
+          API.get("/fetch-city")
+        ]);
+        setCountries(countryRes?.data);
+        setStates(stateRes?.data);
+        setCities(cityRes?.data);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        stopLoadingBar();
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const getAuthUserData = async () => {
+      setHandlePermissionLoading(true)
+      try {
         const { data } = await API.get("/profile");
         setAuthUser(data?.data);
       } catch (error) {
@@ -47,21 +69,9 @@ const EditUser = () => {
       }
     }
 
-    const getStatesData = async () => {
-      try {
-        startLoadingBar();
-        const response = await API.get("/fetch-states");
-        setStates(response?.data);
-      } catch (error) {
-        toast.error(error.message);
-      } finally {
-        stopLoadingBar();
-      }
-    }
-
     const getStatusData = async () => {
+      startLoadingBar();
       try {
-        startLoadingBar();
         const response = await API.get("/status");
         const filteredStatus = response?.data.filter((item) => item.parent_status === "User");
         setStatus(filteredStatus);
@@ -73,14 +83,13 @@ const EditUser = () => {
     }
 
     getAuthUserData();
-    getStatesData();
     getStatusData();
   }, []);
 
   useEffect(() => {
     const fetchAllData = async () => {
+      startLoadingBar();
       try {
-        startLoadingBar();
         const [userData, roles, permissionsRes] = await Promise.all([
           API.get(`/user/${objectId}`),
           API.get("/roles"),
@@ -113,33 +122,29 @@ const EditUser = () => {
     pincode: user?.pincode || "",
     city: user?.city || "",
     state: user?.state || "",
+    country: user?.country || "",
     role: user?.role || "",
     permission: user?.permission || [],
     status: user?.status || "",
   };
 
   const handleSubmit = async (values) => {
+    const toastId = toast.loading("Updating...");
+    startLoadingBar();
     try {
-      startLoadingBar();
+      if (!values.permission || values.permission.length === 0) {
+        toast.error("Please select at least one permission.", { id: toastId });
+        stopLoadingBar();
+        return;
+      }
+
       const response = await API.put(`/user/${objectId}`, values);
-      if (response.data.message) {
-        toast.success(response.data.message);
+      if (response.status === 200) {
+        toast.success(response.data.message || "Updated successfully", { id: toastId });
         navigate('/dashboard/users');
-      } else {
-        toast.error(response.data.error);
       }
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 400) {
-          toast.error(error.response.data.error || "Bad Request");
-        } else if (error.response.status === 500) {
-          toast.error("Internal server error, please try again later.");
-        } else {
-          toast.error("Something went wrong, please try again.");
-        }
-      } else {
-        toast.error(`Submission failed: ${error.message}`);
-      }
+      toast.error(error.response?.data?.error || "Update failed", { id: toastId });
     } finally {
       stopLoadingBar();
     }
@@ -178,23 +183,6 @@ const EditUser = () => {
     }
   }
 
-  const fetchCitiesByState = async (state_name) => {
-    if (!state_name) {
-      setCity([]);
-      return;
-    }
-    try {
-      const response = await API.get(`/fetch-city`);
-      setCity(response?.data.filter((items) => items.state_name === state_name));
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchCitiesByState(formik.values.state);
-  }, [formik.values.state]);
-
   const handleSelectAllChange = (e) => {
     const checked = e.target.checked;
     setSelectAll(checked);
@@ -212,6 +200,9 @@ const EditUser = () => {
       setSelectAll(false);
     }
   }, [formik.values.permission, permissionData]);
+
+  const filteredStates = states.filter((item) => item.country_name === formik.values.country);
+  const filteredCities = cities.filter((item) => item.state_name === formik.values.state);
 
   return (
     <Fragment>
@@ -283,7 +274,7 @@ const EditUser = () => {
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    disabled
+                  // disabled
                   />
                   {formik.touched.email && formik.errors.email ? (
                     <div className="text-danger">
@@ -304,7 +295,7 @@ const EditUser = () => {
                     buttonClass={`bg-white border ${formik.touched.phone && formik.errors.phone ? "border-danger" : ""}`}
                     onChange={(value) => formik.setFieldValue("phone", value)}
                     onBlur={formik.handleBlur("phone")}
-                    disabled
+                  // disabled
                   />
                   {formik.touched.phone && formik.errors.phone ? (
                     <div className="text-danger">
@@ -314,7 +305,7 @@ const EditUser = () => {
                 </Form.Group>
               </Col>
               {/* Address */}
-              <Col md={6}>
+              <Col md={12}>
                 <Form.Group className="mb-3">
                   <Form.Label htmlFor="userAddress">Address</Form.Label>
                   <Form.Control
@@ -361,28 +352,57 @@ const EditUser = () => {
                   ) : null}
                 </Form.Group>
               </Col>
-              {/* State */}
+              {/* Coutries */}
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label htmlFor="exampleInputState">State</Form.Label>
+                  <Form.Label>Country</Form.Label>
+                  <Form.Select
+                    name="country"
+                    value={formik.values.country}
+                    onChange={(e) => {
+                      formik.setFieldValue("country", e.target.value);
+                      formik.setFieldValue("state", "");
+                      formik.setFieldValue("city", "");
+                    }}
+                    onBlur={formik.handleBlur}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((item) => (
+                      <option key={item.id} value={item.country_name}>{item.country_name}</option>
+                    ))}
+                  </Form.Select>
+                  {formik.touched.country && formik.errors.country && (
+                    <div className="text-danger">{formik.errors.country}</div>
+                  )}
+                </Form.Group>
+              </Col>
+              {/* States */}
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>State</Form.Label>
                   <Form.Select
                     name="state"
                     value={formik.values.state}
-                    onChange={formik.handleChange}
+                    onChange={(e) => {
+                      formik.setFieldValue("state", e.target.value);
+                      formik.setFieldValue("city", "");
+                    }}
                     onBlur={formik.handleBlur}
                   >
                     <option value="">Select State</option>
-                    {states.map((items) => (
-                      <option key={items.id} value={items.name}>{items.name}</option>
+                    {filteredStates.map((item) => (
+                      <option key={item.id} value={item.name}>{item.name}</option>
                     ))}
                   </Form.Select>
-                  {formik.errors.state && formik.touched.state ? <div className="text-danger">{formik.errors.state}</div> : null}
+                  {formik.touched.state && formik.errors.state && (
+                    <div className="text-danger">{formik.errors.state}</div>
+                  )}
                 </Form.Group>
               </Col>
-              {/* City */}
+              {/* Cities */}
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label htmlFor="exampleInputcity">City</Form.Label>
+                  <Form.Label>City</Form.Label>
                   <Form.Select
                     name="city"
                     value={formik.values.city}
@@ -390,11 +410,13 @@ const EditUser = () => {
                     onBlur={formik.handleBlur}
                   >
                     <option value="">Select City</option>
-                    {city.map((items) => (
-                      <option key={items.id} value={items.name}>{items.name}</option>
+                    {filteredCities.map((item) => (
+                      <option key={item.id} value={item.name}>{item.name}</option>
                     ))}
                   </Form.Select>
-                  {formik.errors.city && formik.touched.city ? <div className="text-danger">{formik.errors.city}</div> : null}
+                  {formik.touched.city && formik.errors.city && (
+                    <div className="text-danger">{formik.errors.city}</div>
+                  )}
                 </Form.Group>
               </Col>
               {/* Role */}
@@ -472,8 +494,9 @@ const EditUser = () => {
                 </Form.Group>
               </Col>
             </Row>
-            <Button type="submit" variant="primary">
-              Update User
+
+            <Button type="submit" disabled={formik.isSubmitting}>
+              {formik.isSubmitting ? "Updating..." : "Update"}
             </Button>
           </Form>
         </Card.Body>

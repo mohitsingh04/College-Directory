@@ -7,8 +7,7 @@ import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
 
-export default function EditHostel() {
-    const navigate = useNavigate();
+export default function EditHostel({ setHostelData, setToggleHostelPage }) {
     const { uniqueId } = useParams();
     const [hostel, setHostel] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -39,27 +38,19 @@ export default function EditHostel() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.put(`/hostel/${hostel[0]?.uniqueId}`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate(0);
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                const newHostel = await API.get('/hostel');
+                const filtered = newHostel.data.filter((hos) => hos.propertyId === Number(uniqueId));
+                setHostelData(filtered);
+                setToggleHostelPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -138,9 +129,11 @@ export default function EditHostel() {
                                 />
                             </Form.Group>
                         </Col>
-
                     </Row>
-                    <Button type="submit">Update</Button>
+
+                    <Button type="submit" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? "Updating..." : "Update"}
+                    </Button>
                 </Form>
             )}
         </Fragment>

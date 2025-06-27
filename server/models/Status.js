@@ -15,7 +15,6 @@ const StatusSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: [true, "Please provide a description."]
     },
     createdAt: {
         type: Date,

@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react';
 import { Accordion, Card } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { API } from '../../../../services/API';
 import AddFaqs from './AddFaqs';
 import EditFaqs from './EditFaqs';
@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 
 export default function Faqs() {
     const [toggleFaqsPage, setToggleFaqsPage] = useState(true);
+    const [showAddFaqForm, setShowAddFaqForm] = useState(false);
     const { uniqueId } = useParams();
     const [faqs, setFaqs] = useState([]);
     const [faqsUniqueId, setFaqsUniqueId] = useState("");
@@ -16,8 +17,14 @@ export default function Faqs() {
     const fetchFaqs = async () => {
         try {
             const response = await API.get(`/faqs`);
-            const filteredFaqs = response.data.filter((faqs) => faqs.propertyId === Number(uniqueId));
+            const filteredFaqs = response.data.filter((faq) => faq.propertyId === Number(uniqueId));
             setFaqs(filteredFaqs);
+
+            if (filteredFaqs.length === 0) {
+                setShowAddFaqForm(true);
+            } else {
+                setShowAddFaqForm(false);
+            }
         } catch (error) {
             console.error('Error fetching faqs:', error);
         }
@@ -26,14 +33,6 @@ export default function Faqs() {
     useEffect(() => {
         fetchFaqs();
     }, [uniqueId]);
-
-    const handleHideFaqsPage = () => {
-        setToggleFaqsPage(false);
-    }
-
-    const handleShowFaqsPage = () => {
-        setToggleFaqsPage(true);
-    }
 
     const handleEditFaqs = (id) => {
         setToggleFaqsPage(false);
@@ -65,40 +64,48 @@ export default function Faqs() {
     return (
         <Fragment>
             <Card>
-                <Card.Header className='flex justify-between'>
+                <Card.Header className='flex justify-between items-center'>
                     <div className="media-heading">
                         <h5>
-                            {faqs.length > 0
-                                ?
-                                toggleFaqsPage
-                                    ?
-                                    <strong>Faqs</strong>
-                                    :
-                                    <strong>Edit Faqs</strong>
-                                :
-                                <strong>Faqs</strong>
-                            }
+                            <strong>
+                                {faqs.length > 0
+                                    ? toggleFaqsPage
+                                        ? showAddFaqForm
+                                            ? "Add Faqs"
+                                            : "Faqs"
+                                        : "Edit Faqs"
+                                    : "Add Faqs"}
+                            </strong>
                         </h5>
                     </div>
-                    <div>
-                        {faqs.length > 0
-                            ?
-                            toggleFaqsPage ?
-                                null
-                                :
-                                <button className="btn btn-danger btn-sm" title="Close" onClick={handleShowFaqsPage}>
-                                    <i className="fe fe-x"></i>
-                                </button>
-                            :
-                            null
-                        }
-                    </div>
+
+                    {/* Toggle buttons */}
+                    {toggleFaqsPage ? (
+                        faqs.length > 0 && (
+                            <button
+                                className={`btn btn-${showAddFaqForm ? 'danger' : 'primary'} btn-sm`}
+                                onClick={() => setShowAddFaqForm(!showAddFaqForm)}
+                            >
+                                {showAddFaqForm ? <i className="fe fe-x"></i> : <><i className="fe fe-plus"></i> Add Faq</>}
+                            </button>
+                        )
+                    ) : (
+                        <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => {
+                                setToggleFaqsPage(true);
+                                setFaqsUniqueId("");
+                            }}
+                        >
+                            <i className="fe fe-x"></i>
+                        </button>
+                    )}
                 </Card.Header>
+
                 <Card.Body>
-                    {toggleFaqsPage
-                        ?
+                    {toggleFaqsPage ? (
                         <>
-                            {faqs.length > 0 ? (
+                            {faqs.length > 0 && !showAddFaqForm ? (
                                 <Accordion id="accordionExample">
                                     {faqs.map((item, index) => (
                                         <div key={index} className="mt-1">
@@ -122,36 +129,26 @@ export default function Faqs() {
                                     ))}
                                 </Accordion>
                             ) : (
-                                <p>No Faqs Found</p>
+                                <AddFaqs
+                                    onFaqAdded={() => {
+                                        fetchFaqs();
+                                        setShowAddFaqForm(false);
+                                    }}
+                                />
                             )}
                         </>
-                        :
-                        <>
-                            <EditFaqs faqsUniqueId={faqsUniqueId} />
-                        </>
-                    }
+                    ) : (
+                        <EditFaqs
+                            faqsUniqueId={faqsUniqueId}
+                            onFaqUpdated={() => {
+                                fetchFaqs();
+                                setToggleFaqsPage(true);
+                                setFaqsUniqueId("");
+                            }}
+                        />
+                    )}
                 </Card.Body>
             </Card>
-
-            {toggleFaqsPage
-                ?
-                <>
-                    <Card>
-                        <Card.Header>
-                            <div className="media-heading">
-                                <h5>
-                                    <strong>Add Faqs</strong>
-                                </h5>
-                            </div>
-                        </Card.Header>
-                        <Card.Body>
-                            <AddFaqs />
-                        </Card.Body>
-                    </Card>
-                </>
-                :
-                null
-            }
         </Fragment>
     );
 }

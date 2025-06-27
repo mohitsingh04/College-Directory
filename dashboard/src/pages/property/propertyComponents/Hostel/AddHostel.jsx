@@ -5,9 +5,21 @@ import { useFormik } from "formik";
 import { toast } from "react-hot-toast";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
+import * as Yup from "yup";
 
-export default function AddHostel() {
-    const navigate = useNavigate();
+const validationSchema = Yup.object({
+    boys_hostel_fees: Yup.number()
+        .typeError("Boys hostel fees must be a number.")
+        .positive("Boys hostel fees must be greater than 0.")
+        .required("Boys hostel fees is required."),
+
+    girls_hostel_fees: Yup.number()
+        .typeError("Girls hostel fees must be a number.")
+        .positive("Girls hostel fees must be greater than 0.")
+        .required("Girls hostel fees is required."),
+});
+
+export default function AddHostel({ setHostel, setToggleHostelPage }) {
     const { uniqueId } = useParams();
 
     const initialValues = {
@@ -19,32 +31,25 @@ export default function AddHostel() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post(`/hostel`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate(0);
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                const newHostel = await API.get('/hostel');
+                const filtered = newHostel.data.filter((hos) => hos.propertyId === Number(uniqueId));
+                setHostel(filtered);
+                setToggleHostelPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
     const formik = useFormik({
         initialValues: initialValues,
+        validationSchema: validationSchema,
         onSubmit: handleSubmit,
     });
 
@@ -61,11 +66,14 @@ export default function AddHostel() {
                                 id="boys_hostel_fees"
                                 placeholder="Boys hostel fees"
                                 name="boys_hostel_fees"
-                                className={`form-control`}
+                                className={`form-control ${formik.touched.boys_hostel_fees && formik.errors.boys_hostel_fees ? "is-invalid" : ""}`}
                                 value={formik.values.boys_hostel_fees}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             />
+                            {formik.touched.boys_hostel_fees && formik.errors.boys_hostel_fees ? (
+                                <div className="text-red-500 mt-1">{formik.errors.boys_hostel_fees}</div>
+                            ) : null}
                         </Form.Group>
                     </Col>
                     {/* Boys Hostel Description */}
@@ -92,11 +100,14 @@ export default function AddHostel() {
                                 id="girls_hostel_fees"
                                 placeholder="Girls hostel fees"
                                 name="girls_hostel_fees"
-                                className={`form-control`}
+                                className={`form-control ${formik.touched.girls_hostel_fees && formik.errors.girls_hostel_fees ? "is-invalid" : ""}`}
                                 value={formik.values.girls_hostel_fees}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             />
+                            {formik.touched.girls_hostel_fees && formik.errors.girls_hostel_fees ? (
+                                <div className="text-red-500 mt-1">{formik.errors.girls_hostel_fees}</div>
+                            ) : null}
                         </Form.Group>
                     </Col>
                     {/* Girls Hostel Description */}
@@ -114,9 +125,11 @@ export default function AddHostel() {
                             />
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

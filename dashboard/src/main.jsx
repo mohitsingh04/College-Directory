@@ -74,9 +74,6 @@ import AuthorizedUser from './components/protectedRoutes/AuthorizedUser';
 import ProtectedRoutes from './components/protectedRoutes/ProtectedRoutes';
 
 // Front
-import CollegeDetails from './frontend/pages/Property/CollegeDetails';
-import HomePage from './frontend/pages/HomePage';
-import RegisterWithOtp from './pages/auth/RegisterWithOtp';
 import VerifyOtp from './pages/auth/VerifyOtp';
 import Role from './pages/users/Role';
 
@@ -96,17 +93,11 @@ const AppWrapper = () => {
             <Scrolltotop />
             <Toaster />
             <Routes>
-              {/* <Route path='/' element={<HomePage />} />
-              <Route path='/india-colleges' element={<Search />} /> */}
-              {/* <Route path="/university" element={<University />} /> */}
-              {/* <Route path="/university/:collegeId-:collegeName-:city" element={<CollegeDetails />} /> */}
-              {/* <Route path="/:collegeType/:collegeId/:collegeName/:city" element={<CollegeDetails />} /> */}
 
               {/* Public Routes */}
               <Route path='/' element={<Custompage />}>
                 <Route path='/' element={<GuestRoute><Login /></GuestRoute>} />
                 <Route path='/register' element={<GuestRoute><Register /></GuestRoute>} />
-                <Route path='/register-with-otp' element={<GuestRoute><RegisterWithOtp /></GuestRoute>} />
                 <Route path='/verify-otp' element={<GuestRoute><VerifyOtp /></GuestRoute>} />
                 <Route path='/forgot-password' element={<GuestRoute><Forgotpassword /></GuestRoute>} />
                 <Route path='/reset-password' element={<GuestRoute><ResetPassword /></GuestRoute>} />
@@ -158,7 +149,6 @@ const AppWrapper = () => {
                 {/* Property */}
                 <Route path='/dashboard/property' element={<ProtectedRoutes><AllProperty /></ProtectedRoutes>} />
                 <Route path='/dashboard/property/add' element={<ProtectedRoutes><AddProperty /></ProtectedRoutes>} />
-                {/* <Route path='/dashboard/property/edit/:uniqueId' element={<ProtectedRoutes><EditProperty /></ProtectedRoutes>} /> */}
                 <Route path='/dashboard/property/view/:uniqueId' element={<ProtectedRoutes><ViewProperty /></ProtectedRoutes>} />
 
               </Route>

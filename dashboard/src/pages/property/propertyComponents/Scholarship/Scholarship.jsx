@@ -103,9 +103,15 @@ export default function Scholarship() {
                                     }
                                 </>
                                 :
-                                <EditScholarship />
+                                <EditScholarship
+                                    setScholarship={setScholarship}
+                                    setToggleScholarshipPage={setToggleScholarshipPage}
+                                />
                             :
-                            <AddScholarship />
+                            <AddScholarship
+                                setScholarship={setScholarship}
+                                setToggleScholarshipPage={setToggleScholarshipPage}
+                            />
                         }
                     </Card.Body>
                 </Card>

@@ -8,7 +8,7 @@ import { API } from "../../../../services/API";
 import ALLImages from "../../../../common/Imagesdata";
 import Skeleton from "react-loading-skeleton";
 
-export default function EditFaculty({ facultyUniqueId }) {
+export default function EditFaculty({ facultyUniqueId, onFacultyUpdated }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [previewProfile, setPreviewProfile] = useState("");
@@ -53,6 +53,7 @@ export default function EditFaculty({ facultyUniqueId }) {
         formData.append("department", values.department);
         formData.append("profile", values.profile);
 
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.put(`/faculty/${facultyUniqueId}`, formData, {
                 headers: {
@@ -61,23 +62,11 @@ export default function EditFaculty({ facultyUniqueId }) {
             });
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate(0);
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                onFacultyUpdated();
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -183,8 +172,7 @@ export default function EditFaculty({ facultyUniqueId }) {
                                     onChange={handleFileChange}
                                     onBlur={formik.handleBlur}
                                 />
-                                <div className="hover-effect w-32 rounded-circle">
-                                    <Form.Label htmlFor="profile"><i className="fe fe-upload me-1"></i>Upload Profile</Form.Label>
+                                <div className="mb-3">
                                     {previewProfile ? (
                                         <img src={previewProfile} alt="Profile Preview" className="w-32 logo-ratio" />
                                     ) : faculty[0]?.profile !== "image.png" ? (
@@ -193,11 +181,14 @@ export default function EditFaculty({ facultyUniqueId }) {
                                         <img src={ALLImages('noImage')} alt="logo" className="w-32 logo-ratio" />
                                     )}
                                 </div>
+                                <Form.Label htmlFor="profile" className="btn btn-primary btn-sm"><i className="fe fe-upload me-1"></i>Upload Profile</Form.Label>
                             </Form.Group>
                         </Col>
-
                     </Row>
-                    <Button type="submit">Update</Button>
+
+                    <Button type="submit" disabled={formik.isSubmitting}>
+                        {formik.isSubmitting ? "Updating..." : "Update"}
+                    </Button>
                 </Form>
             }
         </Fragment>

@@ -18,8 +18,8 @@ export default function HandleUpdatePodcast() {
 
     useEffect(() => {
         const getExam = async () => {
+            startLoadingBar();
             try {
-                startLoadingBar();
                 const { data } = await API.get(`/exam/${objectId}`);
                 setExam(data);
             } catch (error) {
@@ -43,8 +43,9 @@ export default function HandleUpdatePodcast() {
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
+        startLoadingBar();
         try {
-            startLoadingBar();
             const formData = new FormData();
             formData.append("podcast_hindi", values.podcast_hindi);
             formData.append("podcast_english", values.podcast_english);
@@ -55,24 +56,10 @@ export default function HandleUpdatePodcast() {
                 }
             });
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate('/dashboard/exam');
-            }
+            toast.success(response.data.message || "Updated successfully", { id: toastId });
+            navigate('/dashboard/exam');
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.data.error || "Not Found");
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         } finally {
             stopLoadingBar();
         }
@@ -174,9 +161,11 @@ export default function HandleUpdatePodcast() {
                                     )}
                                 </Form.Group>
                             </Col>
-
                         </Row>
-                        <Button type="submit">Update</Button>
+
+                        <Button type="submit" disabled={formik.isSubmitting}>
+                            {formik.isSubmitting ? "Updating..." : "Update"}
+                        </Button>
                     </Form>
                 </Card.Body>
             </Card>

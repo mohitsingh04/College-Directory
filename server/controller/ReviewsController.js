@@ -23,7 +23,7 @@ export const getReviewsById = async (req, res) => {
 
 export const addReviews = async (req, res) => {
     try {
-        const { propertyId, name, email, phone_number, gender, rating, review } = req.body;
+        const { propertyId, name, email, phone_number, rating, review } = req.body;
 
         const lastReviews = await Reviews.findOne().sort({ _id: -1 }).limit(1);
         const x = lastReviews ? lastReviews.uniqueId + 1 : 1;
@@ -43,7 +43,6 @@ export const addReviews = async (req, res) => {
             name,
             email,
             phone_number,
-            gender,
             rating,
             review
         })
@@ -68,14 +67,13 @@ export const updateReviews = async (req, res) => {
             return res.status(404).json({ error: "Reviews not found!" });
         }
 
-        const { name, email, phone_number, gender, rating, review } = req.body;
+        const { name, email, phone_number, rating, review } = req.body;
 
         const updatedReviews = await Reviews.findOneAndUpdate({ uniqueId }, {
             $set: {
                 name,
                 email,
                 phone_number,
-                gender,
                 rating,
                 review
             }

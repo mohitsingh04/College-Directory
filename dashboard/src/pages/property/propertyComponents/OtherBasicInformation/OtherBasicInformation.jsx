@@ -11,8 +11,6 @@ export default function OtherBasicInformation() {
     const [otherBasicInformation, setOtherBasicInformation] = useState([]);
     const [isExpandedShortDescription, setIsExpandedShortDescription] = useState(false);
     const [isExpandedFullDescription, setIsExpandedFullDescription] = useState(false);
-    const [isExpandedAdmissionProcess, setIsExpandedAdmissionProcess] = useState(false);
-    const [isExpandedLoanProcess, setIsExpandedLoanProcess] = useState(false);
 
     const toggleReadMoreShortDescription = () => {
         setIsExpandedShortDescription(!isExpandedShortDescription);
@@ -20,14 +18,6 @@ export default function OtherBasicInformation() {
 
     const toggleReadMoreFullDescription = () => {
         setIsExpandedFullDescription(!isExpandedFullDescription);
-    };
-
-    const toggleReadMoreAdmissionProcess = () => {
-        setIsExpandedAdmissionProcess(!isExpandedAdmissionProcess);
-    };
-
-    const toggleReadMoreLoanProcess = () => {
-        setIsExpandedLoanProcess(!isExpandedLoanProcess);
     };
 
     useEffect(() => {
@@ -161,7 +151,7 @@ export default function OtherBasicInformation() {
                                             )}
                                         </Col>
                                         <Col md={12} className="my-3">
-                                            <h4>Short Description :</h4>
+                                            <h1>Short Description :</h1>
                                             {otherBasicInformation[0]?.short_description.length >= 1500
                                                 ?
                                                 <>
@@ -187,8 +177,7 @@ export default function OtherBasicInformation() {
                                             }
                                         </Col>
                                         <Col md={12} className="my-3">
-                                            <h4>Full Description :</h4>
-                                            {/* {otherBasicInformation[0]?.full_description} */}
+                                            <h1>Full Description :</h1>
                                             {otherBasicInformation[0]?.full_description.length >= 1500
                                                 ?
                                                 <>
@@ -209,60 +198,6 @@ export default function OtherBasicInformation() {
                                                     style={{ fontSize: "16px" }}
                                                     dangerouslySetInnerHTML={{
                                                         __html: otherBasicInformation[0]?.full_description
-                                                    }}
-                                                />
-                                            }
-                                        </Col>
-                                        <Col md={12} className="my-3">
-                                            <h4>Admission Process :</h4>
-                                            {/* {otherBasicInformation[0]?.admission_process} */}
-                                            {otherBasicInformation[0]?.admission_process.length >= 1500
-                                                ?
-                                                <>
-                                                    <p
-                                                        style={{ fontSize: "16px" }}
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: isExpandedAdmissionProcess
-                                                                ? otherBasicInformation[0]?.admission_process
-                                                                : otherBasicInformation[0]?.admission_process.substring(0, 1500) + "...",
-                                                        }}
-                                                    />
-                                                    <button onClick={toggleReadMoreAdmissionProcess} className="text-blue-700 underline">
-                                                        {isExpandedAdmissionProcess ? "Read Less" : "Read More"}
-                                                    </button>
-                                                </>
-                                                :
-                                                <p
-                                                    style={{ fontSize: "16px" }}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: otherBasicInformation[0]?.admission_process
-                                                    }}
-                                                />
-                                            }
-                                        </Col>
-                                        <Col md={12} className="my-3">
-                                            <h4>Loan :</h4>
-                                            {/* {otherBasicInformation[0]?.loan_process} */}
-                                            {otherBasicInformation[0]?.loan_process.length >= 1500
-                                                ?
-                                                <>
-                                                    <p
-                                                        style={{ fontSize: "16px" }}
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: isExpandedLoanProcess
-                                                                ? otherBasicInformation[0]?.loan_process
-                                                                : otherBasicInformation[0]?.loan_process.substring(0, 1500) + "...",
-                                                        }}
-                                                    />
-                                                    <button onClick={toggleReadMoreLoanProcess} className="text-blue-700 underline">
-                                                        {isExpandedLoanProcess ? "Read Less" : "Read More"}
-                                                    </button>
-                                                </>
-                                                :
-                                                <p
-                                                    style={{ fontSize: "16px" }}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: otherBasicInformation[0]?.loan_process
                                                     }}
                                                 />
                                             }

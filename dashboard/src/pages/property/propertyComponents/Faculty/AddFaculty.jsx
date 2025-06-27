@@ -7,8 +7,7 @@ import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import ALLImages from "../../../../common/Imagesdata";
 
-export default function AddFaculty() {
-    const navigate = useNavigate();
+export default function AddFaculty({ onFacultyAdded }) {
     const { uniqueId } = useParams();
     const [previewProfile, setPreviewProfile] = useState("");
 
@@ -34,6 +33,7 @@ export default function AddFaculty() {
         formData.append("department", values.department);
         formData.append("profile", values.profile);
 
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post(`/faculty`, formData, {
                 headers: {
@@ -42,23 +42,11 @@ export default function AddFaculty() {
             });
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate(0);
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                onFacultyAdded();
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 
@@ -168,9 +156,11 @@ export default function AddFaculty() {
                             </div>
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Updating..." : "Update"}
+                </Button>
             </Form>
         </Fragment>
     );

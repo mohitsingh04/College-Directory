@@ -186,3 +186,11 @@
 	object-fit: cover;
 	margin: 3px 0px 3px 0px;
 }
+
+.third-line-ellipsis {
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

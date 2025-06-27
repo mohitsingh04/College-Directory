@@ -35,12 +35,6 @@ const OtherBasicDetailsSchema = new mongoose.Schema({
     full_description: {
         type: String,
     },
-    admission_process: {
-        type: String,
-    },
-    loan_process: {
-        type: String,
-    },
     createdAt: {
         type: Date,
         default: Date.now

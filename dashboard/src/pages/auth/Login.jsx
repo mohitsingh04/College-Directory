@@ -6,7 +6,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-hot-toast";
 import { API } from "../../services/API";
-import DataRequest from "../../services/Token";
 
 const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email").required("Email is required"),
@@ -24,8 +23,8 @@ const Login = () => {
     }
 
     const handleSubmit = async (values) => {
+        setLoading(true)
         try {
-            setLoading(true)
             const response = await API.post("/login", values, { withCredentials: true });
 
             if (response.status === 200) {
@@ -128,7 +127,7 @@ const Login = () => {
                             </div>
 
                             <div className="container-login100-form-btn">
-                                <Button type="submit" className="login100-form-btn btn-primary">
+                                <Button type="submit" className="login100-form-btn btn-primary" disabled={loading}>
                                     {loading
                                         ? <span>Login...</span>
                                         : <span>Login</span>

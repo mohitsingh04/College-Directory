@@ -6,28 +6,25 @@ import { useFormik } from "formik";
 import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
+import Skeleton from "react-loading-skeleton";
 
 export default function EditOtherBasicInformation() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
-    const shortDescriptionRef = useRef(null);
-    const fullDescriptionRef = useRef(null);
-    const admissionProcessRef = useRef(null);
-    const loanProcessRef = useRef(null);
-    const [shortDescription, setShortDescription] = useState("");
-    const [fullDescription, setFullDescription] = useState("");
-    const [admissionProcess, setAdmissionProcess] = useState("");
-    const [loanProcess, setLoanProcess] = useState("");
     const [otherBasicInformation, setOtherBasicInformation] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchOtherBasicInformation = async () => {
+            setLoading(true);
             try {
                 const response = await API.get(`/otherBasicDetails`);
                 const filteredOtherBasicInformation = response.data.filter((otherBasicInformation) => otherBasicInformation.propertyId === Number(uniqueId));
                 setOtherBasicInformation(filteredOtherBasicInformation);
             } catch (error) {
                 console.error('Error fetching other basic information:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -49,6 +46,7 @@ export default function EditOtherBasicInformation() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const formData = new FormData();
             formData.append("propertyId", uniqueId);
@@ -70,23 +68,11 @@ export default function EditOtherBasicInformation() {
             });
 
             if (response.status === 200) {
-                toast.success(response.data.message);
+                toast.success(response.data.message || "Updated successfully", { id: toastId });
+                navigate(0);
             }
-            window.location.reload();
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -116,6 +102,12 @@ export default function EditOtherBasicInformation() {
             formik.setFieldValue("english_podcast", file);
         }
     };
+
+    if (loading || !otherBasicInformation) {
+        return (
+            <Skeleton height={300} />
+        );
+    }
 
     return (
         <Fragment>
@@ -283,39 +275,11 @@ export default function EditOtherBasicInformation() {
                             />
                         </Form.Group>
                     </Col>
-                    {/* Admission Process */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Admission Process</Form.Label>
-                            <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
-                                value={formik.values.admission_process}
-                                onBlur={(newContent) =>
-                                    formik.setFieldValue("admission_process", newContent)
-                                }
-                            />
-                        </Form.Group>
-                    </Col>
-                    {/* Loan Process */}
-                    <Col md={12}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Loan Process</Form.Label>
-                            <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
-                                value={formik.values.loan_process}
-                                onBlur={(newContent) =>
-                                    formik.setFieldValue("loan_process", newContent)
-                                }
-                            />
-                        </Form.Group>
-                    </Col>
 
                 </Row>
-                <Button type="submit">Update</Button>
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Updating..." : "Update"}
+                </Button>
             </Form>
         </Fragment>
     );

@@ -18,19 +18,18 @@ export default function EditExam() {
   const loadingBarRef = useRef(null);
   const [exam, setExam] = useState(null);
   const [status, setStatus] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
   const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const startLoadingBar = () => loadingBarRef.current?.continuousStart();
   const stopLoadingBar = () => loadingBarRef.current?.complete();
 
   useEffect(() => {
     const fetchData = async () => {
+      startLoadingBar();      
+      setHandlePermissionLoading(true);
       try {
-        startLoadingBar();
-        setLoading(true);
-        setHandlePermissionLoading(true);
 
         const [authResponse, statusResponse] = await Promise.all([
           API.get("/profile"),
@@ -47,8 +46,8 @@ export default function EditExam() {
       } catch (error) {
         toast.error(error.message);
       } finally {
-        setLoading(false);
         stopLoadingBar();
+        setLoading(false);
         setHandlePermissionLoading(false);
       }
     };
@@ -59,16 +58,15 @@ export default function EditExam() {
 
   useEffect(() => {
     const getExam = async () => {
+      startLoadingBar();
       try {
-        setLoading(true);
-        startLoadingBar();
         const { data } = await API.get(`/exam/${objectId}`);
         setExam(data);
       } catch (error) {
         toast.error('Error fetching exam' + error.message);
       } finally {
-        stopLoadingBar();
         setLoading(false);
+        stopLoadingBar();
       }
     };
 
@@ -99,8 +97,8 @@ export default function EditExam() {
   });
 
   const handleSubmit = async (values) => {
+    startLoadingBar();
     try {
-      startLoadingBar();
       const response = await API.put(`/exam/${objectId}`, values);
       if (response.data.message) {
         toast.success(response.data.message);
@@ -137,7 +135,6 @@ export default function EditExam() {
   const ExamModeData = [
     { value: "Online", label: "Online" },
     { value: "Offline", label: "Offline" },
-    { value: "Both", label: "Both" },
   ];
 
   useEffect(() => {
@@ -184,7 +181,7 @@ export default function EditExam() {
 
       {loading
         ?
-        <Skeleton height={500} />
+        <Skeleton height={400} />
         :
         <>
           <Card className="custom-card">
@@ -383,9 +380,11 @@ export default function EditExam() {
                       {formik.errors.status && formik.touched.status ? <div className="text-danger mt-1">{formik.errors.status}</div> : null}
                     </Form.Group>
                   </Col>
-
                 </Row>
-                <Button type="submit">Update</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                  {formik.isSubmitting ? "Updating..." : "Update"}
+                </Button>
               </Form>
             </Card.Body>
           </Card>

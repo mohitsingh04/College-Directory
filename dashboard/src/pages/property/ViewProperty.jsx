@@ -21,6 +21,8 @@ import Course from "./propertyComponents/Course/Course";
 import Skeleton from "react-loading-skeleton";
 import LoadingBar from 'react-top-loading-bar';
 import toast from "react-hot-toast";
+import AdmissionProcess from "./propertyComponents/Admission Process/AdmissionProcess";
+import LoanProcess from "./propertyComponents/Loan Process/LoanProcess";
 
 export default function ViewProperty() {
     const navigate = useNavigate();
@@ -31,7 +33,6 @@ export default function ViewProperty() {
     const [loading, setLoading] = useState(true);
     const [property, setProperty] = useState("");
     const [authUser, setAuthUser] = useState(null);
-    const [fetchTime, setFetchTime] = useState(null);
     const [propertyCourseData, setPropertyCourseData] = useState([]);
     const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
 
@@ -40,17 +41,17 @@ export default function ViewProperty() {
 
     useEffect(() => {
         const getAuthUserData = async () => {
-            const startTime = performance.now(); // Start time
+            setLoading(true);
+            startLoadingBar();
+            setHandlePermissionLoading(true)
             try {
-                setHandlePermissionLoading(true)
                 const { data } = await API.get("/profile");
                 setAuthUser(data?.data);
-
-                const endTime = performance.now(); // End time
-                setFetchTime(((endTime - startTime) / 1000).toFixed(2)); // Convert to seconds
             } catch (error) {
                 toast.error(error.message);
             } finally {
+                setLoading(false);
+                stopLoadingBar();
                 setHandlePermissionLoading(false)
             }
         }
@@ -60,17 +61,18 @@ export default function ViewProperty() {
 
     useEffect(() => {
         const getPropertyCourseData = async () => {
-            const startTime = performance.now(); // Start time
+            setLoading(true);
+            startLoadingBar();
             try {
                 const response = await API.get('/property-course');
                 const propertyCourseData = response.data;
                 const filterPropertyCourse = propertyCourseData.filter(course => course?.propertyId === Number(uniqueId));
                 setPropertyCourseData(filterPropertyCourse);
-
-                const endTime = performance.now(); // End time
-                setFetchTime(((endTime - startTime) / 1000).toFixed(2)); // Convert to seconds
             } catch (error) {
                 toast.error(error.message);
+            } finally {
+                setLoading(false);
+                stopLoadingBar();
             }
         }
 
@@ -78,18 +80,16 @@ export default function ViewProperty() {
     }, []);
 
     const fetchReviews = async () => {
-        const startTime = performance.now(); // Start time
+        setLoading(true);
+        startLoadingBar();
         try {
-            startLoadingBar();
             const response = await API.get(`/reviews`);
             const filteredReviews = response.data.filter((reviews) => reviews.propertyId === Number(uniqueId));
             setReviews(filteredReviews);
-
-            const endTime = performance.now(); // End time
-            setFetchTime(((endTime - startTime) / 1000).toFixed(2)); // Convert to seconds
         } catch (error) {
             console.error('Error fetching reviews:', error);
         } finally {
+            setLoading(false);
             stopLoadingBar();
         }
     };
@@ -100,15 +100,11 @@ export default function ViewProperty() {
 
     useEffect(() => {
         const getProperty = async () => {
-            const startTime = performance.now(); // Start time
+            setLoading(true);
+            startLoadingBar();
             try {
-                setLoading(true);
-                startLoadingBar();
                 const response = await API.get(`/property/${uniqueId}`);
                 setProperty(response.data);
-
-                const endTime = performance.now(); // End time
-                setFetchTime(((endTime - startTime) / 1000).toFixed(2)); // Convert to seconds
             } catch (error) {
                 console.error('Error fetching Property:', error);
             } finally {
@@ -153,9 +149,12 @@ export default function ViewProperty() {
         { id: "faculty", label: "Faculty" },
         { id: "reviews", label: "Reviews" },
         { id: "qna", label: "QnA" },
-        { id: "others", label: "Other Details" },
+        { id: "others", label: "Ranks & Others" },
         { id: "seo", label: "Seo" },
         { id: "courses", label: "Courses" },
+        { id: "admission-process", label: "Admission Process" },
+        { id: "loan-process", label: "Loan Process" },
+
     ];
 
     const [activeTab, setActiveTab] = useState("info");
@@ -262,7 +261,7 @@ export default function ViewProperty() {
                                                                     <div className="media-body">
                                                                         <span className="text-muted">Posts</span>
                                                                         <div className="fw-semibold fs-25">
-                                                                            328
+                                                                            123
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -378,6 +377,12 @@ export default function ViewProperty() {
                             </Tab.Pane>
                             <Tab.Pane className="p-0 border-0" eventKey="courses">
                                 <Course />
+                            </Tab.Pane>
+                            <Tab.Pane className="p-0 border-0" eventKey="admission-process">
+                                <AdmissionProcess />
+                            </Tab.Pane>
+                            <Tab.Pane className="p-0 border-0" eventKey="loan-process">
+                                <LoanProcess />
                             </Tab.Pane>
                         </Tab.Content>
                     </Tab.Container>

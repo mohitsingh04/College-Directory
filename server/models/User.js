@@ -36,6 +36,9 @@ const UserSchema = new mongoose.Schema({
     state: {
         type: String,
     },
+    country: {
+        type: String,
+    },
     role: {
         type: String,
         default: "Property Manager"

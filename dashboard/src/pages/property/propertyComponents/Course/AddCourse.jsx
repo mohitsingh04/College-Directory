@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 
-export default function AddCourse() {
+export default function AddCourse({ onCourseAdded }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [categoryData, setCategoryData] = useState([]);
@@ -20,7 +20,7 @@ export default function AddCourse() {
     const [currentPropertyData, setCurrentPropertyData] = useState("");
     const [propertyCourse, setPropertyCourse] = useState("");
     const [propertyCourseData, setPropertyCourseData] = useState([]);
-    const [selectedCourseName, setSelectedCourseName] = useState("");
+    const [selectedCourseUniqueId, setSelectedCourseUniqueId] = useState("");
     const [selectedPropertyCourseName, setSelectedPropertyCourseName] = useState("");
 
     // Current Property Data
@@ -60,7 +60,6 @@ export default function AddCourse() {
                 const response = await API.get('/property-course');
                 const propertyCourseData = response.data;
                 const filteredPropertyCourse = propertyCourseData.filter(propertyCourse => propertyCourse?.propertyId === affiliatedProperty[0]?.uniqueId);
-                // const filteredPropertyCourseData = filteredPropertyCourse.find(course => course.name === selectedCourseName);
                 setPropertyCourseData(filteredPropertyCourse)
             } catch (error) {
                 console.error("Error fetching property course details:", error);
@@ -75,21 +74,13 @@ export default function AddCourse() {
         const getDataOfPropertyCourse = async () => {
             if (!selectedPropertyCourseName) return;
             try {
-                // const response = await API.get('/property-course');
-                // const propertyCourseData = response.data;
-                // const filteredPropertyCourse = propertyCourseData.filter(propertyCourse => propertyCourse?.propertyId === affiliatedProperty?.[0]?.uniqueId);
-                // const filteredPropertyCourseData = filteredPropertyCourse.find(course => course.name === selectedPropertyCourseName);
-                // setPropertyCourse(filteredPropertyCourseData)
-
                 const response = await API.get('/property-course');
                 const propertyCourseData = response.data;
 
-                // Filter based on propertyId
                 const filteredPropertyCourse = propertyCourseData.filter(propertyCourse =>
                     propertyCourse?.propertyId === affiliatedProperty?.[0]?.uniqueId
                 );
 
-                // Find the course where name contains the selectedPropertyCourseName
                 const filteredPropertyCourseData = filteredPropertyCourse.find(course =>
                     course.name?.some(item => item.value === selectedPropertyCourseName)
                 );
@@ -106,11 +97,11 @@ export default function AddCourse() {
     // Fetch Course Details By Click
     useEffect(() => {
         const fetchPropertyCourse = async () => {
-            if (!selectedCourseName) return;
+            if (!selectedCourseUniqueId) return;
             try {
                 const response = await API.get(`/course`);
                 const courseData = response.data;
-                const filteredCourse = courseData.find(course => course.name === selectedCourseName);
+                const filteredCourse = courseData.find(course => course.uniqueId === Number(selectedCourseUniqueId));
                 setPropertyCourse(filteredCourse);
             } catch (error) {
                 console.error("Error fetching course details:", error);
@@ -118,7 +109,7 @@ export default function AddCourse() {
         };
 
         fetchPropertyCourse();
-    }, [selectedCourseName]);
+    }, [selectedCourseUniqueId]);
 
     // Fetch Category and Course Data
     useEffect(() => {
@@ -145,6 +136,7 @@ export default function AddCourse() {
 
     const initialValues = {
         propertyId: uniqueId,
+        course_id: propertyCourse?.uniqueId || "",
         name: propertyCourse?.name || "",
         short_name: propertyCourse?.short_name || "",
         specialization: propertyCourse?.specialization || "",
@@ -161,27 +153,15 @@ export default function AddCourse() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
-            const formData = { ...values, description: editorRef.current.getContent(), duration: `${values.course_duration} ${values.course_duration_unit}` };
-            const response = await API.post("/property-course", formData);
+            const response = await API.post("/property-course", values);
             if (response.status === 200) {
-                toast.success(response.data.message || "Course added succesfully");
-                window.location.reload();
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                onCourseAdded();
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 
@@ -233,7 +213,7 @@ export default function AddCourse() {
                                     }))}
                                     values={[]}
                                     closeOnSelect
-                                    placeholder="Choose Course"
+                                    placeholder="Choose Course...      "
                                     keepSelectedInList={false}
                                     searchable={true}
                                     dropdownHandle={false}
@@ -256,22 +236,20 @@ export default function AddCourse() {
                             <Form.Group className="mb-3">
                                 <Form.Label htmlFor="courseName">Name</Form.Label>
                                 <Dropdown
-                                    options={Array.from(
-                                        new Set(courseData.map((group) => group.name))
-                                    ).map((name) => ({
-                                        label: name,
-                                        value: name,
+                                    options={courseData.map((course) => ({
+                                        label: `${course.name} - [${course.specialization}]`,
+                                        value: `${course.uniqueId}`,
                                     }))}
                                     values={[]}
                                     closeOnSelect
-                                    placeholder="Choose Course   "
+                                    placeholder="Choose Course...      "
                                     keepSelectedInList={false}
                                     searchable={true}
                                     dropdownHandle={false}
                                     value={formik.values.name}
                                     onChange={(value) => {
                                         formik.setFieldValue("name", value[0].value);
-                                        setSelectedCourseName(value[0].value);
+                                        setSelectedCourseUniqueId(value[0].value);
                                     }}
                                     onBlur={formik.handleBlur}
                                 />
@@ -461,23 +439,6 @@ export default function AddCourse() {
                             ))}
                         </Form.Group>
                     </Col>
-                    {/* Course Fees */}
-                    <Col md={6}>
-                        <Form.Group className="mb-3">
-                            <Form.Label htmlFor="course_fees">Course Fees</Form.Label>
-                            <Form.Control
-                                type="text"
-                                id="course_fees"
-                                placeholder="150000"
-                                name="course_fees"
-                                className={`form-control ${formik.touched.course_fees && formik.errors.course_fees ? 'is-invalid' : ''}`}
-                                value={formik.values.course_fees}
-                                onChange={formik.handleChange}
-                                onBlur={formik.handleBlur}
-                            />
-                            {formik.errors.course_fees && formik.touched.course_fees ? <div className="text-danger mt-1">{formik.errors.course_fees}</div> : null}
-                        </Form.Group>
-                    </Col>
                     {/* Eligibility */}
                     <Col md={12}>
                         <Form.Group className="mb-3">
@@ -510,9 +471,28 @@ export default function AddCourse() {
                             />
                         </Form.Group>
                     </Col>
-
+                    {/* Course Fees */}
+                    <Col md={6}>
+                        <Form.Group className="mb-3">
+                            <Form.Label htmlFor="course_fees">Course Fees</Form.Label>
+                            <Form.Control
+                                type="text"
+                                id="course_fees"
+                                placeholder="150000"
+                                name="course_fees"
+                                className={`form-control ${formik.touched.course_fees && formik.errors.course_fees ? 'is-invalid' : ''}`}
+                                value={formik.values.course_fees}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                            />
+                            {formik.errors.course_fees && formik.touched.course_fees ? <div className="text-danger mt-1">{formik.errors.course_fees}</div> : null}
+                        </Form.Group>
+                    </Col>
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

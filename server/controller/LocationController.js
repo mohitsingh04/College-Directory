@@ -26,7 +26,7 @@ export const getLocationById = async (req, res) => {
 
 export const addLocation = async (req, res) => {
     try {
-        const { propertyId, address, pincode, city, state } = req.body;
+        const { propertyId, address, pincode, country, city, state } = req.body;
 
         const location = await Location.findOne({ propertyId });
         if (location) {
@@ -50,10 +50,10 @@ export const addLocation = async (req, res) => {
             propertyId,
             address,
             pincode,
+            country,
             city,
             state
         });
-        // console.log(newLocation)
         const savedLocation = await newLocation.save();
         return res.json({ message: "Added Successfully.", savedLocation });
     } catch (error) {
@@ -74,12 +74,13 @@ export const updateLocation = async (req, res) => {
             return res.status(404).json({ error: "Location not found!" });
         }
 
-        const { address, pincode, city, state } = req.body;
+        const { address, pincode, country, city, state } = req.body;
 
         const updatedLocation = await Location.findOneAndUpdate({ uniqueId }, {
             $set: {
                 address,
                 pincode,
+                country,
                 city,
                 state
             }

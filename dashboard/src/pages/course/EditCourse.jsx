@@ -16,24 +16,22 @@ export default function EditCourse() {
   const loadingBarRef = useRef(null);
   const [status, setStatus] = useState([]);
   const [course, setCourse] = useState("");
-  const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [toggleHideShow, setToggleHideShow] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [filteredSubCategory, setFilteredSubCategory] = useState([]);
   const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const startLoadingBar = () => loadingBarRef.current?.continuousStart();
   const stopLoadingBar = () => loadingBarRef.current?.complete();
 
   useEffect(() => {
     const fetchData = async () => {
+      startLoadingBar();
+      setHandlePermissionLoading(true);
       try {
-        setLoading(true);
-        startLoadingBar();
-        setHandlePermissionLoading(true);
-
         const [authResponse, categoryResponse, statusResponse] = await Promise.all([
           API.get("/profile"),
           API.get("/category"),
@@ -63,9 +61,8 @@ export default function EditCourse() {
 
   useEffect(() => {
     const getCourseData = async () => {
+      startLoadingBar();
       try {
-        setLoading(true);
-        startLoadingBar();
         const { data } = await API.get(`/course/${objectId}`);
         setCourse(data);
       } catch (error) {
@@ -106,30 +103,16 @@ export default function EditCourse() {
   });
 
   const handleSubmit = async (values) => {
+    const toastId = toast.loading("Updating...");
+    startLoadingBar();
     try {
-      startLoadingBar();
       const formData = { ...values, duration: `${values.course_duration} ${values.course_duration_unit}` };
       const response = await API.put(`/course/${objectId}`, formData);
-      if (response.data.message) {
-        toast.success(response.data.message);
-        navigate('/dashboard/course');
-      } else {
-        toast.error(response.data.error);
-      }
+
+      toast.success(response.data.message || "Updated successfully", { id: toastId });
+      navigate('/dashboard/course');
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 400) {
-          toast.error(error.response.data.error || "Bad Request");
-        } else if (error.response.status === 404) {
-          toast.error(error.response.status);
-        } else if (error.response.status === 500) {
-          toast.error("Internal server error, please try again later.");
-        } else {
-          toast.error("Something went wrong, please try again.");
-        }
-      } else {
-        toast.error(`Failed: ${error.message}`);
-      }
+      toast.error(error.response?.data?.error || "Update failed", { id: toastId });
     } finally {
       stopLoadingBar();
     }
@@ -207,7 +190,7 @@ export default function EditCourse() {
 
       {loading
         ?
-        <Skeleton height={500} />
+        <Skeleton height={400} />
         :
         <Card className="custom-card">
           <Card.Header>
@@ -472,9 +455,11 @@ export default function EditCourse() {
                     {formik.errors.status && formik.touched.status ? <div className="text-danger mt-1">{formik.errors.status}</div> : null}
                   </Form.Group>
                 </Col>
-
               </Row>
-              <Button type="submit">Update</Button>
+
+              <Button type="submit" disabled={formik.isSubmitting}>
+                {formik.isSubmitting ? "Updating..." : "Update"}
+              </Button>
             </Form>
           </Card.Body>
         </Card>

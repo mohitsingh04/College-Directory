@@ -30,28 +30,14 @@ export default function University() {
     });
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post("/property", values);
 
-            if (response.status === 200) {
-                toast.success(response.data.message);
-                navigate('/dashboard/property');
-            }
+            toast.success(response.data.message || "Added successfully", { id: toastId });
+            navigate('/dashboard/property');
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    console.log(error.response)
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 
@@ -60,12 +46,6 @@ export default function University() {
         validationSchema: validationSchema,
         onSubmit: handleSubmit,
     });
-
-    const handleFileChange = (e, setFieldValue, fieldName, setPreview) => {
-        const file = e.currentTarget.files[0];
-        setFieldValue(fieldName, file);
-        setPreview(URL.createObjectURL(file));
-    };
 
     const AffiliationData = [
         { value: "AICTE", label: "All India Council for Technical Education(AICTE)" },
@@ -221,9 +201,11 @@ export default function University() {
                             />
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add Property</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </div>
     );

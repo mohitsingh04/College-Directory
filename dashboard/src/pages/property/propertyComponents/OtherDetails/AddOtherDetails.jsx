@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 
-export default function AddOtherDetails() {
+export default function AddOtherDetails({ setOtherDetails, setToggleOtherDetailsPage }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
 
@@ -21,27 +21,19 @@ export default function AddOtherDetails() {
     }
 
     const handleSubmit = async (values) => {
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.post(`/other-details`, values);
 
             if (response.status === 200) {
-                toast.success(response.data.message);
-                window.location.reload();
+                toast.success(response.data.message || "Added successfully", { id: toastId });
+                const newOtherDetails = await API.get('/other-details');
+                const filtered = newOtherDetails.data.filter((otherDetails) => otherDetails.propertyId === Number(uniqueId));
+                setOtherDetails(filtered);
+                setToggleOtherDetailsPage(true);
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.status);
-                } else if (error.response.status === 500) {
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Update failed", { id: toastId });
         }
     };
 
@@ -144,9 +136,11 @@ export default function AddOtherDetails() {
                             />
                         </Form.Group>
                     </Col>
-
                 </Row>
-                <Button type="submit">Add</Button>
+
+                <Button type="submit" disabled={formik.isSubmitting}>
+                    {formik.isSubmitting ? "Adding..." : "Add"}
+                </Button>
             </Form>
         </Fragment>
     );

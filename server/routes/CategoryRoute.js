@@ -25,25 +25,6 @@ const storage = multer.diskStorage({
     }
 });
 
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         let uploadPath = '';
-//         if (file.fieldname === "logo") {
-//             uploadPath = './media/category/logo';
-//         } else if (file.fieldname === "featured_image") {
-//             uploadPath = './media/category/featured';
-//         }
-
-//         ensureDirectoryExistence(uploadPath);
-
-//         cb(null, uploadPath);
-//     },
-//     filename: function (req, file, cb) {
-//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//         cb(null, `${file.fieldname}-${uniqueSuffix}.png`);
-//     }
-// });
-
 const upload = multer({ storage: storage })
 
 categoryRouter.get("/category", getCategory);

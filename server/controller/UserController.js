@@ -6,18 +6,15 @@ import jwt from "jsonwebtoken";
 import { sendEmail, sendPasswordEmailForANewUser } from "../helper/mailer.js";
 import { getDataFromToken } from "../helper/getDataFromToken.js";
 import twilio from "twilio";
-import fs from "fs";
+import fs from 'fs';
+import path from 'path';
+import sharp from 'sharp';
 
 const ensureDirectoryExistence = (dir) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
 };
-
-function generatePassowrd() {
-    const password = Math.random().toString(36).slice(2, 10);
-    return password;
-}
 
 const permissions = [
     {
@@ -142,7 +139,7 @@ export const resendEmail = async (req, res) => {
 
         await sendEmail({ email, emailType: "VERIFY", userId: userId });
 
-        return res.status(200).json({ message: "A verification email has been sent to your email address. The verification email will expire after 24 hours." });
+        return res.status(200).json({ message: "A verification otp has been sent to your email address." });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -252,37 +249,98 @@ export const updateProfile = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        const uniqueId = user.uniqueId;
 
         const { name, pincode, address, country, city, state } = req.body;
 
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: userId },
+            {
+                $set: {
+                    name,
+                    pincode,
+                    address,
+                    city,
+                    state,
+                    country
+                }
+            },
+            { new: true }
+        );
+
+        return res.status(200).json({ message: "Profile updated successfully.", updatedUser });
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+const deleteFileIfExists = async (filePath) => {
+    if (filePath && fs.existsSync(filePath)) {
+        try {
+            await fs.promises.unlink(filePath);
+            console.log(`Deleted old file: ${filePath}`);
+        } catch (err) {
+            console.warn(`Failed to delete old image ${filePath}: ${err.message}`);
+        }
+    }
+};
+
+export const updateProfileImage = async (req, res) => {
+    try {
+        const userId = await getDataFromToken(req);
+        const user = await User.findOne({ _id: userId }).select("-password");
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const uniqueId = user.uniqueId;
         const profilePath = `./media/profile/${uniqueId}/`;
         ensureDirectoryExistence(profilePath);
 
         let profileImagePath = user.profile_image;
+        let profileImageCompressedPath = user.profile_image_compressed;
 
         if (req.files && req.files.profile_image) {
-            const oldPath = req.files.profile_image[0].path;
-            const newPath = `${profilePath}${req.files.profile_image[0].filename}`;
-            fs.renameSync(oldPath, newPath);
-            profileImagePath = newPath;
+            // Delete old files
+            await deleteFileIfExists(user.profile_image);
+            await deleteFileIfExists(user.profile_image_compressed);
+
+            const uploadedFile = req.files.profile_image[0];
+            const ext = path.extname(uploadedFile.originalname).toLowerCase();
+            const baseName = path.basename(uploadedFile.filename, ext);
+
+            const originalTarget = `${profilePath}${baseName}${ext}`;
+            const webpTarget = `${profilePath}${baseName}-compressed.webp`;
+
+            // Move original
+            await fs.promises.rename(uploadedFile.path, originalTarget);
+
+            // Generate WebP
+            await sharp(originalTarget)
+                // optionally add resize: .resize(200, 200)
+                .toFormat('webp')
+                .toFile(webpTarget);
+
+            profileImagePath = originalTarget;
+            profileImageCompressedPath = webpTarget;
+        } else {
+            return res.status(400).json({ error: "No image uploaded" });
         }
 
-        const updatedUser = await User.findOneAndUpdate({ _id: userId }, {
-            $set: {
-                name,
-                pincode,
-                address,
-                city,
-                state,
-                country,
-                profile_image: profileImagePath
-            }
-        });
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: userId },
+            {
+                $set: {
+                    profile_image: profileImagePath,
+                    profile_image_compressed: profileImageCompressedPath
+                }
+            },
+            { new: true }
+        );
 
-        return res.status(200).json({ message: "Saved successfully.", updatedUser });
+        return res.status(200).json({ message: "Profile image updated successfully.", updatedUser });
     } catch (error) {
-        console.log(error.message)
+        console.error(error.message);
         return res.status(500).json({ error: error.message });
     }
 };
@@ -395,9 +453,8 @@ export const addUser = async (req, res) => {
             return res.status(400).json({ error: "This phone number is already exist." });
         }
 
-        const password = "123456";
-        const salt = await bcryptjs.genSalt(10);
-        const hashedPassword = await bcryptjs.hash(password, salt);
+        const password = String(Math.floor(100000 + Math.random() * 899999));
+        const hashedPassword = bcrypt.hashSync(password, 10);
 
         const lastUser = await User.findOne().sort({ _id: -1 }).limit(1);
         const x = lastUser ? lastUser.uniqueId + 1 : 1;

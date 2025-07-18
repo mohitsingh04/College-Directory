@@ -115,6 +115,5 @@ export default function ViewCourse({ courseUniqueId }) {
                 </tbody>
             </table>
         </div>
-
     );
 }

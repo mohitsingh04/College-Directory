@@ -21,40 +21,9 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        // const fileExtension = file.fieldname === "logo" || file.fieldname === "featured_image" ? '.png' : file.fieldname === "podcast_hindi" || file.fieldname === "podcast_english" ? '.mp3' : '';
-        // cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
         cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
 });
-
-// const storeMedia = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         let uploadPath = '';
-//         switch (file.fieldname) {
-//             case "logo":
-//                 uploadPath = './media/exam/logo';
-//                 break;
-//             case "featured_image":
-//                 uploadPath = './media/exam/featured';
-//                 break;
-//             case "podcast_hindi":
-//             case "podcast_english":
-//                 uploadPath = './media/exam/podcast';
-//                 break;
-//             default:
-//                 break;
-//         }
-
-//         ensureDirectoryExistence(uploadPath);
-
-//         cb(null, uploadPath);
-//     },
-//     filename: function (req, file, cb) {
-//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//         const fileExtension = file.fieldname === "logo" || file.fieldname === "featured_image" ? '.png' : file.fieldname === "podcast_hindi" || file.fieldname === "podcast_english" ? '.mp3' : '';
-//         cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
-//     }
-// });
 
 const upload = multer({ storage: storage });
 

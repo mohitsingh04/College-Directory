@@ -3,13 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Col, Row, Card, Form, ListGroup, Breadcrumb, Button } from "react-bootstrap";
 import ALLImages from "../../common/Imagesdata";
 import ChangePassword from "../auth/password/ChangePassword";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-hot-toast";
-import { useFormik } from "formik";
 import { API } from "../../services/API";
 import Skeleton from "react-loading-skeleton";
 import LoadingBar from 'react-top-loading-bar';
 import PhoneInput from "react-phone-input-2";
+import ProfileImage from "./ProfileImage";
 
 const validationSchema = Yup.object({
     name: Yup.string()
@@ -92,7 +93,6 @@ export default function EditProfile() {
         city: user?.city || "",
         state: user?.state || "",
         country: user?.country || "",
-        profile_image: user?.profile_image || "",
     }
 
     const handleSubmit = async (values) => {
@@ -105,12 +105,11 @@ export default function EditProfile() {
         formData.append("city", values.city);
         formData.append("state", values.state);
         formData.append("country", values.country);
-        formData.append("profile_image", values.profile_image);
 
         startLoadingBar();
         const toastId = toast.loading("Updating...");
         try {
-            const response = await API.put(`/profile`, formData, {
+            const response = await API.put(`/update-profile`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -177,6 +176,14 @@ export default function EditProfile() {
                         <Col xl={4} md={12} sm={12}>
                             <Card className="custom-card edit-password-section">
                                 <Card.Header>
+                                    <div className="card-title">Profile Image</div>
+                                </Card.Header>
+                                <Card.Body>
+                                    <ProfileImage />
+                                </Card.Body>
+                            </Card>
+                            <Card className="custom-card edit-password-section">
+                                <Card.Header>
                                     <div className="card-title">Change Password</div>
                                 </Card.Header>
                                 <Card.Body>
@@ -197,38 +204,6 @@ export default function EditProfile() {
                                 <Card.Body>
                                     <Form onSubmit={formik.handleSubmit} encType="multipart/form-data">
                                         <Row>
-                                            {/* Profile Image */}
-                                            <Col className="mb-4" xl={12} md={12} sm={12}>
-                                                <Row>
-                                                    <Col xl={3} md={12} sm={12}>
-                                                        {previewProfile
-                                                            ? <img src={previewProfile} alt="Logo Preview" className="rounded-circle" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
-                                                            : user?.profile_image
-                                                                ? <img src={`${import.meta.env.VITE_API_URL}${user?.profile_image}`} alt="Profile Image Preview" className="rounded-circle" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
-                                                                : <img className="rounded-circle" src={ALLImages('face8')} alt="img" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
-                                                        }
-                                                    </Col>
-                                                    <Col xl={9} md={12} sm={12}>
-                                                        <Form.Group className="mb-3">
-                                                            {/* Hidden file input */}
-                                                            <Form.Control
-                                                                type="file"
-                                                                id="profile_image"
-                                                                name="profile_image"
-                                                                accept="image/jpeg, image/png"
-                                                                hidden
-                                                                onChange={(e) => handleFileChange(e, formik.setFieldValue, "profile_image", setPreviewProfile)}
-                                                                onBlur={formik.handleBlur}
-                                                            />
-
-                                                            {/* Label as button */}
-                                                            <Form.Label htmlFor="profile_image" className="btn btn-primary btn-sm">
-                                                                <i className="fe fe-upload me-1"></i>Upload Profile
-                                                            </Form.Label>
-                                                        </Form.Group>
-                                                    </Col>
-                                                </Row>
-                                            </Col>
                                             {/* Name */}
                                             <Col xl={12} md={12} sm={12}>
                                                 <Form.Group className="mb-3">

@@ -23,6 +23,7 @@ import LoadingBar from 'react-top-loading-bar';
 import toast from "react-hot-toast";
 import AdmissionProcess from "./propertyComponents/Admission Process/AdmissionProcess";
 import LoanProcess from "./propertyComponents/Loan Process/LoanProcess";
+import EnquiryList from "./propertyComponents/Enquiry/EnquiryList";
 
 export default function ViewProperty() {
     const navigate = useNavigate();
@@ -136,8 +137,9 @@ export default function ViewProperty() {
             );
         }
     }
-
+    
     const tabMapping = [
+        { id: "enquiry", label: "Enquiry" },
         { id: "info", label: "Info" },
         { id: "location", label: "Location" },
         { id: "gallery", label: "Gallery" },
@@ -154,7 +156,6 @@ export default function ViewProperty() {
         { id: "courses", label: "Courses" },
         { id: "admission-process", label: "Admission Process" },
         { id: "loan-process", label: "Loan Process" },
-
     ];
 
     const [activeTab, setActiveTab] = useState("info");
@@ -300,40 +301,45 @@ export default function ViewProperty() {
                                     </Row>
                                 </div>
                             </Card.Body>
-                            <div className="border-top">
-                                <div className="wideget-user-tab">
-                                    <div className="tab-menu-heading">
-                                        <div className="tabs-menu1">
-                                            {loading ? (
-                                                <>
-                                                    <Nav as='ul' variant="pills" className="nav-style-3">
-                                                        <Nav.Item as='li'><Nav.Link eventKey="first"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="second"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="third"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="fourth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="fifth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="sixth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="seventh"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                        <Nav.Item as='li'><Nav.Link eventKey="eighth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
-                                                    </Nav>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Nav as="ul" variant="pills" className="nav-style-3" activeKey={activeTab} onSelect={handleSelect}>
-                                                        {tabMapping.map((tab) => (
-                                                            <Nav.Item as="li" key={tab.id}>
-                                                                <Nav.Link eventKey={tab.id}>
-                                                                    {tab.label}
-                                                                </Nav.Link>
-                                                            </Nav.Item>
-                                                        ))}
-                                                    </Nav>
-                                                </>
-                                            )}
+                            {authUser?.role === "Property Manager"
+                                ?
+                                null
+                                :
+                                <div className="border-top">
+                                    <div className="wideget-user-tab">
+                                        <div className="tab-menu-heading">
+                                            <div className="tabs-menu1">
+                                                {loading ? (
+                                                    <>
+                                                        <Nav as='ul' variant="pills" className="nav-style-3">
+                                                            <Nav.Item as='li'><Nav.Link eventKey="first"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                            <Nav.Item as='li'><Nav.Link eventKey="second"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                            <Nav.Item as='li'><Nav.Link eventKey="third"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                            <Nav.Item as='li'><Nav.Link eventKey="fourth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                            <Nav.Item as='li'><Nav.Link eventKey="fifth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                            <Nav.Item as='li'><Nav.Link eventKey="sixth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                            <Nav.Item as='li'><Nav.Link eventKey="seventh"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                            <Nav.Item as='li'><Nav.Link eventKey="eighth"><Skeleton width={90} height={30} /></Nav.Link></Nav.Item>
+                                                        </Nav>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Nav as="ul" variant="pills" className="nav-style-3" activeKey={activeTab} onSelect={handleSelect}>
+                                                            {tabMapping.map((tab) => (
+                                                                <Nav.Item as="li" key={tab.id}>
+                                                                    <Nav.Link eventKey={tab.id}>
+                                                                        {tab.label}
+                                                                    </Nav.Link>
+                                                                </Nav.Item>
+                                                            ))}
+                                                        </Nav>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
                         </Card>
                         <Tab.Content>
                             <Tab.Pane className="p-0 border-0" eventKey="info">
@@ -383,6 +389,9 @@ export default function ViewProperty() {
                             </Tab.Pane>
                             <Tab.Pane className="p-0 border-0" eventKey="loan-process">
                                 <LoanProcess />
+                            </Tab.Pane>
+                            <Tab.Pane className="p-0 border-0" eventKey="enquiry">
+                                <EnquiryList />
                             </Tab.Pane>
                         </Tab.Content>
                     </Tab.Container>

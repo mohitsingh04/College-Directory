@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 galleryRouter.get("/gallery", getGallery);
-galleryRouter.get("/gallery/:uniqueId", authMiddleware, getGalleryById);
+galleryRouter.get("/gallery/:uniqueId", getGalleryById);
 galleryRouter.post("/gallery", upload.fields([{ name: 'gallery', maxCount: 8 }]), addGallery);
 galleryRouter.put("/gallery/:uniqueId", upload.fields([{ name: 'gallery', maxCount: 8 }]), updateGallery);
 galleryRouter.delete("/gallery/:uniqueId", deleteGallery);

@@ -4,7 +4,7 @@ import { addSeo, getSeo, updateSeo } from "../controller/SeoController.js";
 
 const seoRouter = express.Router();
 
-seoRouter.get("/seo", authMiddleware, getSeo);
+seoRouter.get("/seo", getSeo);
 seoRouter.post("/seo", addSeo);
 seoRouter.put("/seo/:uniqueId", updateSeo);
 

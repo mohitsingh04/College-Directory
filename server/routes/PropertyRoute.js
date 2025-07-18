@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 propertyRouter.get("/get-property-list", getProperty);
-propertyRouter.get("/property", authMiddleware, getProperty);
+propertyRouter.get("/property", getProperty);
 propertyRouter.get("/property/:uniqueId", getPropertyById);
 propertyRouter.post("/property", addProperty);
 propertyRouter.put("/property/:uniqueId", updateProperty);

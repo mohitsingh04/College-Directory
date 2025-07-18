@@ -49,7 +49,8 @@ export default function College() {
             const response = await API.post("/property", values);
 
             toast.success(response.data.message || "Added successfully", { id: toastId });
-            navigate('/dashboard/property');
+            navigate(`/dashboard/property/view/${response.data.savedProperty.uniqueId}?tab=info`);
+            window.location.reload();
         } catch (error) {
             toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }

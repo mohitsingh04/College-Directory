@@ -21,8 +21,6 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        // const fileExtension = file.fieldname === "brochure" ? '.pdf' : '.mp3';
-        // cb(null, `${file.fieldname}-${uniqueSuffix}${fileExtension}`);
         cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
 });

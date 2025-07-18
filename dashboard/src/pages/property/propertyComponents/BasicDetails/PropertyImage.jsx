@@ -48,20 +48,7 @@ export default function PropertyImage() {
                 toast.success(response.data.message || "Updated successfully", { id: toastId });
             }
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 400) {
-                    toast.error(error.response.data.error || "Bad Request");
-                } else if (error.response.status === 404) {
-                    toast.error(error.response.data.error || "Not Found");
-                } else if (error.response.status === 500) {
-                    console.log(error.response.data)
-                    toast.error("Internal server error, please try again later.");
-                } else {
-                    toast.error("Something went wrong, please try again.");
-                }
-            } else {
-                toast.error(`Failed: ${error.message}`);
-            }
+            toast.error(error.response?.data?.error || "Failed", { id: toastId });
         }
     };
 

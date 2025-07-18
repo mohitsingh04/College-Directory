@@ -1,5 +1,5 @@
 import express from "express";
-import { addUser, changePassword, deleteUser, forgotPassword, getPermissions, getRoles, getUser, getUserById, login, logout, myProfile, register, resendEmail, resetPassword, softDelete, token, updateProfile, updateUser, verifyEmail } from "../controller/UserController.js";
+import { addUser, changePassword, deleteUser, forgotPassword, getPermissions, getRoles, getUser, getUserById, login, logout, myProfile, register, resendEmail, resetPassword, softDelete, token, updateProfile, updateProfileImage, updateUser, verifyEmail } from "../controller/UserController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import multer from "multer";
 import fs from "fs";
@@ -35,20 +35,21 @@ userRouter.post("/logout", logout);
 userRouter.post("/verifyemail", verifyEmail);
 userRouter.post("/forgotpassword", forgotPassword);
 userRouter.post("/resetpassword", resetPassword);
-userRouter.get("/profile", authMiddleware, myProfile);
-userRouter.put("/profile", upload.fields([{ name: 'profile_image', maxCount: 1 }]), updateProfile);
+userRouter.get("/profile", myProfile);
+userRouter.put("/update-profile", updateProfile);
+userRouter.put("/update-profile-image", upload.fields([{ name: "profile_image", maxCount: 1 }]), updateProfileImage);
 userRouter.get("/token", token);
 userRouter.put("/changepassword", changePassword);
-userRouter.get("/roles", authMiddleware, getRoles);
-userRouter.get("/permissions", authMiddleware, getPermissions);
+userRouter.get("/roles", getRoles);
+userRouter.get("/permissions", getPermissions);
 userRouter.post("/resend-email/:email", resendEmail);
 
 // User Manage API's
 userRouter.get("/user", getUser);
-userRouter.post("/user", authMiddleware, addUser);
-userRouter.get("/user/:Id", authMiddleware, getUserById);
-userRouter.put("/user/:Id", authMiddleware, updateUser);
-userRouter.delete("/user/:Id", authMiddleware, deleteUser);
-userRouter.post("/soft-delete/:Id", authMiddleware, softDelete);
+userRouter.post("/user", addUser);
+userRouter.get("/user/:Id", getUserById);
+userRouter.put("/user/:Id", updateUser);
+userRouter.delete("/user/:Id", deleteUser);
+userRouter.post("/soft-delete/:Id", softDelete);
 
 export default userRouter;

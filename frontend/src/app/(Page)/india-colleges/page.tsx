@@ -101,7 +101,7 @@ export default function IndiaColleges() {
 	const fetchPropertyData = useCallback(async () => {
 		try {
 			setLoading(true);
-			const response = await API.get("/get-property-list");
+			const response = await API.get("/property");
 			const filteredPropertyData = response.data;
 			setPropertyData(filteredPropertyData);
 		} catch (error) {
@@ -158,12 +158,12 @@ export default function IndiaColleges() {
 		const fetchAndMergeData = async () => {
 			try {
 				setLoading(true);
-				const propertyResponse = await API.get("/get-property-list");
-				const locationResponse = await API.get("/get-property-location");
+				const propertyResponse = await API.get("/property");
+				const locationResponse = await API.get("/location");
 				const reviewsResponse = await API.get("/reviews");
 				const propertyCourseResponse = await API.get("/property-course");
 
-				const propertyList = propertyResponse?.data || [];
+				const propertyList = propertyResponse?.data?.filter((property: any)=>property.status === "Active") || [];
 				const locationList = locationResponse?.data || [];
 				const reviewsList = reviewsResponse?.data || [];
 				const propertyCourseList = propertyCourseResponse?.data || [];
@@ -340,7 +340,6 @@ export default function IndiaColleges() {
 		return <Loader />;
 	}
 
-	// console.log(`${filteredProperties[0]?.property_type}/${filteredProperties[0]?.uniqueId}/${filteredProperties[0]?.property_name}/${filteredProperties[0]?.location?.city}`)
 	const slugify = (text: string) =>
 		text
 			.toLowerCase()

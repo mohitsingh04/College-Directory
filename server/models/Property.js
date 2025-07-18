@@ -42,10 +42,12 @@ const PropertySchema = new mongoose.Schema({
         type: String,
         default: "image.png"
     },
+    logo_compressed: String,
     featured_image: {
         type: String,
         default: "image.png"
     },
+    featured_image_compressed: String,
     status: {
         type: String,
         default: "Pending"

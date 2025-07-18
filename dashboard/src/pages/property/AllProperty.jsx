@@ -190,6 +190,12 @@ export default function AllProperty() {
         document.title = "AJ | All Property";
     }, []);
 
+    useEffect(() => {
+        if (authUser?.role === "Property Manager") {
+            navigate('/dashboard');
+        }
+    }, [authUser?.role]);
+
     const hasPermission = authUser?.permission?.some(
         (item) => item.value === "Read Property"
     );

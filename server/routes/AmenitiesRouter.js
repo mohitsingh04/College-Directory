@@ -4,7 +4,7 @@ import { addAmenities, getAmenities, updateAmenities } from "../controller/Ameni
 
 const amenitiesRouter = express.Router();
 
-amenitiesRouter.get("/amenities", authMiddleware, getAmenities);
+amenitiesRouter.get("/amenities", getAmenities);
 amenitiesRouter.post("/amenities", addAmenities);
 amenitiesRouter.put("/amenities/:uniqueId", updateAmenities);
 

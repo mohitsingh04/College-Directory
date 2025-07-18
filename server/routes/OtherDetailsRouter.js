@@ -4,7 +4,7 @@ import { addOtherDetails, getOtherDetails, updateOtherDetails } from "../control
 
 const otherDetailsRouter = express.Router();
 
-otherDetailsRouter.get("/other-details", authMiddleware, getOtherDetails);
+otherDetailsRouter.get("/other-details", getOtherDetails);
 otherDetailsRouter.post("/other-details", addOtherDetails);
 otherDetailsRouter.put("/other-details/:uniqueId", updateOtherDetails);
 

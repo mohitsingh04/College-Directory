@@ -49,6 +49,7 @@ const UserSchema = new mongoose.Schema({
     profile_image: {
         type: String,
     },
+    profile_image_compressed: String,
     isVerified: {
         type: Boolean,
         default: false

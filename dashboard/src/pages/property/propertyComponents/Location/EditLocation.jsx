@@ -39,6 +39,8 @@ export default function EditLocation({ setLocation, setToggleLocationPage }) {
         fetchData();
     }, [uniqueId]);
 
+    console.log(states.length)
+
     const initialValues = {
         address: location[0]?.address || "",
         pincode: location[0]?.pincode || "",

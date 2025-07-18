@@ -27,6 +27,7 @@ import propertyCourseRouter from "./routes/PropertyCourseRouter.js";
 import amenitiesRouter from "./routes/AmenitiesRouter.js";
 import admissionProcessRouter from "./routes/AdmissionProcessRoute.js";
 import loanProcessRouter from "./routes/LoanProcessRoute.js";
+import enquiryRouter from "./routes/EnquiryRoute.js";
 
 dotenv.config();
 
@@ -69,6 +70,7 @@ app.use("/api/", propertyCourseRouter);
 app.use("/api/", amenitiesRouter);
 app.use("/api/", admissionProcessRouter);
 app.use("/api/", loanProcessRouter);
+app.use("/api/", enquiryRouter);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on http://localhost:${process.env.PORT}`);

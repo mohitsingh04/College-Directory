@@ -7,11 +7,11 @@ const locationRouter = express.Router();
 locationRouter.get("/get-property-location", getLocation);
 locationRouter.get("/location", getLocation);
 locationRouter.post("/location", addLocation);
-locationRouter.get("/location/:uniqueId", authMiddleware, getLocationById);
+locationRouter.get("/location/:uniqueId", getLocationById);
 locationRouter.put("/location/:uniqueId", updateLocation);
 // locationRouter.delete("/location/:uniqueId", deleteLocation);
-locationRouter.get("/fetch-country", authMiddleware, getCountry);
-locationRouter.get("/fetch-states", authMiddleware, getStates);
-locationRouter.get("/fetch-city", authMiddleware, getCity);
+locationRouter.get("/fetch-country", getCountry);
+locationRouter.get("/fetch-states", getStates);
+locationRouter.get("/fetch-city", getCity);
 
 export default locationRouter;

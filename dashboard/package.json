@@ -25,6 +25,7 @@
     "@reduxjs/toolkit": "^1.9.7",
     "@simonwep/pickr": "^1.9.1",
     "@tanstack/react-query": "^5.66.10",
+    "@tanstack/react-table": "^8.21.3",
     "@tinymce/tinymce-react": "^5.1.1",
     "apexcharts": "^3.49.1",
     "axios": "^1.7.7",

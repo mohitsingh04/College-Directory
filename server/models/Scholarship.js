@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { db1, db2 } from "../mongoose/index.js";
+import { db1 } from "../mongoose/index.js";
 
 const ScholarshipSchema = new mongoose.Schema({
     uniqueId: {

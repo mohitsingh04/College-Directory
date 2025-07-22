@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Card, Form, Breadcrumb, Button } from "react-bootstrap";
 import * as Yup from "yup";
@@ -11,6 +11,7 @@ import HandleUpdatePodcast from "./HandleUpdatePodcast";
 import LoadingBar from 'react-top-loading-bar';
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
+import { getEditorConfig } from "../../services/context/editorConfig";
 
 export default function EditExam() {
   const navigate = useNavigate();
@@ -21,13 +22,14 @@ export default function EditExam() {
   const [authUser, setAuthUser] = useState(null);
   const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const editorConfig = useMemo(() => getEditorConfig(), []);
 
   const startLoadingBar = () => loadingBarRef.current?.continuousStart();
   const stopLoadingBar = () => loadingBarRef.current?.complete();
 
   useEffect(() => {
     const fetchData = async () => {
-      startLoadingBar();      
+      startLoadingBar();
       setHandlePermissionLoading(true);
       try {
 
@@ -351,9 +353,7 @@ export default function EditExam() {
                     <Form.Group className="mb-3">
                       <Form.Label>Description</Form.Label>
                       <JoditEditor
-                        config={{
-                          height: 300,
-                        }}
+                        config={editorConfig}
                         id="description"
                         value={formik.values.description}
                         onBlur={(newContent) =>

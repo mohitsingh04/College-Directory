@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 const validationSchema = Yup.object({
     scholarship: Yup.string()
@@ -18,6 +19,7 @@ export default function EditScholarship({ setScholarship, setToggleScholarshipPa
     const { uniqueId } = useParams();
     const [scholarshipData, setScholarshipData] = useState("");
     const [loading, setLoading] = useState(true);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     useEffect(() => {
         const fetchScholarship = async () => {
@@ -78,9 +80,7 @@ export default function EditScholarship({ setScholarship, setToggleScholarshipPa
                             <Form.Group className="mb-3">
                                 <Form.Label>Scholarship</Form.Label>
                                 <JoditEditor
-                                    config={{
-                                        height: 300,
-                                    }}
+                                    config={editorConfig}
                                     value={formik.values.scholarship}
                                     onBlur={(newContent) =>
                                         formik.setFieldValue("scholarship", newContent)

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Card, Form, Breadcrumb, Button } from "react-bootstrap";
 import Dropdown from "react-dropdown-select";
@@ -9,6 +9,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
 import Skeleton from "react-loading-skeleton";
 import JoditEditor from "jodit-react";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 export default function EditCourse({ courseUniqueId }) {
     const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function EditCourse({ courseUniqueId }) {
     const [courseData, setCourseData] = useState([]);
     const [propertyCourse, setPropertyCourse] = useState("");
     const [loading, setLoading] = useState(true);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     useEffect(() => {
         const fetchPropertyCourse = async () => {
@@ -394,9 +396,7 @@ export default function EditCourse({ courseUniqueId }) {
                             <Form.Group className="mb-3">
                                 <Form.Label htmlFor="userName">Description</Form.Label>
                                 <JoditEditor
-                                    config={{
-                                        height: 300,
-                                    }}
+                                    config={editorConfig}
                                     value={formik.values.description}
                                     onBlur={(newContent) =>
                                         formik.setFieldValue("description", newContent)

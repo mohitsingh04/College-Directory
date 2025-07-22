@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
@@ -7,12 +7,14 @@ import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 export default function EditQuestionAndAnswer({ questionAndAnswerUniqueId, onQnaUpdated }) {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [questionAndAnswer, setQuestionAndAnswer] = useState("");
     const [loading, setLoading] = useState(true);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     useEffect(() => {
         const fetchQuestionAndAnswer = async () => {
@@ -42,7 +44,7 @@ export default function EditQuestionAndAnswer({ questionAndAnswerUniqueId, onQna
     });
 
     const handleSubmit = async (values) => {
-            const toastId = toast.loading("Updating...");
+        const toastId = toast.loading("Updating...");
         try {
             const response = await API.put(`/questionAndAnswer/${questionAndAnswerUniqueId}`, values);
 
@@ -96,9 +98,7 @@ export default function EditQuestionAndAnswer({ questionAndAnswerUniqueId, onQna
                             <Form.Group className="mb-3">
                                 <Form.Label>Answer</Form.Label>
                                 <JoditEditor
-                                    config={{
-                                        height: 300,
-                                    }}
+                                    config={editorConfig}
                                     value={formik.values.answer}
                                     onBlur={(newContent) =>
                                         formik.setFieldValue("answer", newContent)

@@ -39,8 +39,8 @@ export default function College() {
     const validationSchema = Yup.object({
         property_name: Yup.string().required("College name is required."),
         short_name: Yup.string().required("Short name is required."),
-        phone_number: Yup.string().required("Phone is required."),
-        email: Yup.string().required("Email address is required."),
+        // phone_number: Yup.string().required("Phone is required."),
+        // email: Yup.string().required("Email address is required."),
     });
 
     const handleSubmit = async (values) => {
@@ -118,30 +118,16 @@ export default function College() {
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="phone_number">Phone Number</Form.Label>
-                            {/* <PhoneInput
-                                country={'in'}
-                                value={formik.values.phone_number}
-                                inputClass={`border w-100 ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
-                                inputStyle={{ height: "45px" }}
-                                buttonClass={`bg-white border ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
-                                onChange={(value) => formik.setFieldValue("phone_number", value)}
-                                onBlur={formik.handleBlur("phone_number")}
-                            /> */}
                             <Form.Control
                                 type="text"
                                 id="phone_number"
                                 placeholder="Phone number/Landline number"
                                 name="phone_number"
-                                className={`form-control ${formik.touched.phone_number && formik.errors.phone_number ? 'is-invalid' : ''}`}
+                                className={`form-control`}
                                 value={formik.values.phone_number}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {formik.touched.phone_number && formik.errors.phone_number ? (
-                                <div className="text-danger">
-                                    {formik.errors.phone_number}
-                                </div>
-                            ) : null}
                         </Form.Group>
                     </Col>
                     {/* Email */}
@@ -153,16 +139,11 @@ export default function College() {
                                 id="email"
                                 placeholder="Email"
                                 name="email"
-                                className={`form-control ${formik.touched.email && formik.errors.email ? 'is-invalid' : ''}`}
+                                className={`form-control`}
                                 value={formik.values.email}
                                 onChange={formik.handleChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {formik.touched.email && formik.errors.email ? (
-                                <div className="text-danger">
-                                    {formik.errors.email}
-                                </div>
-                            ) : null}
                         </Form.Group>
                     </Col>
                     {/* Affiliated By */}

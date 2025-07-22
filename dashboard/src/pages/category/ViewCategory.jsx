@@ -14,6 +14,7 @@ export default function ViewCategory() {
     const [authUser, setAuthUser] = useState(null);
     const loadingBarRef = useRef(null);
     const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
+    const [isExpanded, setIsExpanded] = useState();
 
     const startLoadingBar = () => loadingBarRef.current?.continuousStart();
     const stopLoadingBar = () => loadingBarRef.current?.complete();
@@ -49,6 +50,10 @@ export default function ViewCategory() {
 
         getCategory();
     }, [objectId]);
+
+    const toggleReadMore = () => {
+        setIsExpanded((prev) => !prev);
+    };
 
     useEffect(() => {
         document.title = "AJ | View Category";
@@ -151,7 +156,7 @@ export default function ViewCategory() {
                                 )}
                                 <h3 className="mt-3">{category.parent_category}  ({category.category_name})</h3>
                                 <div style={{ fontSize: "16px" }}>
-                                    <h6 className="mt-3">Description: </h6>
+                                    <h6 className="mt-3">Description:</h6>
                                     {category.description.length >= 1500 ? (
                                         <>
                                             <p
@@ -161,12 +166,17 @@ export default function ViewCategory() {
                                                         : category.description.substring(0, 1200) + "...",
                                                 }}
                                             />
-                                            <button onClick={toggleReadMore} className="text-blue-700 underline">
+                                            <button
+                                                onClick={toggleReadMore}
+                                                className="text-blue-700 underline"
+                                            >
                                                 {isExpanded ? "Read Less" : "Read More"}
                                             </button>
                                         </>
                                     ) : (
-                                        <p dangerouslySetInnerHTML={{ __html: category.description }} />
+                                        <p
+                                            dangerouslySetInnerHTML={{ __html: category.description }}
+                                        />
                                     )}
                                 </div>
                             </>

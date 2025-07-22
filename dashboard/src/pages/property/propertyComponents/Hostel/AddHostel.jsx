@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { useFormik } from "formik";
@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import * as Yup from "yup";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 const validationSchema = Yup.object({
     boys_hostel_fees: Yup.number()
@@ -21,6 +22,7 @@ const validationSchema = Yup.object({
 
 export default function AddHostel({ setHostel, setToggleHostelPage }) {
     const { uniqueId } = useParams();
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     const initialValues = {
         propertyId: uniqueId,
@@ -115,9 +117,7 @@ export default function AddHostel({ setHostel, setToggleHostelPage }) {
                         <Form.Group className="mb-3">
                             <Form.Label>Girls Hostel Description</Form.Label>
                             <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
+                                config={editorConfig}
                                 value={formik.values.girls_hostel_description}
                                 onBlur={(newContent) =>
                                     formik.setFieldValue("girls_hostel_description", newContent)

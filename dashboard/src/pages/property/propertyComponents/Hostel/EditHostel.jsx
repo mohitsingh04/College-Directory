@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { useFormik } from "formik";
@@ -6,11 +6,13 @@ import { toast } from "react-hot-toast";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 export default function EditHostel({ setHostelData, setToggleHostelPage }) {
     const { uniqueId } = useParams();
     const [hostel, setHostel] = useState([]);
     const [loading, setLoading] = useState(true);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     useEffect(() => {
         const fetchHostel = async () => {
@@ -119,9 +121,7 @@ export default function EditHostel({ setHostelData, setToggleHostelPage }) {
                             <Form.Group className="mb-3">
                                 <Form.Label>Girls Hostel Description</Form.Label>
                                 <JoditEditor
-                                    config={{
-                                        height: 300,
-                                    }}
+                                    config={editorConfig}
                                     value={formik.values.girls_hostel_description}
                                     onBlur={(newContent) =>
                                         formik.setFieldValue("girls_hostel_description", newContent)

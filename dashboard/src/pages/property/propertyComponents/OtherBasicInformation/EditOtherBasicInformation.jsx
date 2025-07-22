@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
@@ -7,12 +7,14 @@ import { Editor } from '@tinymce/tinymce-react';
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 export default function EditOtherBasicInformation() {
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const [otherBasicInformation, setOtherBasicInformation] = useState([]);
     const [loading, setLoading] = useState(true);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     useEffect(() => {
         const fetchOtherBasicInformation = async () => {
@@ -250,9 +252,7 @@ export default function EditOtherBasicInformation() {
                         <Form.Group className="mb-3">
                             <Form.Label>Short Description</Form.Label>
                             <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
+                                config={editorConfig}
                                 value={formik.values.short_description}
                                 onBlur={(newContent) =>
                                     formik.setFieldValue("short_description", newContent)
@@ -265,9 +265,7 @@ export default function EditOtherBasicInformation() {
                         <Form.Group className="mb-3">
                             <Form.Label>Full Description</Form.Label>
                             <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
+                                config={editorConfig}
                                 value={formik.values.full_description}
                                 onBlur={(newContent) =>
                                     formik.setFieldValue("full_description", newContent)

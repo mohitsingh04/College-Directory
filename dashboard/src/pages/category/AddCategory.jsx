@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Col, Row, Card, Form, Breadcrumb, Button } from "react-bootstrap";
 import * as Yup from "yup";
@@ -9,6 +9,7 @@ import { API } from "../../services/API";
 import LoadingBar from 'react-top-loading-bar';
 import JoditEditor from "jodit-react";
 import ALLImages from "../../common/Imagesdata";
+import { getEditorConfig } from "../../services/context/editorConfig";
 
 export default function AddCategory() {
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function AddCategory() {
     const [PreviewLogo, setPreviewLogo] = useState(null);
     const [PreviewFeaturedImage, setPreviewFeaturedImage] = useState(null);
     const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     const startLoadingBar = () => loadingBarRef.current?.continuousStart();
     const stopLoadingBar = () => loadingBarRef.current?.complete();
@@ -235,39 +237,12 @@ export default function AddCategory() {
                                 <Form.Group className="mb-6">
                                     <Form.Label>Description</Form.Label>
                                     <JoditEditor
-                                        config={{
-                                            height: 300,
-                                        }}
+                                        config={editorConfig}
                                         value={formik.values.description}
                                         onBlur={(newContent) =>
                                             formik.setFieldValue("description", newContent)
                                         }
                                     />
-                                    {/* <JoditEditor
-                                        value={formik.values.description}
-                                        config={{
-                                            height: 300,
-                                            toolbarAdaptive: false,
-                                            readonly: false,
-                                            useSearch: true, // example plugin
-                                            uploader: { insertImageAsBase64URI: true }, // for image paste
-                                            enableDragAndDropFileToEditor: true,
-                                            buttons: [
-                                                'bold', 'italic', 'underline', '|',
-                                                'ul', 'ol', '|',
-                                                'font', 'fontsize', 'brush', 'paragraph', '|',
-                                                'image', 'video', 'table', 'link', '|',
-                                                'undo', 'redo', 'copyformat', 'hr', 'eraser', '|',
-                                                'fullsize', 'preview', 'print'
-                                            ],
-                                            extraButtons: [],
-                                            showXPathInStatusbar: false,
-                                            language: 'en',
-                                        }}
-                                        onChange={(newContent) =>
-                                            formik.setFieldValue("description", newContent)
-                                        }
-                                    /> */}
                                 </Form.Group>
                             </Col>
                             {/* Logo */}

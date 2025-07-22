@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import Dropdown from "react-dropdown-select";
@@ -7,6 +7,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 export default function AddCourse({ onCourseAdded }) {
     const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function AddCourse({ onCourseAdded }) {
     const [propertyCourseData, setPropertyCourseData] = useState([]);
     const [selectedCourseUniqueId, setSelectedCourseUniqueId] = useState("");
     const [selectedPropertyCourseName, setSelectedPropertyCourseName] = useState("");
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     // Current Property Data
     useEffect(() => {
@@ -461,9 +463,7 @@ export default function AddCourse({ onCourseAdded }) {
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="userName">Description</Form.Label>
                             <JoditEditor
-                                config={{
-                                    height: 300,
-                                }}
+                                config={editorConfig}
                                 value={formik.values.description}
                                 onBlur={(newContent) =>
                                     formik.setFieldValue("description", newContent)

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Card, Form, Breadcrumb, Button } from "react-bootstrap";
 import Dropdown from "react-dropdown-select";
@@ -9,6 +9,7 @@ import { API } from "../../services/API";
 import LoadingBar from "react-top-loading-bar";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
+import { getEditorConfig } from "../../services/context/editorConfig";
 
 export default function EditCourse() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function EditCourse() {
   const [filteredSubCategory, setFilteredSubCategory] = useState([]);
   const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const editorConfig = useMemo(() => getEditorConfig(), []);
 
   const startLoadingBar = () => loadingBarRef.current?.continuousStart();
   const stopLoadingBar = () => loadingBarRef.current?.complete();
@@ -427,9 +429,7 @@ export default function EditCourse() {
                   <Form.Group className="mb-3">
                     <Form.Label htmlFor="userName">Description</Form.Label>
                     <JoditEditor
-                      config={{
-                        height: 300,
-                      }}
+                      config={editorConfig}
                       value={formik.values.description}
                       onBlur={(newContent) =>
                         formik.setFieldValue("description", newContent)

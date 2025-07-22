@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
@@ -8,6 +8,7 @@ import { API } from "../../../../services/API";
 import Dropdown from "react-dropdown-select";
 import Skeleton from "react-loading-skeleton";
 import JoditEditor from "jodit-react";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 export default function EditSeo({ setSeo, setToggleSeoPage }) {
     const { uniqueId } = useParams();
@@ -15,6 +16,7 @@ export default function EditSeo({ setSeo, setToggleSeoPage }) {
     const [count, setCount] = useState(0);
     const maxChars = 200;
     const [loading, setLoading] = useState(true);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     useEffect(() => {
         const fetchSeo = async () => {
@@ -178,9 +180,7 @@ export default function EditSeo({ setSeo, setToggleSeoPage }) {
                             <Form.Group className="mb-3">
                                 <Form.Label>Description</Form.Label>
                                 <JoditEditor
-                                    config={{
-                                        height: 300,
-                                    }}
+                                    config={editorConfig}
                                     value={formik.values.description}
                                     onBlur={(newContent) =>
                                         formik.setFieldValue("description", newContent)

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
@@ -7,11 +7,13 @@ import * as Yup from "yup";
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
 import Skeleton from "react-loading-skeleton";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 export default function EditFaqs({ faqsUniqueId, onFaqUpdated }) {
     const { uniqueId } = useParams();
     const [faqs, setFaqs] = useState("");
     const [loading, setLoading] = useState(true);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     useEffect(() => {
         const fetchFaqs = async () => {
@@ -101,7 +103,7 @@ export default function EditFaqs({ faqsUniqueId, onFaqUpdated }) {
                             <Form.Group className="mb-3">
                                 <Form.Label>Answer</Form.Label>
                                 <JoditEditor
-                                    config={{ height: 300 }}
+                                    config={editorConfig}
                                     value={formik.values.answer}
                                     onBlur={(newContent) => formik.setFieldValue("answer", newContent)}
                                 />

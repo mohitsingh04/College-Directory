@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { toast } from "react-hot-toast";
@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import * as Yup from 'yup';
 import { API } from "../../../../services/API";
 import JoditEditor from "jodit-react";
+import { getEditorConfig } from "../../../../services/context/editorConfig";
 
 const validationSchema = Yup.object({
   process: Yup.string()
@@ -15,6 +16,7 @@ const validationSchema = Yup.object({
 export default function AddAdmissionProcess({ setAdmissionProcess, setToggleAdmissionProcessPage }) {
   const navigate = useNavigate();
   const { uniqueId } = useParams();
+  const editorConfig = useMemo(() => getEditorConfig(), []);
 
   const initialValues = {
     propertyId: uniqueId,
@@ -53,9 +55,7 @@ export default function AddAdmissionProcess({ setAdmissionProcess, setToggleAdmi
             <Form.Group className="mb-3">
               <Form.Label>Admission Process</Form.Label>
               <JoditEditor
-                config={{
-                  height: 300,
-                }}
+                config={editorConfig}
                 value={formik.values.process}
                 onBlur={(newContent) =>
                   formik.setFieldValue("process", newContent)

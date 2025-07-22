@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Col, Row, Card, Form, Breadcrumb, Button } from "react-bootstrap";
 import * as Yup from "yup";
@@ -8,6 +8,7 @@ import { API } from "../../services/API";
 import LoadingBar from 'react-top-loading-bar';
 import ALLImages from "../../common/Imagesdata";
 import JoditEditor from "jodit-react";
+import { getEditorConfig } from "../../services/context/editorConfig";
 
 export default function EditCategory() {
     const { objectId } = useParams();
@@ -20,6 +21,7 @@ export default function EditCategory() {
     const loadingBarRef = useRef(null);
     const [handlePermissionLoading, setHandlePermissionLoading] = useState(false);
     const [status, setStatus] = useState([]);
+    const editorConfig = useMemo(() => getEditorConfig(), []);
 
     const startLoadingBar = () => loadingBarRef.current?.continuousStart();
     const stopLoadingBar = () => loadingBarRef.current?.complete();
@@ -271,9 +273,7 @@ export default function EditCategory() {
                                 <Form.Group className="mb-3">
                                     <Form.Label>Description</Form.Label>
                                     <JoditEditor
-                                        config={{
-                                            height: 300,
-                                        }}
+                                        config={editorConfig}
                                         value={formik.values.description}
                                         onBlur={(newContent) =>
                                             formik.setFieldValue("description", newContent)

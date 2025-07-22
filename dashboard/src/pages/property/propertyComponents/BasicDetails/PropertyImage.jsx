@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { useFormik } from "formik";
 import ALLImages from "../../../../common/Imagesdata";
 import { API } from "../../../../services/API";
+import Skeleton from "react-loading-skeleton";
 
 export default function PropertyImage() {
     const navigate = useNavigate();
@@ -64,6 +65,9 @@ export default function PropertyImage() {
         setPreview(URL.createObjectURL(file));
     };
 
+    if (!property) {
+        return <Skeleton height={300} />;
+    }
 
     return (
         <Fragment>

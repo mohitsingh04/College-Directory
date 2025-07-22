@@ -48,6 +48,10 @@ app.use(
     })
 );
 
+app.get("/", (req, res) => {
+    res.send("API is running");
+});
+
 app.use("/api/", userRouter);
 app.use("/api/", statusRouter);
 app.use("/api/", examRouter);

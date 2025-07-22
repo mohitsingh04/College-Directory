@@ -52,7 +52,7 @@ const HeroSection = () => {
 									className="w-full rounded-lg border-gray-300 pl-10 pr-4 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
 								/>
 							</div>
-							<button className="flex-none rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+							<button className="flex-none rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
 								Search
 							</button>
 						</div>
@@ -93,8 +93,8 @@ const HeroSection = () => {
 					<div className="relative mt-14 sm:mt-20 lg:mt-0 lg:w-1/2">
 						<div className="relative mx-auto w-full max-w-lg">
 							<img
-								className="w-full max-w-lg rounded-xl shadow-lg ring-1 ring-gray-400/10"
-								src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+								className="max-w-lg rounded-xl shadow-lg ring-1 ring-gray-400/10"
+								src="https://picsum.photos/536/354"
 								alt="College students studying in a modern library"
 							/>
 						</div>

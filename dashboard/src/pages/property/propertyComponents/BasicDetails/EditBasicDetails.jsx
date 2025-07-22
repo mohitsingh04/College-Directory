@@ -143,7 +143,7 @@ export default function EditBasicDetails({ onUpdated }) {
                 {/* Phone Number */}
                 <Col md={6}>
                     <Form.Group className="mb-3">
-                        <PhoneInput
+                        {/* <PhoneInput
                             country={'in'}
                             value={formik.values.phone_number}
                             onChange={(value) => formik.setFieldValue("phone_number", value)}
@@ -151,6 +151,16 @@ export default function EditBasicDetails({ onUpdated }) {
                             inputClass={`border w-100 ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
                             inputStyle={{ height: "45px" }}
                             buttonClass={`bg-white border ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
+                        /> */}
+                        <Form.Control
+                            type="text"
+                            id="phone_number"
+                            placeholder="Phone number/Landline number"
+                            name="phone_number"
+                            className={`form-control ${formik.touched.phone_number && formik.errors.phone_number ? 'is-invalid' : ''}`}
+                            value={formik.values.phone_number}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
                         />
                         {formik.touched.phone_number && formik.errors.phone_number && (
                             <div className="text-danger">{formik.errors.phone_number}</div>
@@ -161,13 +171,23 @@ export default function EditBasicDetails({ onUpdated }) {
                 {/* Alternate Phone */}
                 <Col md={6}>
                     <Form.Group className="mb-3">
-                        <PhoneInput
+                        {/* <PhoneInput
                             country={'in'}
                             value={formik.values.alt_phone_number}
                             onChange={(value) => formik.setFieldValue("alt_phone_number", value)}
                             onBlur={formik.handleBlur("alt_phone_number")}
                             inputClass="border w-100"
                             inputStyle={{ height: "45px" }}
+                        /> */}
+                        <Form.Control
+                            type="text"
+                            id="alt_phone_number"
+                            placeholder="Phone number/Landline number"
+                            name="alt_phone_number"
+                            className={`form-control ${formik.touched.alt_phone_number && formik.errors.alt_phone_number ? 'is-invalid' : ''}`}
+                            value={formik.values.alt_phone_number}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
                         />
                     </Form.Group>
                 </Col>

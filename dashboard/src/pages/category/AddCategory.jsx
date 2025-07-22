@@ -243,6 +243,31 @@ export default function AddCategory() {
                                             formik.setFieldValue("description", newContent)
                                         }
                                     />
+                                    {/* <JoditEditor
+                                        value={formik.values.description}
+                                        config={{
+                                            height: 300,
+                                            toolbarAdaptive: false,
+                                            readonly: false,
+                                            useSearch: true, // example plugin
+                                            uploader: { insertImageAsBase64URI: true }, // for image paste
+                                            enableDragAndDropFileToEditor: true,
+                                            buttons: [
+                                                'bold', 'italic', 'underline', '|',
+                                                'ul', 'ol', '|',
+                                                'font', 'fontsize', 'brush', 'paragraph', '|',
+                                                'image', 'video', 'table', 'link', '|',
+                                                'undo', 'redo', 'copyformat', 'hr', 'eraser', '|',
+                                                'fullsize', 'preview', 'print'
+                                            ],
+                                            extraButtons: [],
+                                            showXPathInStatusbar: false,
+                                            language: 'en',
+                                        }}
+                                        onChange={(newContent) =>
+                                            formik.setFieldValue("description", newContent)
+                                        }
+                                    /> */}
                                 </Form.Group>
                             </Col>
                             {/* Logo */}

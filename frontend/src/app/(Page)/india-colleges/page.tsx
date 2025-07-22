@@ -3,14 +3,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { Search, ChevronDown, Star, MapPin } from "lucide-react";
 import API from "@/services/API/API";
-import { useSearchParams } from "next/navigation";
 import Loader from "@/Components/Loader/Loader";
 import Link from "next/link";
 
+// Interfaces
 interface Review {
 	rating: number;
 }
-
+interface Affiliation {
+	value: string;
+	label: string;
+}
+interface PropertyCourse {
+	uniqueId: number;
+	name: { value: string }[];
+	short_name: string;
+	course_type: { value: string }[];
+}
 interface Property {
 	property_name: string;
 	short_name: string;
@@ -19,33 +28,16 @@ interface Property {
 	featured_image: string;
 	reviews: Review[];
 	college_or_university_type: { value: string }[];
-	location: {
-		city: string;
-		state: string;
-	};
-	affiliated_by: any;
-	propertyCourse: any[];
+	location: { city: string; state: string };
+	affiliated_by: Affiliation[];
+	propertyCourse: PropertyCourse[];
+	brochure_url?: string;
 }
-
-interface PropertyCourse {
-	uniqueId: number;
-	name: { value: string }[];
-	short_name: string;
-	course_type: { value: string }[];
-}
-
 interface PropertyLocation {
 	uniqueId: number;
 	city: string;
 	state: string;
 }
-
-interface PropertyCategory {
-	uniqueId: number;
-	category_name: string;
-	parent_category: string;
-}
-
 interface Filters {
 	courses: string[];
 	states: string[];
@@ -54,28 +46,20 @@ interface Filters {
 	collegeTypes: string[];
 }
 
+// Component
 export default function IndiaColleges() {
-	const searchParams = useSearchParams();
-	const [propertyData, setPropertyData] = useState<Property[]>([]);
 	const [mergedData, setMergedData] = useState<Property[]>([]);
 	const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+	const [loading, setLoading] = useState(true);
 	const [propertyCourse, setPropertyCourse] = useState<PropertyCourse[]>([]);
 	const [propertyLocation, setPropertyLocation] = useState<PropertyLocation[]>(
 		[]
 	);
-	const [propertyCategory, setPropertyCategory] = useState<PropertyCategory[]>(
-		[]
-	);
-	const [loading, setLoading] = useState(true);
-
-	// Search states
 	const [searchPropertyCourse, setSearchPropertyCourse] = useState("");
 	const [searchPropertyState, setSearchPropertyState] = useState("");
 	const [searchPropertyCity, setSearchPropertyCity] = useState("");
 	const [searchPropertyCollegeType, setSearchPropertyCollegeType] =
 		useState("");
-
-	// Filter data states
 	const [filterPropertyCourseData, setFilterPropertyCourseData] = useState<
 		PropertyCourse[]
 	>([]);
@@ -88,7 +72,6 @@ export default function IndiaColleges() {
 	const [filterPropertyCollegeTypeData, setFilterPropertyCollegeTypeData] =
 		useState<Property[]>([]);
 
-	// Selected filters
 	const [selectedFilters, setSelectedFilters] = useState<Filters>({
 		courses: [],
 		states: [],
@@ -97,231 +80,9 @@ export default function IndiaColleges() {
 		collegeTypes: [],
 	});
 
-	// Fetch Property Data
-	const fetchPropertyData = useCallback(async () => {
-		try {
-			setLoading(true);
-			const response = await API.get("/property");
-			const filteredPropertyData = response.data;
-			setPropertyData(filteredPropertyData);
-		} catch (error) {
-			console.log(error);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// Fetch Course Data
-	const fetchPropertyDataCourse = useCallback(async () => {
-		try {
-			setLoading(true);
-			const response = await API.get("/property-course");
-			const filteredPropertyCourseData = response.data;
-			setPropertyCourse(filteredPropertyCourseData);
-		} catch (error) {
-			console.log(error);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// Fetch Location Data
-	const fetchPropertyDataLocation = useCallback(async () => {
-		try {
-			setLoading(true);
-			const response = await API.get("/location");
-			const filteredPropertyLocationData = response.data;
-			setPropertyLocation(filteredPropertyLocationData);
-		} catch (error) {
-			console.log(error);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// Fetch Category Data
-	const fetchPropertyDataCategory = useCallback(async () => {
-		try {
-			setLoading(true);
-			const response = await API.get("/category");
-			const filteredPropertyCategoryData = response.data;
-			setPropertyCategory(filteredPropertyCategoryData);
-		} catch (error) {
-			console.log(error);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	// Fetch Merged Data
-	useEffect(() => {
-		const fetchAndMergeData = async () => {
-			try {
-				setLoading(true);
-				const propertyResponse = await API.get("/property");
-				const locationResponse = await API.get("/location");
-				const reviewsResponse = await API.get("/reviews");
-				const propertyCourseResponse = await API.get("/property-course");
-
-				const propertyList = propertyResponse?.data?.filter((property: any)=>property.status === "Active") || [];
-				const locationList = locationResponse?.data || [];
-				const reviewsList = reviewsResponse?.data || [];
-				const propertyCourseList = propertyCourseResponse?.data || [];
-
-				const locationMap = new Map(
-					locationList.map((loc: any) => [loc.propertyId, loc])
-				);
-				const reviewsMap = new Map();
-				reviewsList.forEach((rew: any) => {
-					if (!reviewsMap.has(rew.propertyId)) {
-						reviewsMap.set(rew.propertyId, []);
-					}
-					reviewsMap.get(rew.propertyId).push(rew);
-				});
-				const propertyCourseMap = new Map();
-				propertyCourseList.forEach((course: any) => {
-					if (!propertyCourseMap.has(course.propertyId)) {
-						propertyCourseMap.set(course.propertyId, []);
-					}
-					propertyCourseMap.get(course.propertyId).push(course);
-				});
-
-				const merged = propertyList.map((property: any) => ({
-					...property,
-					location: locationMap.get(property.uniqueId) || null,
-					reviews: reviewsMap.get(property.uniqueId) || [],
-					propertyCourse: propertyCourseMap.get(property.uniqueId) || [],
-				}));
-
-				setMergedData(merged);
-				setFilteredProperties(merged);
-			} catch (error: any) {
-				console.log(error.message);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchAndMergeData();
-	}, []);
-
-	useEffect(() => {
-		fetchPropertyData();
-		fetchPropertyDataCourse();
-		fetchPropertyDataLocation();
-		fetchPropertyDataCategory();
-	}, [
-		fetchPropertyData,
-		fetchPropertyDataCourse,
-		fetchPropertyDataLocation,
-		fetchPropertyDataCategory,
-	]);
-
-	// Handle filter changes
-	const handleFilterChange = (filterType: keyof Filters, value: string) => {
-		setSelectedFilters((prev) => {
-			const newFilters = { ...prev };
-			if (newFilters[filterType].includes(value)) {
-				newFilters[filterType] = newFilters[filterType].filter(
-					(item) => item !== value
-				);
-			} else {
-				newFilters[filterType] = [...newFilters[filterType], value];
-			}
-			return newFilters;
-		});
-	};
-
-	// Apply all filters
-	useEffect(() => {
-		let filtered = [...mergedData];
-
-		// Filter by courses
-		if (selectedFilters.courses.length > 0) {
-			filtered = filtered.filter((property) =>
-				property.propertyCourse.some((course: any) =>
-					selectedFilters.courses.includes(course.name[0]?.value)
-				)
-			);
-		}
-
-		// Filter by states
-		if (selectedFilters.states.length > 0) {
-			filtered = filtered.filter((property) =>
-				selectedFilters.states.includes(property.location?.state)
-			);
-		}
-
-		// Filter by cities
-		if (selectedFilters.cities.length > 0) {
-			filtered = filtered.filter((property) =>
-				selectedFilters.cities.includes(property.location?.city)
-			);
-		}
-
-		// Filter by college types
-		if (selectedFilters.collegeTypes.length > 0) {
-			filtered = filtered.filter((property) =>
-				property.college_or_university_type.some((type) =>
-					selectedFilters.collegeTypes.includes(type.value)
-				)
-			);
-		}
-
-		setFilteredProperties(filtered);
-	}, [selectedFilters, mergedData]);
-
-	// Fiter Course
-	useEffect(() => {
-		const filteredData = propertyCourse?.filter((course) => {
-			const searchValue = searchPropertyCourse?.toLowerCase();
-			const nameMatch = course.name?.[0]?.value
-				?.toLowerCase()
-				?.includes(searchValue);
-			const shortNameMatch = course?.short_name
-				?.toLowerCase()
-				.includes(searchValue);
-			return nameMatch || shortNameMatch;
-		});
-		setFilterPropertyCourseData(filteredData);
-	}, [propertyCourse, searchPropertyCourse]);
-
-	// Fiter State
-	useEffect(() => {
-		const searchValue = searchPropertyState.toLowerCase();
-		const filteredData = propertyLocation.filter((propertyState) => {
-			const nameMatch = propertyState.state
-				?.toLowerCase()
-				.includes(searchValue);
-			return nameMatch;
-		});
-		setFilterPropertyStateData(filteredData);
-	}, [propertyLocation, searchPropertyState]);
-
-	// Fiter City
-	useEffect(() => {
-		const searchValue = searchPropertyCity.toLowerCase();
-		const filteredData = propertyLocation.filter((propertyCity) => {
-			const nameMatch = propertyCity.city?.toLowerCase().includes(searchValue);
-			return nameMatch;
-		});
-		setFilterPropertyCityData(filteredData);
-	}, [propertyLocation, searchPropertyCity]);
-
-	// Fiter College Type
-	useEffect(() => {
-		const filteredData = propertyData.filter((property) => {
-			const searchValue = searchPropertyCollegeType.toLowerCase();
-			const nameMatch = property.college_or_university_type[0]?.value
-				?.toLowerCase()
-				.includes(searchValue);
-			console.log(nameMatch);
-			return nameMatch;
-		});
-		setFilterPropertyCollegeTypeData(filteredData);
-	}, [propertyData, searchPropertyCollegeType]);
-
-	const [expandedSections, setExpandedSections] = useState({
+	const [expandedSections, setExpandedSections] = useState<
+		Record<string, boolean>
+	>({
 		courses: true,
 		states: true,
 		cities: true,
@@ -329,22 +90,172 @@ export default function IndiaColleges() {
 		college_type: true,
 	});
 
-	const toggleSection = (section: keyof typeof expandedSections) => {
+	const toggleSection = (section: string) => {
 		setExpandedSections((prev) => ({
 			...prev,
 			[section]: !prev[section],
 		}));
 	};
 
-	if (loading) {
-		return <Loader />;
-	}
+	const fetchAndMergeData = useCallback(async () => {
+		try {
+			setLoading(true);
+			const [propertyRes, locationRes, reviewsRes, courseRes] =
+				await Promise.all([
+					API.get("/property"),
+					API.get("/location"),
+					API.get("/reviews"),
+					API.get("/property-course"),
+				]);
+
+			const properties =
+				propertyRes?.data?.filter((p: any) => p.status === "Active") || [];
+			const locations = locationRes?.data || [];
+			const reviews = reviewsRes?.data || [];
+			const courses = courseRes?.data || [];
+
+			setPropertyCourse(courses);
+			setPropertyLocation(locations);
+
+			const locationMap = new Map(
+				locations.map((loc: any) => [loc.propertyId, loc])
+			);
+			const reviewsMap = new Map();
+			reviews.forEach((rev: any) => {
+				if (!reviewsMap.has(rev.propertyId)) reviewsMap.set(rev.propertyId, []);
+				reviewsMap.get(rev.propertyId).push(rev);
+			});
+
+			const courseMap = new Map();
+			courses.forEach((course: any) => {
+				if (!courseMap.has(course.propertyId))
+					courseMap.set(course.propertyId, []);
+				courseMap.get(course.propertyId).push(course);
+			});
+
+			const merged = properties.map((property: any) => ({
+				...property,
+				location: locationMap.get(property.uniqueId) || {},
+				reviews: reviewsMap.get(property.uniqueId) || [],
+				propertyCourse: courseMap.get(property.uniqueId) || [],
+			}));
+
+			setMergedData(merged);
+			setFilteredProperties(merged);
+		} catch (err: any) {
+			console.error(err.message);
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		fetchAndMergeData();
+	}, [fetchAndMergeData]);
+
+	const handleFilterChange = (type: keyof Filters, value: string) => {
+		setSelectedFilters((prev) => {
+			const exists = prev[type].includes(value);
+			const updated = exists
+				? prev[type].filter((v) => v !== value)
+				: [...prev[type], value];
+			return { ...prev, [type]: updated };
+		});
+	};
+
+	// Filtering logic
+	useEffect(() => {
+		let results = [...mergedData];
+
+		if (selectedFilters.courses.length) {
+			results = results.filter((property) =>
+				property.propertyCourse.some((course) =>
+					selectedFilters.courses.includes(course.name?.[0]?.value)
+				)
+			);
+		}
+
+		if (selectedFilters.courseTypes.length) {
+			results = results.filter((property) =>
+				property.propertyCourse.some((course) =>
+					course.course_type?.some((ct) =>
+						selectedFilters.courseTypes.includes(ct.value)
+					)
+				)
+			);
+		}
+
+		if (selectedFilters.states.length) {
+			results = results.filter((p) =>
+				selectedFilters.states.includes(p.location?.state)
+			);
+		}
+
+		if (selectedFilters.cities.length) {
+			results = results.filter((p) =>
+				selectedFilters.cities.includes(p.location?.city)
+			);
+		}
+
+		if (selectedFilters.collegeTypes.length) {
+			results = results.filter((p) =>
+				p.college_or_university_type?.some((type) =>
+					selectedFilters.collegeTypes.includes(type.value)
+				)
+			);
+		}
+
+		setFilteredProperties(results);
+	}, [selectedFilters, mergedData]);
+
+	// Search filters
+	useEffect(() => {
+		const value = searchPropertyCourse.toLowerCase();
+		setFilterPropertyCourseData(
+			propertyCourse.filter(
+				(c) =>
+					c.name?.[0]?.value?.toLowerCase?.().includes(value) ||
+					c.short_name?.toLowerCase?.().includes(value)
+			)
+		);
+	}, [searchPropertyCourse, propertyCourse]);
+
+	useEffect(() => {
+		const value = searchPropertyState.toLowerCase();
+		setFilterPropertyStateData(
+			propertyLocation.filter((loc) =>
+				loc.state?.toLowerCase?.().includes(value)
+			)
+		);
+	}, [searchPropertyState, propertyLocation]);
+
+	useEffect(() => {
+		const value = searchPropertyCity.toLowerCase();
+		setFilterPropertyCityData(
+			propertyLocation.filter((loc) =>
+				loc.city?.toLowerCase?.().includes(value)
+			)
+		);
+	}, [searchPropertyCity, propertyLocation]);
+
+	useEffect(() => {
+		const value = searchPropertyCollegeType.toLowerCase();
+		setFilterPropertyCollegeTypeData(
+			mergedData.filter((c) =>
+				c.college_or_university_type?.[0]?.value
+					?.toLowerCase?.()
+					.includes(value)
+			)
+		);
+	}, [searchPropertyCollegeType, mergedData]);
 
 	const slugify = (text: string) =>
 		text
 			.toLowerCase()
 			.replace(/\s+/g, "-")
 			.replace(/[^\w\-]+/g, "");
+
+	if (loading) return <Loader />;
 
 	return (
 		<div className="container mx-auto px-4 py-8">

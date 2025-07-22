@@ -42,6 +42,10 @@ export default function OtherBasicInformation() {
         setToggleOtherBasicInformationPage(true);
     }
 
+    if (!otherBasicInformation) {
+        return <Skeleton height={300} />;
+    }
+
     return (
         <div>
             <div id="profile-log-switch">

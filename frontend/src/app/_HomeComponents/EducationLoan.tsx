@@ -20,7 +20,7 @@ const EducationLoan = () => {
 			<div className="flex flex-col md:flex-row justify-center gap-10 mt-6">
 				<div className="flex flex-col items-center">
 					<img
-						src="https://www.admissionjockey.com/v2/assets/images/site/Layer%2054.jpg"
+						src="https://picsum.photos/536/354"
 						alt="Register Now"
 						className="w-12 h-12"
 					/>
@@ -28,7 +28,7 @@ const EducationLoan = () => {
 				</div>
 				<div className="flex flex-col items-center">
 					<img
-						src="https://www.admissionjockey.com/v2/assets/images/site/Layer%2055.jpg"
+						src="https://picsum.photos/536/354"
 						alt="Fill up the form"
 						className="w-12 h-12"
 					/>
@@ -36,7 +36,7 @@ const EducationLoan = () => {
 				</div>
 				<div className="flex flex-col items-center">
 					<img
-						src="https://www.admissionjockey.com/v2/assets/images/site/Layer%2056.jpg"
+						src="https://picsum.photos/536/354"
 						alt="Apply to multiple Banks"
 						className="w-12 h-12"
 					/>

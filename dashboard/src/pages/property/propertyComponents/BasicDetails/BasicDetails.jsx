@@ -86,7 +86,7 @@ export default function BasicDetails() {
                                 <table className="table row table-borderless">
                                     <tbody className="col-lg-12 col-xl-6 p-0">
                                         <tr><td><strong>Full Name:</strong> {property.property_name}</td></tr>
-                                        <tr><td><strong>Phone Number:</strong> +{property.phone_number}</td></tr>
+                                        <tr><td><strong>Phone Number:</strong> {property.phone_number}</td></tr>
                                         <tr><td><strong>Year of Establishment:</strong> {property.established_year}</td></tr>
                                         <tr>
                                             <td>
@@ -107,7 +107,7 @@ export default function BasicDetails() {
                                     </tbody>
                                     <tbody className="col-lg-12 col-xl-6 p-0">
                                         <tr><td><strong>Short Name:</strong> {property.short_name}</td></tr>
-                                        <tr><td><strong>Alternate Phone Number:</strong> +{property.alt_phone_number || "N/A"}</td></tr>
+                                        <tr><td><strong>Alternate Phone Number:</strong> {property.alt_phone_number || "N/A"}</td></tr>
                                         <tr><td><strong>Email:</strong> {property.email}</td></tr>
                                         <tr>
                                             <td>

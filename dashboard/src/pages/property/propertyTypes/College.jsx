@@ -12,16 +12,16 @@ export default function College() {
     const navigate = useNavigate();
     const [property, setProperty] = useState([]);
 
-    useEffect(() => {
+    const getProperty = async () => {
         try {
-            const getProperty = async () => {
-                const response = await API.get(`/property`);
-                setProperty(response.data);
-            };
+            const response = await API.get(`/property`);
+            setProperty(response.data);
         } catch (error) {
-
+            console.log(error)
         }
+    };
 
+    useEffect(() => {
         getProperty();
     }, []);
 
@@ -118,7 +118,7 @@ export default function College() {
                     <Col md={6}>
                         <Form.Group className="mb-3">
                             <Form.Label htmlFor="phone_number">Phone Number</Form.Label>
-                            <PhoneInput
+                            {/* <PhoneInput
                                 country={'in'}
                                 value={formik.values.phone_number}
                                 inputClass={`border w-100 ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
@@ -126,6 +126,16 @@ export default function College() {
                                 buttonClass={`bg-white border ${formik.touched.phone_number && formik.errors.phone_number ? "border-danger" : ""}`}
                                 onChange={(value) => formik.setFieldValue("phone_number", value)}
                                 onBlur={formik.handleBlur("phone_number")}
+                            /> */}
+                            <Form.Control
+                                type="text"
+                                id="phone_number"
+                                placeholder="Phone number/Landline number"
+                                name="phone_number"
+                                className={`form-control ${formik.touched.phone_number && formik.errors.phone_number ? 'is-invalid' : ''}`}
+                                value={formik.values.phone_number}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
                             />
                             {formik.touched.phone_number && formik.errors.phone_number ? (
                                 <div className="text-danger">

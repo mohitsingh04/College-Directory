@@ -78,7 +78,6 @@ import VerifyOtp from './pages/auth/VerifyOtp';
 import Role from './pages/users/Role';
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Search from './frontend/pages/SearchPage/Search';
 import { Provider } from 'react-redux';
 import store from './common/redux/Store';
 

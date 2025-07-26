@@ -9,10 +9,31 @@ const ensureDirectoryExistence = (dir) => {
     }
 };
 
+// export const getOtherBasicDetails = async (req, res) => {
+//     try {
+//         const otherBasicDetails = await OtherBasicDetails.find();
+//         return res.status(200).json(otherBasicDetails);
+//     } catch (error) {
+//         return res.status(500).json({ error: error.message });
+//     }
+// };
+
 export const getOtherBasicDetails = async (req, res) => {
     try {
-        const otherBasicDetails = await OtherBasicDetails.find();
-        return res.status(200).json(otherBasicDetails);
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+        const otherBasicDetails = await OtherBasicDetails.find()
+            .skip(skip)
+            .limit(limit)
+            .exec();
+        const total = await OtherBasicDetails.countDocuments();
+        return res.status(200).json({
+            total,
+            page,
+            totalPages: Math.ceil(total / limit),
+            otherBasicDetails,
+        });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }

@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import AddOtherBasicInformation from './AddOtherBasicInformation';
 import EditOtherBasicInformation from './EditOtherBasicInformation';
 import { API } from '../../../../services/API';
+import Skeleton from 'react-loading-skeleton';
 
 export default function OtherBasicInformation() {
     const [toggleOtherBasicInformationPage, setToggleOtherBasicInformationPage] = useState(true);

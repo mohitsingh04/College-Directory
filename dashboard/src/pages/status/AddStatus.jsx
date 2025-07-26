@@ -65,7 +65,7 @@ const AddStatus = () => {
         startLoadingBar();
         try {
             const response = await API.post("/status", values);
-            
+
             if (response.data.message) {
                 toast.success(response.data.message || "Added successfully", { id: toastId });
                 navigate('/dashboard/status');
@@ -150,8 +150,8 @@ const AddStatus = () => {
                                             >
                                                 <option value="">--Select--</option>
                                                 <option value="Uncategorized">Uncategorized</option>
-                                                {status.map((item) => (
-                                                    <option value={`${item.status_name}`}>{item.status_name}</option>
+                                                {[...new Set(status.map(item => item.status_name))].map((uniqueStatus, index) => (
+                                                    <option key={index} value={uniqueStatus}>{uniqueStatus}</option>
                                                 ))}
                                             </select>
                                         </>

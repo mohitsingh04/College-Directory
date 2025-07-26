@@ -18,11 +18,9 @@ export default function EditOtherBasicInformation() {
 
     useEffect(() => {
         const fetchOtherBasicInformation = async () => {
-            setLoading(true);
             try {
-                const response = await API.get(`/otherBasicDetails`);
-                const filteredOtherBasicInformation = response.data.filter((otherBasicInformation) => otherBasicInformation.propertyId === Number(uniqueId));
-                setOtherBasicInformation(filteredOtherBasicInformation);
+                const response = await API.get(`/other-basic-details-property/${uniqueId}`);
+                setOtherBasicInformation(response?.data);
             } catch (error) {
                 console.error('Error fetching other basic information:', error);
             } finally {
@@ -35,16 +33,16 @@ export default function EditOtherBasicInformation() {
 
     const initialValues = {
         propertyId: uniqueId,
-        youtube_link: otherBasicInformation[0]?.youtube_link || "",
-        bitly_link: otherBasicInformation[0]?.bitly_link || "",
-        website_url: otherBasicInformation[0]?.website_url || "",
-        brochure: otherBasicInformation[0]?.brochure || null,
-        hindi_podcast: otherBasicInformation[0]?.hindi_podcast || null,
-        english_podcast: otherBasicInformation[0]?.english_podcast || null,
-        short_description: otherBasicInformation[0]?.short_description || "",
-        full_description: otherBasicInformation[0]?.full_description || "",
-        admission_process: otherBasicInformation[0]?.admission_process || "",
-        loan_process: otherBasicInformation[0]?.loan_process || "",
+        youtube_link: otherBasicInformation?.youtube_link || "",
+        bitly_link: otherBasicInformation?.bitly_link || "",
+        website_url: otherBasicInformation?.website_url || "",
+        brochure: otherBasicInformation?.brochure || null,
+        hindi_podcast: otherBasicInformation?.hindi_podcast || null,
+        english_podcast: otherBasicInformation?.english_podcast || null,
+        short_description: otherBasicInformation?.short_description || "",
+        full_description: otherBasicInformation?.full_description || "",
+        admission_process: otherBasicInformation?.admission_process || "",
+        loan_process: otherBasicInformation?.loan_process || "",
     }
 
     const handleSubmit = async (values) => {
@@ -63,7 +61,7 @@ export default function EditOtherBasicInformation() {
             formData.append("admission_process", values.admission_process);
             formData.append("loan_process", values.loan_process);
 
-            const response = await API.put(`/otherBasicDetails/${otherBasicInformation[0]?.uniqueId}`, formData, {
+            const response = await API.put(`/otherBasicDetails/${otherBasicInformation?.uniqueId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -176,10 +174,10 @@ export default function EditOtherBasicInformation() {
                                 onChange={handleBrochureFileChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {otherBasicInformation[0]?.brochure !== "brochure.pdf" ? (
+                            {otherBasicInformation?.brochure !== "brochure.pdf" ? (
                                 <u>
                                     <a
-                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.brochure}`}
+                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation?.brochure}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
@@ -204,10 +202,10 @@ export default function EditOtherBasicInformation() {
                                 onChange={handleHindiPodcastFileChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {otherBasicInformation[0]?.hindi_podcast !== "music.mp3" ? (
+                            {otherBasicInformation?.hindi_podcast !== "music.mp3" ? (
                                 <u>
                                     <a
-                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.hindi_podcast}`}
+                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation?.hindi_podcast}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
@@ -232,10 +230,10 @@ export default function EditOtherBasicInformation() {
                                 onChange={handleEnglishPodcastFileChange}
                                 onBlur={formik.handleBlur}
                             />
-                            {otherBasicInformation[0]?.english_podcast !== "music.mp3" ? (
+                            {otherBasicInformation?.english_podcast !== "music.mp3" ? (
                                 <u>
                                     <a
-                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.english_podcast}`}
+                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation?.english_podcast}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >

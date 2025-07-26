@@ -18,11 +18,8 @@ export default function Location() {
     const fetchLocation = async () => {
         try {
             startLoadingBar();
-            const response = await API.get('/location');
-            const filteredLocation = response.data.filter(
-                (loc) => loc.propertyId === Number(uniqueId)
-            );
-            setLocation(filteredLocation);
+            const response = await API.get(`/location-by-property/${uniqueId}`);
+            setLocation(response?.data);
         } catch (error) {
             console.error('Error fetching location:', error);
         } finally {
@@ -50,7 +47,7 @@ export default function Location() {
                     <Card.Header className="flex justify-between">
                         <div className="media-heading">
                             <h5>
-                                {location.length > 0
+                                {location
                                     ? toggleLocationPage
                                         ? <strong>Location</strong>
                                         : <strong>Edit Location</strong>
@@ -58,7 +55,7 @@ export default function Location() {
                             </h5>
                         </div>
                         <div>
-                            {location.length > 0 && (
+                            {location && (
                                 toggleLocationPage ? (
                                     <button className="btn btn-primary btn-sm" title="Edit" onClick={handleHideLocationPage}>
                                         <i className="fe fe-edit"></i>
@@ -72,16 +69,16 @@ export default function Location() {
                         </div>
                     </Card.Header>
                     <Card.Body>
-                        {location.length > 0 ? (
+                        {location ? (
                             toggleLocationPage ? (
                                 <div className="table-responsive">
                                     <table className="table row table-borderless">
                                         <tbody className="col-lg-12 col-xl-6 p-0">
-                                            <tr><td><strong>Address :</strong> {location[0]?.address}</td></tr>
-                                            <tr><td><strong>Pincode :</strong> {location[0]?.pincode}</td></tr>
-                                            <tr><td><strong>Country :</strong> {location[0]?.country}</td></tr>
-                                            <tr><td><strong>State :</strong> {location[0]?.state}</td></tr>
-                                            <tr><td><strong>City :</strong> {location[0]?.city}</td></tr>
+                                            <tr><td><strong>Address :</strong> {location?.address}</td></tr>
+                                            <tr><td><strong>Pincode :</strong> {location?.pincode}</td></tr>
+                                            <tr><td><strong>Country :</strong> {location?.country}</td></tr>
+                                            <tr><td><strong>State :</strong> {location?.state}</td></tr>
+                                            <tr><td><strong>City :</strong> {location?.city}</td></tr>
                                         </tbody>
                                     </table>
                                 </div>

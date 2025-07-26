@@ -23,9 +23,8 @@ export default function OtherBasicInformation() {
     useEffect(() => {
         const fetchOtherBasicInformation = async () => {
             try {
-                const response = await API.get(`/otherBasicDetails`);
-                const filteredOtherBasicInformation = response.data.filter((otherBasicInformation) => otherBasicInformation.propertyId === Number(uniqueId));
-                setOtherBasicInformation(filteredOtherBasicInformation);
+                const response = await API.get(`/other-basic-details-property/${uniqueId}`);
+                setOtherBasicInformation(response?.data);
             } catch (error) {
                 console.error('Error fetching other basic information:', error);
             }
@@ -53,7 +52,7 @@ export default function OtherBasicInformation() {
                     <Card.Header className="flex justify-between">
                         <div className="media-heading">
                             <h5>
-                                {otherBasicInformation.length > 0
+                                {otherBasicInformation
                                     ?
                                     toggleOtherBasicInformationPage
                                         ?
@@ -66,7 +65,7 @@ export default function OtherBasicInformation() {
                             </h5>
                         </div>
                         <div className=''>
-                            {otherBasicInformation.length > 0
+                            {otherBasicInformation
                                 ?
                                 toggleOtherBasicInformationPage ?
                                     <button className="btn btn-primary btn-sm" title="Edit" onClick={handleHideOtherBasicInformationPage}>
@@ -82,7 +81,7 @@ export default function OtherBasicInformation() {
                         </div>
                     </Card.Header>
                     <Card.Body>
-                        {otherBasicInformation.length > 0
+                        {otherBasicInformation
                             ?
                             toggleOtherBasicInformationPage
                                 ?
@@ -91,25 +90,25 @@ export default function OtherBasicInformation() {
                                         <Col md={6} className="my-3">
                                             <strong>Youtube Link: </strong>
                                             <br />
-                                            {otherBasicInformation[0]?.youtube_link || "N/A"}
+                                            {otherBasicInformation?.youtube_link || "N/A"}
                                         </Col>
                                         <Col md={6} className="my-3">
                                             <strong>Bitly Link</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.bitly_link || "N/A"}
+                                            {otherBasicInformation?.bitly_link || "N/A"}
                                         </Col>
                                         <Col md={6} className="my-3">
                                             <strong>Website</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.website_url || "N/A"}
+                                            {otherBasicInformation?.website_url || "N/A"}
                                         </Col>
                                         <Col md={6} className="my-3">
                                             <strong>Brochure</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.brochure !== "brochure.pdf" ? (
+                                            {otherBasicInformation?.brochure !== "brochure.pdf" ? (
                                                 <u>
                                                     <a
-                                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.brochure}`}
+                                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation?.brochure}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
@@ -123,10 +122,10 @@ export default function OtherBasicInformation() {
                                         <Col md={6} className="my-3">
                                             <strong>Hindi Podcast</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.hindi_podcast !== "music.mp3" ? (
+                                            {otherBasicInformation?.hindi_podcast !== "music.mp3" ? (
                                                 <u>
                                                     <a
-                                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.hindi_podcast}`}
+                                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation?.hindi_podcast}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
@@ -140,10 +139,10 @@ export default function OtherBasicInformation() {
                                         <Col md={6} className="my-3">
                                             <strong>English Podcast</strong>
                                             <br />
-                                            {otherBasicInformation[0]?.english_podcast !== "music.mp3" ? (
+                                            {otherBasicInformation?.english_podcast !== "music.mp3" ? (
                                                 <u>
                                                     <a
-                                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation[0]?.english_podcast}`}
+                                                        href={`${import.meta.env.VITE_API_URL}${otherBasicInformation?.english_podcast}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
@@ -155,16 +154,16 @@ export default function OtherBasicInformation() {
                                             )}
                                         </Col>
                                         <Col md={12} className="my-3">
-                                            <h1>Short Description :</h1>
-                                            {otherBasicInformation[0]?.short_description.length >= 1500
+                                            <h5>Short Description :</h5>
+                                            {otherBasicInformation?.short_description?.length >= 1500
                                                 ?
                                                 <>
                                                     <p
-                                                        style={{ fontSize: "16px" }}
+                                                        style={{ fontSize: "14px" }}
                                                         dangerouslySetInnerHTML={{
                                                             __html: isExpandedShortDescription
-                                                                ? otherBasicInformation[0]?.short_description
-                                                                : otherBasicInformation[0]?.short_description.substring(0, 1500) + "...",
+                                                                ? otherBasicInformation?.short_description
+                                                                : otherBasicInformation?.short_description.substring(0, 1500) + "...",
                                                         }}
                                                     />
                                                     <button onClick={toggleReadMoreShortDescription} className="text-blue-700 underline">
@@ -173,24 +172,24 @@ export default function OtherBasicInformation() {
                                                 </>
                                                 :
                                                 <p
-                                                    style={{ fontSize: "16px" }}
+                                                    style={{ fontSize: "14px" }}
                                                     dangerouslySetInnerHTML={{
-                                                        __html: otherBasicInformation[0]?.short_description
+                                                        __html: otherBasicInformation?.short_description
                                                     }}
                                                 />
                                             }
                                         </Col>
                                         <Col md={12} className="my-3">
-                                            <h1>Full Description :</h1>
-                                            {otherBasicInformation[0]?.full_description.length >= 1500
+                                            <h5>Full Description :</h5>
+                                            {otherBasicInformation?.full_description?.length >= 1500
                                                 ?
                                                 <>
                                                     <p
-                                                        style={{ fontSize: "16px" }}
+                                                        style={{ fontSize: "14px" }}
                                                         dangerouslySetInnerHTML={{
                                                             __html: isExpandedFullDescription
-                                                                ? otherBasicInformation[0]?.full_description
-                                                                : otherBasicInformation[0]?.full_description.substring(0, 1500) + "...",
+                                                                ? otherBasicInformation?.full_description
+                                                                : otherBasicInformation?.full_description.substring(0, 1500) + "...",
                                                         }}
                                                     />
                                                     <button onClick={toggleReadMoreFullDescription} className="text-blue-700 underline">
@@ -199,9 +198,9 @@ export default function OtherBasicInformation() {
                                                 </>
                                                 :
                                                 <p
-                                                    style={{ fontSize: "16px" }}
+                                                    style={{ fontSize: "14px" }}
                                                     dangerouslySetInnerHTML={{
-                                                        __html: otherBasicInformation[0]?.full_description
+                                                        __html: otherBasicInformation?.full_description
                                                     }}
                                                 />
                                             }

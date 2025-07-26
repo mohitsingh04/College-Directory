@@ -23,9 +23,8 @@ export default function Hostel() {
     useEffect(() => {
         const fetchHostel = async () => {
             try {
-                const response = await API.get(`/hostel`);
-                const filteredHostel = response.data.filter((hostel) => hostel.propertyId === Number(uniqueId));
-                setHostel(filteredHostel);
+                const response = await API.get(`/hostel-by-property/${uniqueId}`);
+                setHostel(response?.data);
             } catch (error) {
                 console.error('Error fetching hostel:', error);
             }
@@ -49,7 +48,7 @@ export default function Hostel() {
                     <Card.Header className='flex justify-between'>
                         <div className="media-heading">
                             <h5>
-                                {hostel?.length > 0
+                                {hostel
                                     ?
                                     toggleHostelPage
                                         ?
@@ -62,7 +61,7 @@ export default function Hostel() {
                             </h5>
                         </div>
                         <div>
-                            {hostel?.length > 0
+                            {hostel
                                 ?
                                 toggleHostelPage ?
                                     <button className="btn btn-primary btn-sm" title="Edit" onClick={handleHideHostelPage}>
@@ -78,23 +77,23 @@ export default function Hostel() {
                         </div>
                     </Card.Header>
                     <Card.Body>
-                        {hostel?.length > 0
+                        {hostel
                             ?
                             toggleHostelPage
                                 ?
                                 <>
                                     <div>
-                                        <p><b>Boys Hostel Fees: </b> {hostel[0]?.boys_hostel_fees}</p>
+                                        <p><b>Boys Hostel Fees: </b> {hostel?.boys_hostel_fees}</p>
                                         <p><b>Boys Hostel Details : </b> </p>
-                                        {hostel[0]?.boys_hostel_description?.length >= 1500
+                                        {hostel?.boys_hostel_description?.length >= 1500
                                             ?
                                             <>
                                                 <p
                                                     style={{ fontSize: "14px" }}
                                                     dangerouslySetInnerHTML={{
                                                         __html: isExpandedBoysDetails
-                                                            ? hostel[0]?.boys_hostel_description
-                                                            : hostel[0]?.boys_hostel_description.substring(0, 1500) + "...",
+                                                            ? hostel?.boys_hostel_description
+                                                            : hostel?.boys_hostel_description.substring(0, 1500) + "...",
                                                     }}
                                                 />
                                                 <button onClick={toggleReadMoreBoysDetails} className="text-blue-700 underline">
@@ -105,23 +104,23 @@ export default function Hostel() {
                                             <p
                                                 style={{ fontSize: "14px" }}
                                                 dangerouslySetInnerHTML={{
-                                                    __html: hostel[0]?.boys_hostel_description
+                                                    __html: hostel?.boys_hostel_description
                                                 }}
                                             />
                                         }
                                     </div>
                                     <div>
-                                        <p><b>Girls Hostel Fees: </b>{hostel[0]?.girls_hostel_fees}</p>
+                                        <p><b>Girls Hostel Fees: </b>{hostel?.girls_hostel_fees}</p>
                                         <p><b>Girls Hostel Details : </b></p>
-                                        {hostel[0]?.girls_hostel_description?.length >= 1500
+                                        {hostel?.girls_hostel_description?.length >= 1500
                                             ?
                                             <>
                                                 <p
                                                     style={{ fontSize: "14px" }}
                                                     dangerouslySetInnerHTML={{
                                                         __html: isExpandedGirlsDetails
-                                                            ? hostel[0]?.girls_hostel_description
-                                                            : hostel[0]?.girls_hostel_description.substring(0, 1500) + "...",
+                                                            ? hostel?.girls_hostel_description
+                                                            : hostel?.girls_hostel_description.substring(0, 1500) + "...",
                                                     }}
                                                 />
                                                 <button onClick={toggleReadMoreGirlsDetails} className="text-blue-700 underline">
@@ -132,7 +131,7 @@ export default function Hostel() {
                                             <p
                                                 style={{ fontSize: "14px" }}
                                                 dangerouslySetInnerHTML={{
-                                                    __html: hostel[0]?.girls_hostel_description
+                                                    __html: hostel?.girls_hostel_description
                                                 }}
                                             />
                                         }

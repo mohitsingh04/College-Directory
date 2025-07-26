@@ -11,6 +11,16 @@ export const getHostel = async (req, res) => {
     }
 };
 
+export const getHostelByProperty = async (req, res) => {
+    try {
+        const { uniqueId } = req.params;
+        const hostel = await Hostel.findOne({ propertyId: uniqueId });
+        return res.status(200).json(hostel);
+    } catch (error) {
+        return res.json({ error: error.message });
+    }
+};
+
 export const addHostel = async (req, res) => {
     try {
         const { propertyId, boys_hostel_fees, boys_hostel_description, girls_hostel_fees, girls_hostel_description } = req.body;

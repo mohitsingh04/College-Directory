@@ -24,6 +24,16 @@ export const getLocationById = async (req, res) => {
     }
 };
 
+export const getLocationByPropertyId = async (req, res) => {
+    try {
+        const { uniqueId } = req.params;
+        const location = await Location.findOne({ propertyId: uniqueId });
+        return res.status(200).json(location);
+    } catch (error) {
+        return res.json({ error: error.message });
+    }
+};
+
 export const addLocation = async (req, res) => {
     try {
         const { propertyId, address, pincode, country, city, state } = req.body;

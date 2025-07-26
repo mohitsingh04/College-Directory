@@ -28,6 +28,16 @@ export const getOtherBasicDetailsById = async (req, res) => {
     }
 };
 
+export const getOtherBasicDetailsByPropertyId = async (req, res) => {
+    try {
+        const { uniqueId } = req.params;
+        const otherBasicDetails = await OtherBasicDetails.findOne({ propertyId: uniqueId });
+        return res.status(200).json(otherBasicDetails);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
 export const addOtherBasicDetails = async (req, res) => {
     try {
         const { propertyId, youtube_link, bitly_link, website_url, short_description, full_description } = req.body;
